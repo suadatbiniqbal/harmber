@@ -41,4 +41,4 @@ Harmber Music Streaming is designed for **fast, smooth, and enjoyable music play
 ## Contact
 
 For feedback or inquiries, reach out:  
-**Suadat Bin Iqbal** – [email@example.com]  
+**Suadat Bin Iqbal** – 
