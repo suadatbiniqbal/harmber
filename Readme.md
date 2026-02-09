@@ -28,7 +28,6 @@ Harmber is a modern **music streaming app** designed to let you enjoy your favor
 
 ## Screenshots
 
-*(Add images of the app UI here for reference)*
 
 ---
 
