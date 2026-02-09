@@ -42,3 +42,6 @@ Harmber Music Streaming is designed for **fast, smooth, and enjoyable music play
 
 For feedback or inquiries, reach out:  
 **Suadat Bin Iqbal** – 
+
+Credits: Koike Natsuko 
+GitHub: https://gitHub.com/koiverse
