@@ -96,7 +96,7 @@ Contributions are welcome!
 ## 🎨 UI Credits
 
 Inspired by UI concepts from:  
-https://github.com/koiverse
+koiverse
 
 ---
 
