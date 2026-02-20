@@ -1,46 +1,106 @@
-# Harmber Music Streaming 🎵
+# 🎵 Harmber Music Streaming
 
-Harmber is a modern **music streaming app** designed to let you enjoy your favorite songs anytime, anywhere. Stream music, create playlists, and discover new tracks—all in a simple and fast interface.
+<p align="center">
+  <img src="Screenshot1.png" width="180"/>
+</p>
 
----
-
-## Features
-
-- 🎶 **Huge Music Library**: Access millions of songs across different genres.  
-- 📀 **Custom Playlists**: Make your own playlists and organize your music.  
-- 🔍 **Easy Search**: Quickly find songs, albums, and artists.  
-- 🎧 **Offline Listening**: Download songs to enjoy them without internet.  
-- 💡 **Smart Recommendations**: Get song suggestions based on your listening habits.  
-- 🕒 **Background Playback**: Keep music playing while using other apps.  
-- 🌙 **Dark Mode**: Comfortable viewing in low-light conditions.  
-- 🔔 **Notifications**: Stay updated with the latest releases from your favorite artists.  
+<p align="center">
+  <b>A modern Android music streaming experience</b><br>
+  Fast • Minimal • Powerful
+</p>
 
 ---
 
-## Installation
+## 🚀 Badges
 
-1. Download the **Harmber APK**.  
-2. Enable **installation from unknown sources** in your Android settings.  
-3. Install the APK on your device.  
-4. Open the app and start listening!  
-
----
-
-## Screenshots
-
+![Platform](https://img.shields.io/badge/Platform-Android-green)
+![Language](https://img.shields.io/badge/Language-Kotlin-purple)
+![Architecture](https://img.shields.io/badge/Architecture-MVVM-blue)
+![Status](https://img.shields.io/badge/Status-Active_Development-brightgreen)
+![License](https://img.shields.io/badge/License-MIT-yellow)
 
 ---
 
-## About
+## ✨ Features
 
-Harmber Music Streaming is designed for **fast, smooth, and enjoyable music playback** on Android devices. Whether you want to stream online or listen offline, Harmber makes music accessible and fun.  
+- 🎶 Stream your favorite tracks
+- 📀 Create and manage playlists
+- 🔍 Fast search (Songs, Albums, Artists)
+- 🎧 Offline listening
+- 💡 Smart recommendations
+- 🕒 Background playback
+- 🌙 Dark mode UI
+- 🔔 Release notifications
+- ⚡ Smooth & responsive interface
 
 ---
 
-## Contact
+## 📸 Screenshots
 
-For feedback or inquiries, reach out:  
-**Suadat Bin Iqbal** – 
+<p align="center">
+  <img src="Screenshot1.png" width="250"/>
+  <img src="Screenshot2.png" width="250"/>
+</p>
 
-UI Credits: Koike Natsuko 
-GitHub: https://gitHub.com/koiverse
+<p align="center">
+  <img src="Screenshot3.png" width="250"/>
+  <img src="Screenshot4.png" width="250"/>
+</p>
+
+---
+
+## 🛠 Tech Stack
+
+- Kotlin  
+- Android SDK  
+- MVVM Architecture  
+- Material Design  
+- Coroutines & Flow  
+
+---
+
+## 📦 Installation
+
+### 🔹 APK
+1. Download latest Harmber APK  
+2. Enable *Install from Unknown Sources*  
+3. Install & start listening 🎧  
+
+### 🔹 Build From Source
+
+```bash
+git clone https://github.com/suadatbiniqbal/harmber.git
+```
+
+Open in Android Studio → Build → Run
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome!
+
+1. Fork the repository  
+2. Create a new branch  
+3. Commit your changes  
+4. Open a Pull Request  
+
+---
+
+## 👤 Author
+
+**Suadat Bin Iqbal**
+
+---
+
+## 🎨 UI Credits
+
+Inspired by UI concepts from:  
+https://github.com/koiverse
+
+---
+
+## 📜 License
+
+This project is licensed under the **MIT License**.  
+See the [LICENSE](LICENSE) file for details.
