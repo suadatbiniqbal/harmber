@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Open in Harmber</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="watch.css"/>
+</head>
+<body>
+
+  <header class="nav">
+    <div class="nav-inner">
+      <a href="/" class="wordmark">Harmber</a>
+    </div>
+  </header>
+
+  <main class="watch-main">
+
+    <div class="watch-card" id="watchCard">
+
+      <div class="thumb-wrap">
+        <img id="videoThumb" src="https://placehold.co/800x450/0e0e10/222?text=Loading..." alt="Thumbnail"/>
+        <div class="thumb-gradient"></div>
+        <div class="play-badge">
+          <svg viewBox="0 0 24 24" fill="white" width="22" height="22"><path d="M8 5v14l11-7z"/></svg>
+        </div>
+      </div>
+
+      <div class="watch-meta">
+        <p class="watch-channel" id="videoChannel">—</p>
+        <h1 class="watch-title" id="videoTitle">Loading track information...</h1>
+      </div>
+
+      <div class="watch-cta">
+        <button class="btn-main btn-xl" id="openInApp">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"/></svg>
+          Open in Harmber
+        </button>
+        <p class="cta-hint">Opens the Harmber app. Make sure it's installed.</p>
+      </div>
+
+    </div>
+
+    <!-- Fallback panel -->
+    <div class="fallback-panel" id="fallbackPanel">
+      <div class="fallback-inner">
+        <div class="fallback-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="32" height="32"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+        </div>
+        <h3>Harmber isn't installed</h3>
+        <p>Download Harmber to open this track directly in the app.</p>
+        <div class="fallback-btns">
+          <a href="/#download" class="btn-main">Download Harmber</a>
+          <a href="/" class="btn-ghost">Go home</a>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    const YT_API_KEY   = 'YOUR_YOUTUBE_API_KEY';
+    const APP_PACKAGE  = 'com.harmber.suadat';
+
+    const params  = new URLSearchParams(window.location.search);
+    const videoId = params.get('v');
+    if (!videoId) window.location.href = '/';
+
+    async function fetchVideo(id) {
+      try {
+        const r = await fetch(
+          `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${id}&key=${YT_API_KEY}`
+        );
+        const d = await r.json();
+        const s = d?.items?.[0]?.snippet;
+        document.getElementById('videoTitle').textContent   = s?.title        ?? 'Unknown Track';
+        document.getElementById('videoChannel').textContent = s?.channelTitle ?? 'YouTube';
+        document.getElementById('videoThumb').src =
+          s?.thumbnails?.maxres?.url  ||
+          s?.thumbnails?.high?.url    ||
+          `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
+        if (s?.title) document.title = `${s.title} — Harmber`;
+      } catch {
+        document.getElementById('videoTitle').textContent   = 'Unknown Track';
+        document.getElementById('videoChannel').textContent = 'YouTube';
+        document.getElementById('videoThumb').src = `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
+      }
+    }
+
+    fetchVideo(videoId);
+
+    document.getElementById('openInApp').addEventListener('click', () => {
+      const intent =
+        `intent://watch?v=${videoId}#Intent;` +
+        `package=${APP_PACKAGE};` +
+        `scheme=https;` +
+        `end;`;
+
+      const t0 = Date.now();
+      window.location.href = intent;
+
+      setTimeout(() => {
+        if (Date.now() - t0 < 2600) {
+          document.getElementById('fallbackPanel').classList.add('visible');
+          document.getElementById('watchCard').classList.add('dimmed');
+        }
+      }, 2000);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://harmber.app/sitemap.xml
+
+# Block system/asset paths
+Disallow: /cdn-cgi/
+Disallow: /*.json$
+Disallow: /api/
