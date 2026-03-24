@@ -147,6 +147,6 @@
   if(!btn)return;
   btn.addEventListener('click',e=>{
     e.preventDefault();
-    window.location.href='YOUR_APK_DIRECT_LINK_HERE';
+    window.location.href='https://github.com/suadatbiniqbal/harmber/releases/download/1.1.3/base.apk';
   });
 })();
