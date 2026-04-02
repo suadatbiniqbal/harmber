@@ -20,8 +20,10 @@
 
     <!-- THUMBNAIL -->
     <div class="thumb-wrap" id="thumbWrap">
-      <img id="thumb" src="https://placehold.co/800x450/111111/333333" alt="Video thumbnail"
-           width="800" height="450" loading="eager"/>
+      <img id="thumb"
+        src="https://placehold.co/800x450/111111/333333"
+        alt="Video thumbnail"
+        width="800" height="450" loading="eager"/>
       <div class="overlay"></div>
       <div class="play-btn" id="playBtn" role="button" aria-label="Open video">&#9654;</div>
     </div>
@@ -35,8 +37,12 @@
         <span class="skeleton" style="display:inline-block;height:1em;width:40%;"></span>
       </p>
       <div class="stats">
-        <span id="views"><span class="skeleton" style="display:inline-block;height:1em;width:80px;"></span></span>
-        <span id="date"><span class="skeleton" style="display:inline-block;height:1em;width:100px;"></span></span>
+        <span id="views">
+          <span class="skeleton" style="display:inline-block;height:1em;width:80px;"></span>
+        </span>
+        <span id="date">
+          <span class="skeleton" style="display:inline-block;height:1em;width:100px;"></span>
+        </span>
       </div>
       <p id="desc" class="desc">
         <span class="skeleton" style="display:block;height:1em;width:100%;margin-bottom:6px;"></span>
@@ -48,20 +54,19 @@
     <!-- CTA -->
     <div class="watch-cta">
       <button id="openBtn" class="btn-primary">Open in App</button>
-      <p class="hint">Android will show all apps that support this link</p>
+      <p class="hint">Opens Harmber — or choose any supported app</p>
     </div>
 
   </div>
 </main>
 
-<!-- FALLBACK: App not installed (desktop / no app) -->
+<!-- FALLBACK -->
 <div id="fallback" class="fallback" role="alertdialog" aria-labelledby="fallbackTitle">
   <div class="fallback-box">
-    <div class="fallback-icon">&#128279;</div>
     <h3 id="fallbackTitle">No app found</h3>
-    <p id="fallbackMsg">No app is installed that can open this link. Open it in your browser instead?</p>
+    <p id="fallbackMsg">No app found for this link. Open in browser instead?</p>
     <div class="fallback-actions">
-      <a id="fallbackOpen" href="#" class="btn-download" target="_blank" rel="noopener noreferrer">Open in Browser</a>
+      <a id="browserBtn" href="#" class="btn-download" target="_blank" rel="noopener noreferrer">Open in Browser</a>
       <a href="/#download" class="btn-outline">Download Harmber</a>
       <button class="btn-ghost" id="fallbackBack">Cancel</button>
     </div>
@@ -77,22 +82,19 @@
 
   if (!id) location.href = '/';
 
-  // The page lives on harmber.xyz — Harmber app has an intent-filter
-  // for this exact domain, so the intent below triggers Android's
-  // native "Open with" chooser showing Harmber (and any other app
-  // that registered for harmber.xyz). YouTube won't hijack it.
-  const harmberUrl = `https://www.youtube.com/watch?v=${id}`;
-  const videoUrl   = `https://www.youtube.com/watch?v=${id}`;
+  const videoUrl   = 'https://www.youtube.com/watch?v=' + id;
+  const harmberUrl = 'https://www.harmber.xyz/watch?v=' + id;
 
   document.getElementById('browserBtn').href = videoUrl;
 
-  // ── Load metadata ────────────────────────────────────────────────
+  // ── Load video metadata ──────────────────────────────────────────
   async function load() {
     try {
       const res  = await fetch(
-        `https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&id=${id}&key=${KEY}`
+        'https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&id=' + id + '&key=' + KEY
       );
       const data = await res.json();
+
       if (!data.items || !data.items.length) return;
 
       const v     = data.items[0];
@@ -102,21 +104,25 @@
       document.getElementById('title').textContent   = s.title;
       document.getElementById('channel').textContent = s.channelTitle;
       document.getElementById('views').textContent   =
-        `${Number(stats.viewCount).toLocaleString()} views`;
+        Number(stats.viewCount).toLocaleString() + ' views';
       document.getElementById('date').textContent    =
         new Date(s.publishedAt).toDateString();
       document.getElementById('desc').textContent    =
         s.description.slice(0, 200) + '\u2026';
 
       const thumbSrc =
-        s.thumbnails.maxres?.url ||
-        s.thumbnails.high?.url   ||
-        s.thumbnails.medium?.url;
+        (s.thumbnails.maxres  && s.thumbnails.maxres.url)  ||
+        (s.thumbnails.high    && s.thumbnails.high.url)    ||
+        (s.thumbnails.medium  && s.thumbnails.medium.url);
 
-      document.getElementById('thumb').src = thumbSrc;
-      document.getElementById('thumb').alt = s.title;
+      if (thumbSrc) {
+        document.getElementById('thumb').src = thumbSrc;
+        document.getElementById('thumb').alt = s.title;
+        document.documentElement.style.setProperty('--thumb-url', 'url(' + thumbSrc + ')');
+      }
+
       document.title = s.title + ' \u2014 Harmber';
-      document.documentElement.style.setProperty('--thumb-url', `url(${thumbSrc})`);
+
     } catch (e) {
       console.error('Failed to load video:', e);
     }
@@ -124,7 +130,7 @@
 
   load();
 
-  // ── Fallback ─────────────────────────────────────────────────────
+  // ── Fallback helpers ─────────────────────────────────────────────
   function showFallback() {
     document.getElementById('fallback').classList.add('visible');
     document.getElementById('card').classList.add('dim');
@@ -137,36 +143,58 @@
 
   document.getElementById('fallbackBack').addEventListener('click', hideFallback);
 
-  // ── Open native chooser ──────────────────────────────────────────
+  // ── Open native app chooser ──────────────────────────────────────
+  // Uses harmber.xyz in the intent so Android shows ALL apps that
+  // registered an intent-filter for this domain (Harmber, etc.).
+  // YouTube is NOT registered for harmber.xyz so it won't auto-open.
+  //
+  // The trick to detect "no app opened":
+  //   - We listen for visibilitychange. If the app chooser opens and
+  //     user picks an app, the page goes hidden.
+  //   - If page stays visible after 1.5s, no app was found → fallback.
+
   function openNativeChooser() {
-    const isAndroid = /android/i.test(navigator.userAgent);
-    const isIOS     = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    const ua        = navigator.userAgent;
+    const isAndroid = /android/i.test(ua);
+    const isIOS     = /iphone|ipad|ipod/i.test(ua);
 
     if (isAndroid) {
-      // intent:// pointing to harmber.xyz — Android resolves this
-      // against installed apps' intent-filters. Harmber registers
-      // harmber.xyz so it appears in the chooser. YouTube does NOT
-      // register harmber.xyz so it won't auto-open.
-      // S.browser_fallback_url opens YouTube in browser if no app found.
-      const fallback  = encodeURIComponent(videoUrl);
+      const fallbackEncoded = encodeURIComponent(videoUrl);
       const intentUrl =
-        `intent://www.harmber.xyz/watch?v=${id}` +
-        `#Intent;scheme=https;` +
-        `S.browser_fallback_url=${fallback};` +
-        `end;`;
+        'intent://www.harmber.xyz/watch?v=' + id +
+        '#Intent;scheme=https;' +
+        'S.browser_fallback_url=' + fallbackEncoded + ';' +
+        'end;';
 
-      location.href = intentUrl;
+      var didHide = false;
 
-      // If still on page after 1.8s → no app opened, show fallback
-      setTimeout(showFallback, 1800);
+      function onHide() {
+        didHide = true;
+        document.removeEventListener('visibilitychange', onHide);
+      }
+      document.addEventListener('visibilitychange', onHide);
+
+      // Use hidden iframe so main page does NOT navigate away.
+      // Chrome intercepts intent:// from iframes too and shows chooser.
+      var frame = document.createElement('iframe');
+      frame.style.cssText = 'display:none;width:0;height:0;border:0;';
+      document.body.appendChild(frame);
+      frame.src = intentUrl;
+
+      // After 1.5s, if page never hid → no app installed → fallback
+      setTimeout(function() {
+        document.removeEventListener('visibilitychange', onHide);
+        document.body.removeChild(frame);
+        if (!didHide) showFallback();
+      }, 1500);
+
       return;
     }
 
     if (isIOS) {
-      // Harmber custom scheme on iOS
-      const start = Date.now();
-      location.href = `harmber://watch?v=${id}`;
-      setTimeout(() => {
+      var start = Date.now();
+      location.href = 'harmber://watch?v=' + id;
+      setTimeout(function() {
         if (Date.now() - start < 1500) {
           window.open(videoUrl, '_blank', 'noopener,noreferrer');
         }
@@ -174,7 +202,7 @@
       return;
     }
 
-    // Desktop — just show fallback with browser link
+    // Desktop
     showFallback();
   }
 
