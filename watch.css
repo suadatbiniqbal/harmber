@@ -275,3 +275,11 @@ body {
     font-size: 20px;
   }
 }
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: url('THUMB_URL') center/cover;
+  filter: blur(80px) brightness(0.3);
+  z-index: -1;
+}
