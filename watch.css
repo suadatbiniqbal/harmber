@@ -1,20 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-
-<title>Loading… — Harmber</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
-
-<style>
 :root {
   --bg: #0a0a0b;
-  --card: #111114;
-  --text: #fff;
+  --card: #111;
+  --text: #ffffff;
   --muted: #9aa0a6;
-  --accent: #7c5cff;
 }
 
 * {
@@ -25,16 +13,17 @@
 }
 
 body {
-  background: radial-gradient(circle at top, #111 0%, #0a0a0b 60%);
+  background: var(--bg);
   color: var(--text);
 }
 
 /* NAV */
 .nav {
-  text-align: center;
   padding: 20px;
-  font-weight: 700;
-  font-size: 20px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 18px;
+  border-bottom: 1px solid #1a1a1a;
 }
 
 /* MAIN */
@@ -49,15 +38,13 @@ body {
   width: 100%;
   max-width: 800px;
   background: var(--card);
-  border-radius: 20px;
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
-  animation: fadeIn 0.6s ease;
+  transition: 0.3s;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px);}
-  to { opacity: 1; transform: translateY(0);}
+.watch-card.dim {
+  opacity: 0.3;
 }
 
 /* VIDEO */
@@ -78,58 +65,73 @@ body {
   padding: 20px;
 }
 
-.watch-channel {
+.title {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.channel {
+  color: var(--muted);
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.stats {
   font-size: 13px;
   color: var(--muted);
-  margin-bottom: 6px;
+  margin-bottom: 14px;
 }
 
-.watch-title {
-  font-size: 22px;
-  font-weight: 600;
-  line-height: 1.4;
+.stats span {
+  margin-right: 10px;
 }
 
-/* BUTTON */
+.desc {
+  font-size: 14px;
+  color: #ccc;
+  line-height: 1.5;
+}
+
+/* CTA */
 .watch-cta {
   padding: 20px;
 }
 
-.btn-main {
+.btn-white {
   width: 100%;
-  padding: 14px;
+  padding: 12px;
+  background: white;
+  color: black;
   border: none;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #7c5cff, #5a3dff);
-  color: white;
+  border-radius: 10px;
   font-weight: 600;
   cursor: pointer;
-  transition: 0.3s;
+  transition: 0.2s;
 }
 
-.btn-main:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 30px rgba(124,92,255,0.4);
+.btn-white:hover {
+  opacity: 0.85;
 }
 
-.cta-hint {
+.hint {
   text-align: center;
   font-size: 12px;
   color: var(--muted);
-  margin-top: 10px;
+  margin-top: 8px;
 }
 
 /* FALLBACK */
 .fallback {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.85);
+  background: rgba(0,0,0,0.9);
   display: flex;
   align-items: center;
   justify-content: center;
   opacity: 0;
   pointer-events: none;
-  transition: 0.4s;
+  transition: 0.3s;
 }
 
 .fallback.visible {
@@ -139,126 +141,12 @@ body {
 
 .fallback-box {
   background: #111;
-  padding: 30px;
-  border-radius: 16px;
+  padding: 24px;
+  border-radius: 12px;
   text-align: center;
-  animation: pop 0.4s ease;
-}
-
-@keyframes pop {
-  from { transform: scale(0.8); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
 }
 
 .fallback-box p {
   color: var(--muted);
-  margin: 10px 0 20px;
+  margin: 10px 0 16px;
 }
-
-.fallback-box a {
-  background: var(--accent);
-  padding: 10px 16px;
-  border-radius: 10px;
-  color: white;
-  text-decoration: none;
-}
-</style>
-</head>
-
-<body>
-
-<div class="nav">Harmber</div>
-
-<main class="watch-main">
-
-  <div class="watch-card" id="card">
-
-    <!-- VIDEO PLAYER -->
-    <div class="video-wrap">
-      <iframe id="player"
-        src=""
-        allow="autoplay; encrypted-media"
-        allowfullscreen>
-      </iframe>
-    </div>
-
-    <!-- META -->
-    <div class="watch-meta">
-      <p id="channel" class="watch-channel">Loading…</p>
-      <h1 id="title" class="watch-title">Loading track…</h1>
-    </div>
-
-    <!-- CTA -->
-    <div class="watch-cta">
-      <button id="openBtn" class="btn-main">
-        Open in Harmber
-      </button>
-      <p class="cta-hint">Better experience in app</p>
-    </div>
-
-  </div>
-
-</main>
-
-<!-- FALLBACK -->
-<div id="fallback" class="fallback">
-  <div class="fallback-box">
-    <h3>Harmber not installed</h3>
-    <p>Download to open this track in app</p>
-    <a href="/#download">Download</a>
-  </div>
-</div>
-
-<script>
-const KEY = 'AIzaSyBXZxLTFUmiFRliRRcEuV1Baxmzq8JiZ_0';
-
-const params = new URLSearchParams(location.search);
-const raw = params.get('v') || '';
-const id = raw.split('&')[0];
-
-if (!id) location.href = '/';
-
-// set video player
-document.getElementById("player").src =
-  `https://www.youtube.com/embed/${id}?autoplay=0`;
-
-// fetch metadata
-async function load() {
-  try {
-    const r = await fetch(
-      `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${id}&key=${KEY}`
-    );
-    const d = await r.json();
-
-    const s = d.items[0].snippet;
-
-    title.textContent = s.title;
-    channel.textContent = s.channelTitle;
-    document.title = s.title + " — Harmber";
-
-  } catch (e) {
-    console.error(e);
-  }
-}
-
-load();
-
-// deep link
-openBtn.onclick = () => {
-  const intent =
-    `intent://watch?v=${id}#Intent;scheme=https;package=com.harmber.suadat;end;`;
-
-  const t = Date.now();
-  location.href = intent;
-
-  setTimeout(() => {
-    if (Date.now() - t < 2500) {
-      fallback.classList.add('visible');
-      card.style.opacity = 0.3;
-    }
-  }, 2000);
-};
-</script>
-
-</body>
-</html>
