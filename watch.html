@@ -3,153 +3,115 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Open in Harmber</title>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <title>Loading… — Harmber</title>
 
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="watch.css"/>
 </head>
 <body>
 
 <header class="nav">
-  <div class="nav-inner">
-    <a href="/" class="wordmark">Harmber</a>
-  </div>
+  <div class="logo">Harmber</div>
 </header>
 
 <main class="watch-main">
 
-  <div class="watch-card" id="watchCard">
+  <div class="watch-card" id="card">
 
-    <div class="thumb-wrap">
-      <img id="videoThumb"
-           src="https://placehold.co/800x450/0e0e10/222?text=Loading..."
-           alt="Thumbnail"/>
-      <div class="thumb-gradient"></div>
-      <div class="play-badge">
-        <svg viewBox="0 0 24 24" fill="white" width="22" height="22">
-          <path d="M8 5v14l11-7z"/>
-        </svg>
-      </div>
+    <!-- PLAYER -->
+    <div class="video-wrap">
+      <iframe id="player" allowfullscreen></iframe>
     </div>
 
+    <!-- META -->
     <div class="watch-meta">
-      <p class="watch-channel" id="videoChannel">Loading...</p>
-      <h1 class="watch-title" id="videoTitle">Loading track information...</h1>
+      <h1 id="title" class="title">Loading...</h1>
+      <p id="channel" class="channel"></p>
+
+      <div class="stats">
+        <span id="views"></span>
+        <span id="date"></span>
+      </div>
+
+      <p id="desc" class="desc"></p>
     </div>
 
+    <!-- CTA -->
     <div class="watch-cta">
-      <button class="btn-main btn-xl" id="openInApp">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2.2">
-          <path d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2
-                   1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2
-                   1.343-2 3-2 3 .895 3 2z"/>
-        </svg>
-        Open in Harmber
-      </button>
-      <p class="cta-hint">Opens the Harmber app. Make sure it's installed.</p>
+      <button id="openBtn" class="btn-white">Open in Harmber</button>
+      <p class="hint">Better experience in app</p>
     </div>
 
-  </div>
-
-  <!-- fallback -->
-  <div class="fallback-panel" id="fallbackPanel">
-    <div class="fallback-inner">
-      <div class="fallback-icon">
-        <svg viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="1.5"
-             width="32" height="32">
-          <circle cx="12" cy="12" r="10"/>
-          <path d="M12 8v4M12 16h.01"/>
-        </svg>
-      </div>
-
-      <h3>Harmber isn't installed</h3>
-      <p>Download Harmber to open this track directly in the app.</p>
-
-      <div class="fallback-btns">
-        <a href="/#download" class="btn-main">Download Harmber</a>
-        <a href="/" class="btn-ghost">Go home</a>
-      </div>
-    </div>
   </div>
 
 </main>
 
+<!-- FALLBACK -->
+<div id="fallback" class="fallback">
+  <div class="fallback-box">
+    <h3>App not installed</h3>
+    <p>Download Harmber to continue</p>
+    <a href="/#download" class="btn-white">Download</a>
+  </div>
+</div>
+
 <script>
-const YT_API_KEY = 'AIzaSyBXZxLTFUmiFRliRRcEuV1Baxmzq8JiZ_0';
-const APP_PACKAGE = 'com.harmber.suadat';
+const KEY = 'AIzaSyBXZxLTFUmiFRliRRcEuV1Baxmzq8JiZ_0';
 
-const params = new URLSearchParams(window.location.search);
-const videoId = params.get('v');
+const params = new URLSearchParams(location.search);
+const raw = params.get('v') || '';
+const id = raw.split('&')[0];
 
-// redirect if no video
-if (!videoId) {
-  window.location.href = '/';
-}
+if (!id) location.href = '/';
 
-// fetch video data
-async function fetchVideo(id) {
+// player
+player.src = `https://www.youtube.com/embed/${id}`;
+
+// fetch data
+async function load() {
   try {
     const res = await fetch(
-      `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${id}&key=${YT_API_KEY}`
+      `https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&id=${id}&key=${KEY}`
     );
-
-    if (!res.ok) throw new Error("HTTP " + res.status);
-
     const data = await res.json();
-    console.log("YT API:", data);
 
-    if (!data.items || data.items.length === 0) {
-      throw new Error("No video found");
-    }
+    const v = data.items[0];
+    const s = v.snippet;
+    const stats = v.statistics;
 
-    const s = data.items[0].snippet;
+    title.textContent = s.title;
+    channel.textContent = s.channelTitle;
 
-    document.getElementById('videoTitle').textContent = s.title;
-    document.getElementById('videoChannel').textContent = s.channelTitle;
+    views.textContent = `${Number(stats.viewCount).toLocaleString()} views`;
+    date.textContent = new Date(s.publishedAt).toDateString();
 
-    document.getElementById('videoThumb').src =
-      s.thumbnails?.maxres?.url ||
-      s.thumbnails?.high?.url ||
-      `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
+    desc.textContent = s.description.slice(0, 200) + "...";
 
     document.title = s.title + " — Harmber";
 
-  } catch (err) {
-    console.error("Fetch failed:", err);
-
-    document.getElementById('videoTitle').textContent = "Failed to load track";
-    document.getElementById('videoChannel').textContent = "YouTube";
-    document.getElementById('videoThumb').src =
-      `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
+  } catch (e) {
+    console.error(e);
   }
 }
 
-fetchVideo(videoId);
+load();
 
-// open app intent
-document.getElementById('openInApp').addEventListener('click', () => {
-
+// intent
+openBtn.onclick = () => {
   const intent =
-    `intent://watch?v=${videoId}#Intent;` +
-    `package=${APP_PACKAGE};` +
-    `scheme=https;end;`;
+    `intent://watch?v=${id}#Intent;scheme=https;package=com.harmber.suadat;end;`;
 
-  const start = Date.now();
-  window.location.href = intent;
+  const t = Date.now();
+  location.href = intent;
 
-  // fallback if app not opened
   setTimeout(() => {
-    if (Date.now() - start < 2500) {
-      document.getElementById('fallbackPanel').classList.add('visible');
-      document.getElementById('watchCard').classList.add('dimmed');
+    if (Date.now() - t < 2500) {
+      fallback.classList.add("visible");
+      card.classList.add("dim");
     }
   }, 2000);
-});
+};
 </script>
 
 </body>
