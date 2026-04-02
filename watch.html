@@ -20,10 +20,16 @@
 
     <!-- THUMBNAIL -->
     <div class="thumb-wrap" id="thumbWrap">
-      <img id="thumb" src="https://placehold.co/800x450/111111/333333" alt="Video thumbnail"
-           width="800" height="450" loading="eager"/>
+      <img
+        id="thumb"
+        src="https://placehold.co/800x450/111111/333333"
+        alt="Video thumbnail"
+        width="800"
+        height="450"
+        loading="eager"
+      />
       <div class="overlay"></div>
-      <div class="play-btn" id="playBtn" role="button" aria-label="Play video">&#9654;</div>
+      <div class="play-btn" id="playBtn" role="button" aria-label="Open video">&#9654;</div>
     </div>
 
     <!-- META -->
@@ -31,13 +37,20 @@
       <h1 id="title" class="title">
         <span class="skeleton" style="display:block;height:1.3em;width:80%;"></span>
       </h1>
+
       <p id="channel" class="channel">
         <span class="skeleton" style="display:inline-block;height:1em;width:40%;"></span>
       </p>
+
       <div class="stats">
-        <span id="views"><span class="skeleton" style="display:inline-block;height:1em;width:80px;"></span></span>
-        <span id="date"><span class="skeleton" style="display:inline-block;height:1em;width:100px;"></span></span>
+        <span id="views">
+          <span class="skeleton" style="display:inline-block;height:1em;width:80px;"></span>
+        </span>
+        <span id="date">
+          <span class="skeleton" style="display:inline-block;height:1em;width:100px;"></span>
+        </span>
       </div>
+
       <p id="desc" class="desc">
         <span class="skeleton" style="display:block;height:1em;width:100%;margin-bottom:6px;"></span>
         <span class="skeleton" style="display:block;height:1em;width:90%;margin-bottom:6px;"></span>
@@ -48,33 +61,21 @@
     <!-- CTA -->
     <div class="watch-cta">
       <button id="openBtn" class="btn-primary">Open in App</button>
-      <p class="hint">Choose your preferred app to open this video</p>
+      <p class="hint">Android will show supported apps automatically</p>
     </div>
 
   </div>
 </main>
 
-<!-- APP CHOOSER BOTTOM SHEET -->
-<div class="chooser-backdrop" id="chooserBackdrop" role="dialog" aria-modal="true" aria-label="Open with app">
-  <div class="chooser-sheet" id="chooserSheet">
-    <div class="chooser-handle"></div>
-    <div class="chooser-header">
-      <h3>Open with</h3>
-      <p class="chooser-url" id="chooserUrl"></p>
-    </div>
-    <ul class="chooser-apps" id="appList" role="listbox"></ul>
-    <button class="chooser-cancel" id="chooserCancel">Cancel</button>
-  </div>
-</div>
-
-<!-- FALLBACK: App not installed -->
+<!-- FALLBACK -->
 <div id="fallback" class="fallback" role="alertdialog" aria-labelledby="fallbackTitle">
   <div class="fallback-box">
-    <h3 id="fallbackTitle">App not installed</h3>
-    <p id="fallbackMsg">This app isn't installed on your device.</p>
+    <h3 id="fallbackTitle">Open in browser</h3>
+    <p id="fallbackMsg">Your device did not show any supported app, so you can continue in browser.</p>
     <div class="fallback-actions">
-      <a href="/#download" class="btn-download">Download Harmber</a>
-      <button class="btn-ghost" id="fallbackBack">Go back</button>
+      <a id="browserBtn" href="#" class="btn-download" target="_blank" rel="noopener noreferrer">Open in Browser</a>
+      <a href="/#download" class="btn-outline">Download Harmber</a>
+      <button class="btn-ghost" id="fallbackBack">Cancel</button>
     </div>
   </div>
 </div>
@@ -83,39 +84,45 @@
   const KEY = 'AIzaSyBXZxLTFUmiFRliRRcEuV1Baxmzq8JiZ_0';
 
   const params = new URLSearchParams(location.search);
-  const raw    = params.get('v') || '';
-  const id     = raw.split('&')[0];
+  const raw = params.get('v') || '';
+  const id = raw.split('&')[0];
 
   if (!id) location.href = '/';
 
-  // ── Load video metadata ──────────────────────────────────────────
+  const videoUrl = `https://www.youtube.com/watch?v=${id}`;
+  const shortUrl = `https://youtu.be/${id}`;
+
+  document.getElementById('browserBtn').href = videoUrl;
+
   async function load() {
     try {
-      const res  = await fetch(
+      const res = await fetch(
         `https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&id=${id}&key=${KEY}`
       );
       const data = await res.json();
 
       if (!data.items || !data.items.length) return;
 
-      const v     = data.items[0];
-      const s     = v.snippet;
+      const v = data.items[0];
+      const s = v.snippet;
       const stats = v.statistics;
 
-      document.getElementById('title').textContent   = s.title;
+      document.getElementById('title').textContent = s.title;
       document.getElementById('channel').textContent = s.channelTitle;
-      document.getElementById('views').textContent   = `${Number(stats.viewCount).toLocaleString()} views`;
-      document.getElementById('date').textContent    = new Date(s.publishedAt).toDateString();
-      document.getElementById('desc').textContent    = s.description.slice(0, 200) + '…';
+      document.getElementById('views').textContent = `${Number(stats.viewCount).toLocaleString()} views`;
+      document.getElementById('date').textContent = new Date(s.publishedAt).toDateString();
+      document.getElementById('desc').textContent = s.description.slice(0, 200) + '…';
 
-      document.getElementById('thumb').src =
+      const thumbSrc =
         s.thumbnails.maxres?.url ||
-        s.thumbnails.high?.url   ||
+        s.thumbnails.high?.url ||
         s.thumbnails.medium?.url;
 
+      document.getElementById('thumb').src = thumbSrc;
       document.getElementById('thumb').alt = s.title;
       document.title = s.title + ' — Harmber';
 
+      document.documentElement.style.setProperty('--thumb-url', `url(${thumbSrc})`);
     } catch (e) {
       console.error('Failed to load video:', e);
     }
@@ -123,215 +130,63 @@
 
   load();
 
-  // ── App definitions ──────────────────────────────────────────────
-  const videoUrl = `https://www.youtube.com/watch?v=${id}`;
-  const shortUrl = `https://youtu.be/${id}`;
-
-  const APPS = [
-    {
-      name: 'Harmber',
-      desc: 'Open in Harmber music & video app',
-      emoji: '🎵',
-      bg: '#1a0a00',
-      intent: `intent://watch?v=${id}#Intent;scheme=https;package=com.harmber.suadat;end;`,
-      scheme: `harmber://watch?v=${id}`,
-      web: null
-    },
-    {
-      name: 'YouTube',
-      desc: 'Open in the official YouTube app',
-      emoji: '▶️',
-      bg: '#1a0000',
-      intent: `intent://watch?v=${id}#Intent;scheme=https;package=com.google.android.youtube;end;`,
-      scheme: `youtube://watch?v=${id}`,
-      web: videoUrl
-    },
-    {
-      name: 'YouTube Music',
-      desc: 'Listen in YouTube Music',
-      emoji: '🎶',
-      bg: '#0a001a',
-      intent: `intent://watch?v=${id}#Intent;scheme=https;package=com.google.android.apps.youtube.music;end;`,
-      scheme: `youtubemusic://watch?v=${id}`,
-      web: `https://music.youtube.com/watch?v=${id}`
-    },
-    {
-      name: 'NewPipe',
-      desc: 'Open in NewPipe (Android)',
-      emoji: '🟠',
-      bg: '#1a0800',
-      intent: `intent://www.youtube.com/watch?v=${id}#Intent;scheme=https;package=org.schabi.newpipe;end;`,
-      scheme: null,
-      web: null
-    },
-    {
-      name: 'Invidious',
-      desc: 'Privacy-friendly YouTube frontend',
-      emoji: '🌐',
-      bg: '#001a0a',
-      intent: null,
-      scheme: null,
-      web: `https://invidious.io/watch?v=${id}`
-    },
-    {
-      name: 'Copy Link',
-      desc: 'Copy video link to clipboard',
-      emoji: '🔗',
-      bg: '#0a0a0a',
-      action: 'copy'
-    },
-    {
-      name: 'Open in Browser',
-      desc: 'Open YouTube in your default browser',
-      emoji: '🔍',
-      bg: '#001020',
-      web: videoUrl,
-      openInBrowser: true
-    }
-  ];
-
-  // ── Build chooser list ───────────────────────────────────────────
-  const appList = document.getElementById('appList');
-  document.getElementById('chooserUrl').textContent = shortUrl;
-
-  APPS.forEach(app => {
-    const li = document.createElement('li');
-    li.setAttribute('role', 'option');
-    li.setAttribute('tabindex', '0');
-    li.innerHTML = `
-      <div class="app-icon" style="background:${app.bg};">${app.emoji}</div>
-      <div class="app-info">
-        <div class="app-name">${app.name}</div>
-        <div class="app-desc">${app.desc}</div>
-      </div>
-      <span class="app-arrow">&#8250;</span>
-    `;
-    li.addEventListener('click', () => handleAppChoice(app));
-    li.addEventListener('keydown', e => {
-      if (e.key === 'Enter' || e.key === ' ') handleAppChoice(app);
-    });
-    appList.appendChild(li);
-  });
-
-  // ── Chooser open / close ─────────────────────────────────────────
-  function openChooser() {
-    document.getElementById('chooserBackdrop').classList.add('open');
-    document.getElementById('chooserCancel').focus();
-  }
-
-  function closeChooser() {
-    document.getElementById('chooserBackdrop').classList.remove('open');
-  }
-
-  document.getElementById('openBtn').addEventListener('click', openChooser);
-  document.getElementById('thumbWrap').addEventListener('click', openChooser);
-  document.getElementById('chooserCancel').addEventListener('click', closeChooser);
-
-  document.getElementById('chooserBackdrop').addEventListener('click', function(e) {
-    if (e.target === this) closeChooser();
-  });
-
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') closeChooser();
-  });
-
-  // ── Handle app choice ─────────────────────────────────────────────
-  function handleAppChoice(app) {
-    closeChooser();
-
-    // Copy link
-    if (app.action === 'copy') {
-      navigator.clipboard.writeText(videoUrl).then(() => {
-        showToast('Link copied!');
-      }).catch(() => {
-        const ta = document.createElement('textarea');
-        ta.value = videoUrl;
-        ta.style.cssText = 'position:fixed;opacity:0;';
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand('copy');
-        document.body.removeChild(ta);
-        showToast('Link copied!');
-      });
-      return;
-    }
-
-    // Always open in new browser tab
-    if (app.openInBrowser && app.web) {
-      window.open(app.web, '_blank', 'noopener,noreferrer');
-      return;
-    }
-
-    // Web-only apps
-    if (!app.intent && !app.scheme && app.web) {
-      window.open(app.web, '_blank', 'noopener,noreferrer');
-      return;
-    }
-
-    // Try native app
-    tryOpenApp(app);
-  }
-
-  function tryOpenApp(app) {
-    const isAndroid = /android/i.test(navigator.userAgent);
-    const target    = isAndroid && app.intent ? app.intent : (app.scheme || app.intent);
-
-    if (!target) {
-      app.web ? window.open(app.web, '_blank', 'noopener,noreferrer') : showFallback(app);
-      return;
-    }
-
-    // Hidden iframe attempt (does not navigate away)
-    const iframe = document.createElement('iframe');
-    iframe.style.cssText = 'display:none;width:0;height:0;border:0;';
-    document.body.appendChild(iframe);
-    try { iframe.contentWindow.location.href = target; } catch(_) {}
-
-    // For Android intent:// Chrome navigates the main page
-    if (isAndroid && app.intent) location.href = target;
-
-    // Detect if user left (app opened successfully)
-    const onVisChange = () => {
-      clearTimeout(timer);
-      document.removeEventListener('visibilitychange', onVisChange);
-    };
-    document.addEventListener('visibilitychange', onVisChange);
-
-    // After 2s still here → app not installed
-    const timer = setTimeout(() => {
-      document.removeEventListener('visibilitychange', onVisChange);
-      if (document.body.contains(iframe)) document.body.removeChild(iframe);
-      app.web
-        ? window.open(app.web, '_blank', 'noopener,noreferrer')
-        : showFallback(app);
-    }, 2000);
-  }
-
-  function showFallback(app) {
-    document.getElementById('fallbackMsg').textContent =
-      `${app.name} isn't installed on your device.`;
+  function showFallback() {
     document.getElementById('fallback').classList.add('visible');
     document.getElementById('card').classList.add('dim');
   }
 
-  document.getElementById('fallbackBack').addEventListener('click', () => {
+  function hideFallback() {
     document.getElementById('fallback').classList.remove('visible');
     document.getElementById('card').classList.remove('dim');
-  });
-
-  // ── Toast ─────────────────────────────────────────────────────────
-  function showToast(msg) {
-    let t = document.getElementById('_toast');
-    if (!t) {
-      t = document.createElement('div');
-      t.id = '_toast';
-      t.className = 'toast';
-      document.body.appendChild(t);
-    }
-    t.textContent = msg;
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 2200);
   }
+
+  document.getElementById('fallbackBack').addEventListener('click', hideFallback);
+
+  function openNativeChooser() {
+    const isAndroid = /android/i.test(navigator.userAgent);
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+
+    if (isAndroid) {
+      const fallbackEncoded = encodeURIComponent(videoUrl);
+
+      const intentUrl =
+        `intent://www.youtube.com/watch?v=${id}` +
+        `#Intent;scheme=https;` +
+        `package=com.google.android.youtube;` +
+        `S.browser_fallback_url=${fallbackEncoded};` +
+        `end;`;
+
+      location.href = intentUrl;
+
+      setTimeout(() => {
+        showFallback();
+      }, 1600);
+
+      return;
+    }
+
+    if (isIOS) {
+      const start = Date.now();
+      location.href = `youtube://watch?v=${id}`;
+
+      setTimeout(() => {
+        if (Date.now() - start < 1400) {
+          window.open(videoUrl, '_blank', 'noopener,noreferrer');
+        }
+      }, 900);
+
+      return;
+    }
+
+    showFallback();
+  }
+
+  document.getElementById('openBtn').addEventListener('click', openNativeChooser);
+  document.getElementById('thumbWrap').addEventListener('click', openNativeChooser);
+  document.getElementById('playBtn').addEventListener('click', function(e) {
+    e.stopPropagation();
+    openNativeChooser();
+  });
 </script>
 
 </body>
