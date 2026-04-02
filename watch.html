@@ -20,14 +20,8 @@
 
     <!-- THUMBNAIL -->
     <div class="thumb-wrap" id="thumbWrap">
-      <img
-        id="thumb"
-        src="https://placehold.co/800x450/111111/333333"
-        alt="Video thumbnail"
-        width="800"
-        height="450"
-        loading="eager"
-      />
+      <img id="thumb" src="https://placehold.co/800x450/111111/333333" alt="Video thumbnail"
+           width="800" height="450" loading="eager"/>
       <div class="overlay"></div>
       <div class="play-btn" id="playBtn" role="button" aria-label="Open video">&#9654;</div>
     </div>
@@ -37,20 +31,13 @@
       <h1 id="title" class="title">
         <span class="skeleton" style="display:block;height:1.3em;width:80%;"></span>
       </h1>
-
       <p id="channel" class="channel">
         <span class="skeleton" style="display:inline-block;height:1em;width:40%;"></span>
       </p>
-
       <div class="stats">
-        <span id="views">
-          <span class="skeleton" style="display:inline-block;height:1em;width:80px;"></span>
-        </span>
-        <span id="date">
-          <span class="skeleton" style="display:inline-block;height:1em;width:100px;"></span>
-        </span>
+        <span id="views"><span class="skeleton" style="display:inline-block;height:1em;width:80px;"></span></span>
+        <span id="date"><span class="skeleton" style="display:inline-block;height:1em;width:100px;"></span></span>
       </div>
-
       <p id="desc" class="desc">
         <span class="skeleton" style="display:block;height:1em;width:100%;margin-bottom:6px;"></span>
         <span class="skeleton" style="display:block;height:1em;width:90%;margin-bottom:6px;"></span>
@@ -61,19 +48,20 @@
     <!-- CTA -->
     <div class="watch-cta">
       <button id="openBtn" class="btn-primary">Open in App</button>
-      <p class="hint">Android will show supported apps automatically</p>
+      <p class="hint">Android will show all apps that support this link</p>
     </div>
 
   </div>
 </main>
 
-<!-- FALLBACK -->
+<!-- FALLBACK: App not installed (desktop / no app) -->
 <div id="fallback" class="fallback" role="alertdialog" aria-labelledby="fallbackTitle">
   <div class="fallback-box">
-    <h3 id="fallbackTitle">Open in browser</h3>
-    <p id="fallbackMsg">Your device did not show any supported app, so you can continue in browser.</p>
+    <div class="fallback-icon">&#128279;</div>
+    <h3 id="fallbackTitle">No app found</h3>
+    <p id="fallbackMsg">No app is installed that can open this link. Open it in your browser instead?</p>
     <div class="fallback-actions">
-      <a id="browserBtn" href="#" class="btn-download" target="_blank" rel="noopener noreferrer">Open in Browser</a>
+      <a id="fallbackOpen" href="#" class="btn-download" target="_blank" rel="noopener noreferrer">Open in Browser</a>
       <a href="/#download" class="btn-outline">Download Harmber</a>
       <button class="btn-ghost" id="fallbackBack">Cancel</button>
     </div>
@@ -83,46 +71,49 @@
 <script>
   const KEY = 'AIzaSyBXZxLTFUmiFRliRRcEuV1Baxmzq8JiZ_0';
 
-  const params = new URLSearchParams(location.search);
-  const raw = params.get('v') || '';
-  const id = raw.split('&')[0];
+  const params  = new URLSearchParams(location.search);
+  const raw     = params.get('v') || '';
+  const id      = raw.split('&')[0];
 
   if (!id) location.href = '/';
 
   const videoUrl = `https://www.youtube.com/watch?v=${id}`;
   const shortUrl = `https://youtu.be/${id}`;
 
-  document.getElementById('browserBtn').href = videoUrl;
+  // Set fallback browser link
+  document.getElementById('fallbackOpen').href = videoUrl;
 
+  // ── Load video metadata ──────────────────────────────────────────
   async function load() {
     try {
-      const res = await fetch(
+      const res  = await fetch(
         `https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&id=${id}&key=${KEY}`
       );
       const data = await res.json();
-
       if (!data.items || !data.items.length) return;
 
-      const v = data.items[0];
-      const s = v.snippet;
+      const v     = data.items[0];
+      const s     = v.snippet;
       const stats = v.statistics;
 
-      document.getElementById('title').textContent = s.title;
+      document.getElementById('title').textContent   = s.title;
       document.getElementById('channel').textContent = s.channelTitle;
-      document.getElementById('views').textContent = `${Number(stats.viewCount).toLocaleString()} views`;
-      document.getElementById('date').textContent = new Date(s.publishedAt).toDateString();
-      document.getElementById('desc').textContent = s.description.slice(0, 200) + '…';
+      document.getElementById('views').textContent   = `${Number(stats.viewCount).toLocaleString()} views`;
+      document.getElementById('date').textContent    = new Date(s.publishedAt).toDateString();
+      document.getElementById('desc').textContent    = s.description.slice(0, 200) + '…';
 
       const thumbSrc =
         s.thumbnails.maxres?.url ||
-        s.thumbnails.high?.url ||
+        s.thumbnails.high?.url   ||
         s.thumbnails.medium?.url;
 
       document.getElementById('thumb').src = thumbSrc;
       document.getElementById('thumb').alt = s.title;
       document.title = s.title + ' — Harmber';
 
+      // Set blurred background
       document.documentElement.style.setProperty('--thumb-url', `url(${thumbSrc})`);
+
     } catch (e) {
       console.error('Failed to load video:', e);
     }
@@ -130,62 +121,67 @@
 
   load();
 
+  // ── Open in App ──────────────────────────────────────────────────
+  // Strategy:
+  //   1. Android Chrome: navigate to the real YouTube URL.
+  //      Android intercepts it and shows the native "Open with" chooser
+  //      listing every app that registered an intent-filter for youtube.com
+  //      (YouTube, Harmber, NewPipe, YT Music, etc.)
+  //   2. iOS: try youtube:// custom scheme, fall back to https://
+  //   3. Desktop / no app: show fallback overlay with browser link.
+
+  function openInApp() {
+    const isAndroid = /android/i.test(navigator.userAgent);
+    const isIOS     = /iphone|ipad|ipod/i.test(navigator.userAgent);
+
+    if (isAndroid) {
+      // Use intent:// with S.browser_fallback_url so Chrome shows
+      // the native app-chooser. If NO app handles it, Chrome opens
+      // the fallback URL automatically — no blank screen.
+      const fallbackEncoded = encodeURIComponent(videoUrl);
+      const intentUri =
+        `intent://www.youtube.com/watch?v=${id}` +
+        `#Intent;scheme=https;` +
+        `S.browser_fallback_url=${fallbackEncoded};` +
+        `end;`;
+
+      // Navigating to an intent:// URI in Chrome Android triggers
+      // the system "Open with" sheet — exactly like the screenshot.
+      location.href = intentUri;
+      return;
+    }
+
+    if (isIOS) {
+      // Try youtube:// — if YouTube/Harmber is installed iOS will open it.
+      // If not, the navigation silently fails; we fall through to browser.
+      const t0 = Date.now();
+      location.href = `youtube://watch?v=${id}`;
+
+      // If still here after 800ms, no app caught it → open browser
+      setTimeout(() => {
+        if (Date.now() - t0 < 1500) {
+          window.open(videoUrl, '_blank', 'noopener,noreferrer');
+        }
+      }, 800);
+      return;
+    }
+
+    // Desktop or unknown — show fallback directly
+    showFallback();
+  }
+
+  document.getElementById('openBtn').addEventListener('click', openInApp);
+  document.getElementById('thumbWrap').addEventListener('click', openInApp);
+
+  // ── Fallback overlay ─────────────────────────────────────────────
   function showFallback() {
     document.getElementById('fallback').classList.add('visible');
     document.getElementById('card').classList.add('dim');
   }
 
-  function hideFallback() {
+  document.getElementById('fallbackBack').addEventListener('click', () => {
     document.getElementById('fallback').classList.remove('visible');
     document.getElementById('card').classList.remove('dim');
-  }
-
-  document.getElementById('fallbackBack').addEventListener('click', hideFallback);
-
-  function openNativeChooser() {
-    const isAndroid = /android/i.test(navigator.userAgent);
-    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-
-    if (isAndroid) {
-      const fallbackEncoded = encodeURIComponent(videoUrl);
-
-      const intentUrl =
-        `intent://www.youtube.com/watch?v=${id}` +
-        `#Intent;scheme=https;` +
-        `package=com.google.android.youtube;` +
-        `S.browser_fallback_url=${fallbackEncoded};` +
-        `end;`;
-
-      location.href = intentUrl;
-
-      setTimeout(() => {
-        showFallback();
-      }, 1600);
-
-      return;
-    }
-
-    if (isIOS) {
-      const start = Date.now();
-      location.href = `youtube://watch?v=${id}`;
-
-      setTimeout(() => {
-        if (Date.now() - start < 1400) {
-          window.open(videoUrl, '_blank', 'noopener,noreferrer');
-        }
-      }, 900);
-
-      return;
-    }
-
-    showFallback();
-  }
-
-  document.getElementById('openBtn').addEventListener('click', openNativeChooser);
-  document.getElementById('thumbWrap').addEventListener('click', openNativeChooser);
-  document.getElementById('playBtn').addEventListener('click', function(e) {
-    e.stopPropagation();
-    openNativeChooser();
   });
 </script>
 
