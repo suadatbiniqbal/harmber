@@ -1,427 +1,188 @@
 <!DOCTYPE html>
-<html lang="en" prefix="og: https://ogp.me/ns#">
+<html lang="en">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 
-  <title>Harmber — Stream smarter. Feel deeper.</title>
-  <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/suadatbiniqbal/harmber/main/logo.png">
+  <title>Harmber</title>
 
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 
-  <meta name="description" content="Harmber is a free, ad-free music streaming app for Android. High-quality Opus audio, synced lyrics, YouTube sync, Discord rich presence and playlist import. No sign-up required."/>
-  <meta name="keywords" content="harmber, music app, ad-free music, android music player, opus audio, lyrics sync, youtube music, discord rich presence, free music streaming"/>
-  <meta name="author" content="Harmber"/>
-  <meta name="robots" content="index, follow"/>
-  <meta name="theme-color" content="#000000"/>
-  <link rel="canonical" href="https://harmber.xyz/"/>
+  <style>
+    :root {
+      --bg: #050505;
+      --card: rgba(255,255,255,0.04);
+      --border: rgba(255,255,255,0.08);
+      --text: #fff;
+      --muted: #aaa;
+    }
 
-  <meta property="og:type"         content="website"/>
-  <meta property="og:url"          content="https://harmber.xyz/"/>
-  <meta property="og:title"        content="Harmber — Stream smarter. Feel deeper."/>
-  <meta property="og:description"  content="Free, ad-free music streaming for Android. Opus audio, synced lyrics, YouTube sync and more. No account needed."/>
-  <meta property="og:image"        content="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/logo.png"/>
-  <meta property="og:site_name"    content="Harmber"/>
-  <meta property="og:locale"       content="en_US"/>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Inter, sans-serif;
+    }
 
-  <meta name="twitter:card"        content="summary_large_image"/>
-  <meta name="twitter:title"       content="Harmber — Stream smarter. Feel deeper."/>
-  <meta name="twitter:description" content="Free, ad-free music streaming for Android. Opus audio, synced lyrics, YouTube sync and more."/>
-  <meta name="twitter:image"       content="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/logo.png"/>
+    body {
+      background: radial-gradient(circle at top, #111, #050505);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
 
-  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/logo.png"/>
-  <link rel="apple-touch-icon"      href="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/logo.png"/>
-  <link rel="manifest"              href="/site.webmanifest"/>
+    .nav {
+      padding: 20px;
+      font-weight: 600;
+      font-size: 18px;
+      opacity: 0.8;
+    }
 
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    "name": "Harmber",
-    "operatingSystem": "Android",
-    "applicationCategory": "MusicApplication",
-    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-    "description": "Free, ad-free music streaming for Android with Opus audio, synced lyrics, YouTube sync and Discord rich presence.",
-    "url": "https://harmber.xyz",
-    "logo": "https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/logo.png"
-  }
-  </script>
+    .container {
+      width: 100%;
+      max-width: 520px;
+      margin-top: 80px;
+      padding: 20px;
+    }
 
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="style.css"/>
+    .card {
+      background: var(--card);
+      backdrop-filter: blur(18px);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+      animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px);}
+      to { opacity: 1; transform: translateY(0);}
+    }
+
+    h1 {
+      font-size: 22px;
+      margin-bottom: 10px;
+    }
+
+    p {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: white;
+      outline: none;
+      margin-bottom: 12px;
+    }
+
+    input::placeholder {
+      color: #666;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      background: white;
+      color: black;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.25s;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(255,255,255,0.15);
+    }
+
+    .footer {
+      margin-top: 40px;
+      font-size: 12px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        margin-top: 40px;
+      }
+
+      h1 {
+        font-size: 18px;
+      }
+    }
+  </style>
 </head>
+
 <body>
 
-  <div class="noise"       aria-hidden="true"></div>
-  <div class="cursor-dot"  id="cursorDot"  aria-hidden="true"></div>
-  <div class="cursor-ring" id="cursorRing" aria-hidden="true"></div>
-  <div class="progress-bar" id="progressBar" aria-hidden="true"></div>
+<div class="nav">Harmber</div>
 
-  <!-- NAV -->
-  <header class="nav" id="nav" role="banner">
-    <div class="nav-inner">
-      <a href="/" class="wordmark" aria-label="Harmber home">
-        <img src="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/logo.png" alt="Harmber" class="wordmark-img"/>
-        Harmber
-      </a>
-      <nav class="nav-links" aria-label="Main navigation">
-        <a href="#features">Features</a>
-        <a href="#screenshots">Screenshots</a>
-        <a href="#download">Download</a>
-        <a href="https://github.com/suadatbiniqbal/harmber" target="_blank" rel="noopener noreferrer">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.013-1.703-2.782.604-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0 1 12 6.836a9.59 9.59 0 0 1 2.504.337c1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>
-          GitHub
-        </a>
-        <a href="#download" class="nav-pill">Download</a>
-      </nav>
-    </div>
-  </header>
+<div class="container">
+  <div class="card">
 
-  <main>
+    <h1>Open YouTube in Harmber</h1>
+    <p>Paste a YouTube link or video ID</p>
 
-  <!-- HERO -->
-  <section class="hero" id="hero" aria-label="Hero">
-    <img class="hero-bg-gif" src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3ptaGlxN3pmc3VobmxmNGZqZnF6eDM5dnBma3Jsdzh0dmoxb2pmeCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/V1ZLZNtPzSJXy/giphy.gif" alt="" aria-hidden="true" loading="eager"/>
-    <div class="hero-overlay" aria-hidden="true"></div>
-    <canvas id="waveCanvas" aria-hidden="true"></canvas>
-    <div class="orb orb-1" aria-hidden="true"></div>
-    <div class="orb orb-2" aria-hidden="true"></div>
-    <div class="orb orb-3" aria-hidden="true"></div>
-    <div class="particles" id="particles" aria-hidden="true"></div>
+    <input id="input" placeholder="https://youtube.com/watch?v=..." />
 
-    <div class="hero-content">
-      <div class="hero-badge">
-        <span class="badge-dot" aria-hidden="true"></span>
-        Free &nbsp;·&nbsp; Ad-free &nbsp;·&nbsp; For Android
-      </div>
+    <button onclick="go()">Open</button>
 
-      <h1 class="hero-heading">
-        <span class="line-wrap"><span class="line anim-l1">Stream smarter.</span></span>
-        <span class="line-wrap"><span class="line anim-l2 line-dim">Feel deeper.</span></span>
-      </h1>
-
-      <p class="hero-sub">
-        Harmber is the music player built for people who actually care about listening.
-        No ads. No noise. Just music the way it was meant to be heard.
-      </p>
-
-      <div class="hero-actions">
-        <a href="#download" class="btn-main btn-glow">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M12 3v13M5 14l7 7 7-7"/><path d="M3 21h18"/></svg>
-          Download APK
-        </a>
-        <a href="#features" class="btn-ghost">
-          Explore features
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </a>
-      </div>
-
-      <div class="hero-trust">
-        <span class="trust-item">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-          No sign-up
-        </span>
-        <span class="trust-sep" aria-hidden="true"></span>
-        <span class="trust-item">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-          Android 8.0+
-        </span>
-        <span class="trust-sep" aria-hidden="true"></span>
-        <span class="trust-item">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-          ~18 MB
-        </span>
-      </div>
-    </div>
-
-    <div class="hero-mockup-row">
-      <div class="phone-wrap phone-left" aria-hidden="true">
-        <div class="phone">
-          <img src="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/ss2.jpg" alt=""/>
-        </div>
-      </div>
-      <div class="phone-wrap phone-center">
-        <div class="phone">
-          <img src="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/ss1.jpg" alt="Harmber player interface"/>
-        </div>
-        <div class="phone-glow" aria-hidden="true"></div>
-      </div>
-      <div class="phone-wrap phone-right" aria-hidden="true">
-        <div class="phone">
-          <img src="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/ss3.jpg" alt=""/>
-        </div>
-      </div>
-    </div>
-
-    <div class="scroll-hint" aria-hidden="true">
-      <div class="scroll-mouse"><div class="scroll-wheel"></div></div>
-      <span>Scroll</span>
-    </div>
-  </section>
-
-  <!-- MARQUEE -->
-  <div class="marquee-wrap" aria-hidden="true">
-    <div class="marquee-track">
-      <div class="marquee-row">
-        <span>Ad-free</span><span class="md">·</span>
-        <span>Opus Audio</span><span class="md">·</span>
-        <span>Lyrics Sync</span><span class="md">·</span>
-        <span>YouTube Sync</span><span class="md">·</span>
-        <span>Discord Rich Presence</span><span class="md">·</span>
-        <span>Playlist Import</span><span class="md">·</span>
-        <span>No Account</span><span class="md">·</span>
-        <span>Free Forever</span><span class="md">·</span>
-      </div>
-      <div class="marquee-row" aria-hidden="true">
-        <span>Ad-free</span><span class="md">·</span>
-        <span>Opus Audio</span><span class="md">·</span>
-        <span>Lyrics Sync</span><span class="md">·</span>
-        <span>YouTube Sync</span><span class="md">·</span>
-        <span>Discord Rich Presence</span><span class="md">·</span>
-        <span>Playlist Import</span><span class="md">·</span>
-        <span>No Account</span><span class="md">·</span>
-        <span>Free Forever</span><span class="md">·</span>
-      </div>
-    </div>
   </div>
 
-  <!-- STATS -->
-  <div class="stats-bar">
-    <div class="stat">
-      <span class="sn" data-target="100">0</span><span class="ss">%</span>
-      <p>Ad-free</p>
-    </div>
-    <div class="sdiv" aria-hidden="true"></div>
-    <div class="stat">
-      <span class="sn sw">Opus</span>
-      <p>Audio codec</p>
-    </div>
-    <div class="sdiv" aria-hidden="true"></div>
-    <div class="stat">
-      <span class="sn" data-target="0">0</span>
-      <p>Accounts needed</p>
-    </div>
-    <div class="sdiv" aria-hidden="true"></div>
-    <div class="stat">
-      <span class="sn sw">18MB</span>
-      <p>App size</p>
-    </div>
+  <div class="footer">
+    Built for fast music access ⚡
   </div>
+</div>
 
-  <!-- FEATURES -->
-  <section class="features" id="features" aria-labelledby="feat-h">
-    <div class="container">
-      <div class="eyebrow"><span class="el"></span>Features<span class="el"></span></div>
-      <h2 class="sh reveal" id="feat-h">Everything you need.<br/>Nothing you don't.</h2>
-      <div class="feat-grid">
+<script>
+function extractId(url) {
+  try {
+    // full URL
+    if (url.includes("youtube.com") || url.includes("youtu.be")) {
+      const u = new URL(url);
 
-        <article class="fc fc-wide reveal" data-delay="0">
-          <div class="fc-bg" aria-hidden="true"></div>
-          <div class="fc-inner">
-            <div class="fi" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22"><path d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"/></svg>
-            </div>
-            <div>
-              <h3>Ad-free music</h3>
-              <p>Every track, every time — zero interruptions. Music the way it was meant to be heard, from start to finish, always.</p>
-            </div>
-          </div>
-          <div class="fc-glow" aria-hidden="true"></div>
-          <div class="fc-edge" aria-hidden="true"></div>
-        </article>
+      // normal
+      if (u.searchParams.get("v")) {
+        return u.searchParams.get("v");
+      }
 
-        <article class="fc reveal" data-delay="80">
-          <div class="fc-bg" aria-hidden="true"></div>
-          <div class="fc-inner">
-            <div class="fi" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
-            </div>
-            <h3>Opus audio quality</h3>
-            <p>High-fidelity Opus codec. Hear every layer and detail in your music.</p>
-          </div>
-          <div class="fc-glow" aria-hidden="true"></div>
-          <div class="fc-edge" aria-hidden="true"></div>
-        </article>
+      // youtu.be
+      return u.pathname.split("/")[1];
+    }
 
-        <article class="fc reveal" data-delay="160">
-          <div class="fc-bg" aria-hidden="true"></div>
-          <div class="fc-inner">
-            <div class="fi" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22"><path d="M4 6h16M4 12h10M4 18h7"/></svg>
-            </div>
-            <h3>Lyrics sync</h3>
-            <p>Real-time synchronized lyrics that follow every beat precisely.</p>
-          </div>
-          <div class="fc-glow" aria-hidden="true"></div>
-          <div class="fc-edge" aria-hidden="true"></div>
-        </article>
+    // assume direct ID
+    return url.trim();
 
-        <article class="fc reveal" data-delay="240">
-          <div class="fc-bg" aria-hidden="true"></div>
-          <div class="fc-inner">
-            <div class="fi" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22"><path d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            </div>
-            <h3>YouTube sync</h3>
-            <p>Stream any YouTube track directly inside Harmber seamlessly.</p>
-          </div>
-          <div class="fc-glow" aria-hidden="true"></div>
-          <div class="fc-edge" aria-hidden="true"></div>
-        </article>
+  } catch {
+    return url.trim();
+  }
+}
 
-        <article class="fc reveal" data-delay="320">
-          <div class="fc-bg" aria-hidden="true"></div>
-          <div class="fc-inner">
-            <div class="fi" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22"><circle cx="12" cy="12" r="10"/><path d="M8.56 2.75c4.37 6.03 6.02 9.42 8.03 17.72m2.54-15.38c-3.72 4.35-8.94 5.66-16.88 5.85m19.5 1.9c-3.5-.93-6.63-.82-8.94 0-2.58.92-5.01 2.86-7.44 6.32"/></svg>
-            </div>
-            <h3>Discord rich presence</h3>
-            <p>Show your currently playing track live on your Discord profile.</p>
-          </div>
-          <div class="fc-glow" aria-hidden="true"></div>
-          <div class="fc-edge" aria-hidden="true"></div>
-        </article>
+function go() {
+  const val = document.getElementById("input").value.trim();
+  if (!val) return;
 
-        <article class="fc fc-wide reveal" data-delay="400">
-          <div class="fc-bg" aria-hidden="true"></div>
-          <div class="fc-inner">
-            <div class="fi" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-            </div>
-            <div>
-              <h3>Playlist import</h3>
-              <p>Import your playlists from Spotify, YouTube and more in seconds. No rebuilding, no friction. Start listening immediately.</p>
-            </div>
-          </div>
-          <div class="fc-glow" aria-hidden="true"></div>
-          <div class="fc-edge" aria-hidden="true"></div>
-        </article>
+  const id = extractId(val);
 
-      </div>
-    </div>
-  </section>
+  if (!id || id.length < 6) {
+    alert("Invalid YouTube link or ID");
+    return;
+  }
 
-  <!-- SCREENSHOTS -->
-  <section class="scr-section" id="screenshots" aria-labelledby="scr-h">
-    <div class="container">
-      <div class="eyebrow"><span class="el"></span>Interface<span class="el"></span></div>
-      <h2 class="sh reveal" id="scr-h">A player that disappears.<br/>The music stays.</h2>
-    </div>
-    <div class="scr-scroll" id="scrScroll">
-      <div class="scr-item reveal" data-delay="0">
-        <div class="scr-phone">
-          <img src="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/ss1.jpg" alt="Now Playing" loading="lazy"/>
-          <div class="scr-shine" aria-hidden="true"></div>
-          <div class="scr-glow"  aria-hidden="true"></div>
-        </div>
-        <p>Now Playing</p>
-      </div>
-      <div class="scr-item reveal" data-delay="80">
-        <div class="scr-phone">
-          <img src="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/ss2.jpg" alt="Library" loading="lazy"/>
-          <div class="scr-shine" aria-hidden="true"></div>
-          <div class="scr-glow"  aria-hidden="true"></div>
-        </div>
-        <p>Library</p>
-      </div>
-      <div class="scr-item reveal" data-delay="160">
-        <div class="scr-phone">
-          <img src="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/ss3.jpg" alt="Lyrics" loading="lazy"/>
-          <div class="scr-shine" aria-hidden="true"></div>
-          <div class="scr-glow"  aria-hidden="true"></div>
-        </div>
-        <p>Lyrics</p>
-      </div>
-      <div class="scr-item reveal" data-delay="240">
-        <div class="scr-phone">
-          <img src="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/ss5.jpg" alt="Discover" loading="lazy"/>
-          <div class="scr-shine" aria-hidden="true"></div>
-          <div class="scr-glow"  aria-hidden="true"></div>
-        </div>
-        <p>Discover</p>
-      </div>
-      <div class="scr-item reveal" data-delay="320">
-        <div class="scr-phone">
-          <img src="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/ss4.jpg" alt="Playlists" loading="lazy"/>
-          <div class="scr-shine" aria-hidden="true"></div>
-          <div class="scr-glow"  aria-hidden="true"></div>
-        </div>
-        <p>Playlists</p>
-      </div>
-    </div>
-  </section>
+  window.location.href = `/watch.html?v=${id}`;
+}
+</script>
 
-  <!-- DOWNLOAD -->
-  <section class="dl-section" id="download" aria-labelledby="dl-h">
-    <div class="dl-grid-bg" aria-hidden="true"></div>
-    <div class="dl-orb dl-o1" aria-hidden="true"></div>
-    <div class="dl-orb dl-o2" aria-hidden="true"></div>
-    <div class="dl-inner reveal">
-      <div class="eyebrow"><span class="el"></span>Get the app<span class="el"></span></div>
-      <h2 class="dl-h" id="dl-h">Ready to listen?</h2>
-      <p class="dl-sub">Free. No account. No tracking. Just install and go.</p>
-      <div class="dl-card">
-        <div class="dl-card-row">
-          <div class="dl-icon">
-            <img src="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/logo.png" alt="Harmber" width="32" height="32"/>
-          </div>
-          <div class="dl-info">
-            <strong>Harmber</strong>
-            <span>v1.1.3 &nbsp;·&nbsp; ~18 MB &nbsp;·&nbsp; Android 8.0+</span>
-          </div>
-          <a href="#" class="btn-main btn-glow" id="apk-btn" aria-label="Download Harmber APK">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M12 3v13M5 14l7 7 7-7"/><path d="M3 21h18"/></svg>
-            Download APK
-          </a>
-        </div>
-        <div class="dl-card-shine" aria-hidden="true"></div>
-      </div>
-      <p class="dl-note">
-        By downloading you agree to our
-        <a href="/terms.html">Terms of Use</a> and
-        <a href="/privacy.html">Privacy Policy</a>.
-      </p>
-    </div>
-  </section>
-
-  </main>
-
-  <!-- FOOTER -->
-  <footer class="footer" role="contentinfo">
-    <div class="ft-top">
-      <div class="ft-brand">
-        <a href="/" class="wordmark" aria-label="Harmber home">
-          <img src="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/logo.png" alt="Harmber" class="wordmark-img"/>
-          Harmber
-        </a>
-        <p>Stream smarter. Feel deeper.</p>
-      </div>
-      <div class="ft-cols">
-        <div class="ft-col">
-          <h4>App</h4>
-          <a href="#features">Features</a>
-          <a href="#screenshots">Screenshots</a>
-          <a href="#download">Download</a>
-        </div>
-        <div class="ft-col">
-          <h4>Legal</h4>
-          <a href="/privacy.html">Privacy Policy</a>
-          <a href="/terms.html">Terms of Use</a>
-        </div>
-        <div class="ft-col">
-          <h4>Links</h4>
-          <a href="https://github.com/suadatbiniqbal/harmber" target="_blank" rel="noopener noreferrer">GitHub</a>
-        </div>
-      </div>
-    </div>
-    <div class="ft-bottom">
-      <p>&copy; 2025 Harmber. All rights reserved.</p>
-      <p>Made with care for music lovers.</p>
-    </div>
-  </footer>
-
-  <script src="app.js"></script>
 </body>
 </html>
