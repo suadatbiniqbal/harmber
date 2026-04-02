@@ -1,10 +1,12 @@
 :root {
-  --bg: #0a0a0b;
-  --card: #111;
-  --text: #ffffff;
-  --muted: #9aa0a6;
+  --bg: #050505;
+  --card: rgba(255,255,255,0.05);
+  --border: rgba(255,255,255,0.08);
+  --text: #fff;
+  --muted: #aaa;
 }
 
+/* RESET */
 * {
   margin: 0;
   padding: 0;
@@ -13,61 +15,114 @@
 }
 
 body {
-  background: var(--bg);
+  background: radial-gradient(circle at top, #111, #050505);
   color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
 }
 
 /* NAV */
 .nav {
   padding: 20px;
   text-align: center;
-  font-weight: 600;
+  font-weight: 700;
   font-size: 18px;
-  border-bottom: 1px solid #1a1a1a;
+  letter-spacing: 1px;
+  opacity: 0.8;
 }
 
 /* MAIN */
 .watch-main {
   display: flex;
   justify-content: center;
-  padding: 30px 16px;
+  padding: 40px 16px;
 }
 
 /* CARD */
 .watch-card {
   width: 100%;
-  max-width: 800px;
+  max-width: 780px;
+  border-radius: 20px;
+  backdrop-filter: blur(20px);
   background: var(--card);
-  border-radius: 16px;
+  border: 1px solid var(--border);
+  box-shadow: 0 20px 80px rgba(0,0,0,0.6);
   overflow: hidden;
+  animation: floatIn 0.6s ease;
+  transition: 0.4s;
+}
+
+@keyframes floatIn {
+  from {
+    opacity: 0;
+    transform: translateY(40px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.watch-card:hover {
+  transform: translateY(-6px) scale(1.01);
+}
+
+/* THUMB */
+.thumb-wrap {
+  position: relative;
+  overflow: hidden;
+}
+
+.thumb-wrap img {
+  width: 100%;
+  display: block;
+  transition: 0.6s ease;
+}
+
+.thumb-wrap:hover img {
+  transform: scale(1.08);
+}
+
+/* overlay gradient */
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+}
+
+/* PLAY BUTTON */
+.play-btn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(1);
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  cursor: pointer;
   transition: 0.3s;
 }
 
-.watch-card.dim {
-  opacity: 0.3;
-}
-
-/* VIDEO */
-.video-wrap {
-  width: 100%;
-  aspect-ratio: 16/9;
-  background: black;
-}
-
-.video-wrap iframe {
-  width: 100%;
-  height: 100%;
-  border: none;
+.play-btn:hover {
+  transform: translate(-50%, -50%) scale(1.15);
+  background: white;
+  color: black;
 }
 
 /* META */
 .watch-meta {
-  padding: 20px;
+  padding: 22px;
 }
 
 .title {
-  font-size: 20px;
-  font-weight: 600;
+  font-size: 22px;
+  font-weight: 700;
   margin-bottom: 8px;
 }
 
@@ -80,38 +135,35 @@ body {
 .stats {
   font-size: 13px;
   color: var(--muted);
-  margin-bottom: 14px;
-}
-
-.stats span {
-  margin-right: 10px;
+  margin-bottom: 12px;
 }
 
 .desc {
   font-size: 14px;
   color: #ccc;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
-/* CTA */
+/* BUTTON */
 .watch-cta {
   padding: 20px;
 }
 
 .btn-white {
   width: 100%;
-  padding: 12px;
+  padding: 13px;
+  border-radius: 12px;
   background: white;
   color: black;
-  border: none;
-  border-radius: 10px;
   font-weight: 600;
+  border: none;
   cursor: pointer;
-  transition: 0.2s;
+  transition: 0.3s;
 }
 
 .btn-white:hover {
-  opacity: 0.85;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(255,255,255,0.2);
 }
 
 .hint {
@@ -125,13 +177,13 @@ body {
 .fallback {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.9);
+  background: rgba(0,0,0,0.85);
   display: flex;
   align-items: center;
   justify-content: center;
   opacity: 0;
   pointer-events: none;
-  transition: 0.3s;
+  transition: 0.4s;
 }
 
 .fallback.visible {
@@ -140,13 +192,21 @@ body {
 }
 
 .fallback-box {
-  background: #111;
-  padding: 24px;
-  border-radius: 12px;
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+  padding: 30px;
+  border-radius: 16px;
   text-align: center;
+  animation: pop 0.4s ease;
+}
+
+@keyframes pop {
+  from { transform: scale(0.8); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
 }
 
 .fallback-box p {
   color: var(--muted);
-  margin: 10px 0 16px;
+  margin: 10px 0 20px;
 }
