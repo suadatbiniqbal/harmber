@@ -3,11 +3,10 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <!-- Server should inject title here -->
-  <title>Video Title — Harmber</title>
+  <title>Loading… — Harmber</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://googleapis.com" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="watch.css"/>
 </head>
 <body>
@@ -16,89 +15,166 @@
   <div class="logo">Harmber</div>
 </header>
 
-<!-- 
-  SERVER-SIDE RENDER NOTE: 
-  Populate these IDs/Srcs on the server to avoid the "Skeleton" flicker.
--->
 <main class="watch-main">
   <div class="watch-card" id="card">
+
+    <!-- THUMBNAIL -->
     <div class="thumb-wrap" id="thumbWrap">
-      <img id="thumb" src="https://youtube.com" alt="Thumbnail"/>
+      <img id="thumb"
+        src="https://placehold.co/800x450/111111/333333"
+        alt="Video thumbnail"
+        width="800" height="450" loading="eager"/>
       <div class="overlay"></div>
-      <div class="play-btn" id="playBtn">▶</div>
+      <div class="play-btn" id="playBtn" role="button" aria-label="Open video">&#9654;</div>
     </div>
 
+    <!-- META -->
     <div class="watch-meta">
-      <h1 id="title" class="title">Video Title Loading...</h1>
-      <p id="channel" class="channel">Channel Name</p>
+      <h1 id="title" class="title">
+        <span class="skeleton" style="display:block;height:1.3em;width:80%;"></span>
+      </h1>
+      <p id="channel" class="channel">
+        <span class="skeleton" style="display:inline-block;height:1em;width:40%;"></span>
+      </p>
       <div class="stats">
-        <span id="views">0 views</span> • <span id="date">Date</span>
+        <span id="views">
+          <span class="skeleton" style="display:inline-block;height:1em;width:80px;"></span>
+        </span>
+        <span id="date">
+          <span class="skeleton" style="display:inline-block;height:1em;width:100px;"></span>
+        </span>
       </div>
-      <p id="desc" class="desc">Description goes here...</p>
+      <p id="desc" class="desc">
+        <span class="skeleton" style="display:block;height:1em;width:100%;margin-bottom:6px;"></span>
+        <span class="skeleton" style="display:block;height:1em;width:90%;margin-bottom:6px;"></span>
+        <span class="skeleton" style="display:block;height:1em;width:65%;"></span>
+      </p>
     </div>
 
+    <!-- CTA -->
     <div class="watch-cta">
-      <!-- This button now triggers the Android Native Chooser/Share Sheet -->
-      <button id="openBtn" class="btn-primary">Open or Share</button>
-      <p class="hint">Tap to choose an app or copy link</p>
+      <button id="openBtn" class="btn-primary">Share</button>
+      <p class="hint">Share this video via any app</p>
     </div>
+
   </div>
 </main>
 
+<!-- FALLBACK -->
+<div id="fallback" class="fallback" role="alertdialog" aria-labelledby="fallbackTitle">
+  <div class="fallback-box">
+    <h3 id="fallbackTitle">Sharing not supported</h3>
+    <p id="fallbackMsg">Your browser doesn't support sharing. Open in browser instead?</p>
+    <div class="fallback-actions">
+      <a id="browserBtn" href="#" class="btn-download" target="_blank" rel="noopener noreferrer">Open in Browser</a>
+      <a href="/#download" class="btn-outline">Download Harmber</a>
+      <button class="btn-ghost" id="fallbackBack">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <script>
-  // 1. Get Video ID from URL
+  const KEY = 'AIzaSyBXZxLTFUmiFRliRRcEuV1Baxmzq8JiZ_0';
+
   const params = new URLSearchParams(location.search);
-  const videoId = params.get('v')?.split('&')[0];
-  
-  if (!videoId) location.href = '/';
+  const raw    = params.get('v') || '';
+  const id     = raw.split('&')[0];
 
-  const videoUrl = `https://youtube.com{videoId}`;
-  const shareTitle = document.title;
+  if (!id) location.href = '/';
 
-  // 2. THE FEATURE: Native Android Chooser (Web Share API)
-  // This shows the "Copy" button + App list exactly like Android Share
-  async function openNativeChooser() {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: shareTitle,
-          text: 'Watch this on Harmber',
-          url: videoUrl 
-        });
-      } catch (err) {
-        console.log('User cancelled or error:', err);
-        // Fallback if they close the sheet without picking
+  const videoUrl   = 'https://www.youtube.com/watch?v=' + id;
+  const harmberUrl = 'https://www.harmber.xyz/watch?v=' + id;
+
+  document.getElementById('browserBtn').href = videoUrl;
+
+  // ── Load video metadata ──────────────────────────────────────────
+  async function load() {
+    try {
+      const res  = await fetch(
+        'https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&id=' + id + '&key=' + KEY
+      );
+      const data = await res.json();
+
+      if (!data.items || !data.items.length) return;
+
+      const v     = data.items[0];
+      const s     = v.snippet;
+      const stats = v.statistics;
+
+      document.getElementById('title').textContent   = s.title;
+      document.getElementById('channel').textContent = s.channelTitle;
+      document.getElementById('views').textContent   =
+        Number(stats.viewCount).toLocaleString() + ' views';
+      document.getElementById('date').textContent    =
+        new Date(s.publishedAt).toDateString();
+      document.getElementById('desc').textContent    =
+        s.description.slice(0, 200) + '\u2026';
+
+      const thumbSrc =
+        (s.thumbnails.maxres  && s.thumbnails.maxres.url)  ||
+        (s.thumbnails.high    && s.thumbnails.high.url)    ||
+        (s.thumbnails.medium  && s.thumbnails.medium.url);
+
+      if (thumbSrc) {
+        document.getElementById('thumb').src = thumbSrc;
+        document.getElementById('thumb').alt = s.title;
+        document.documentElement.style.setProperty('--thumb-url', 'url(' + thumbSrc + ')');
       }
-    } else {
-      // FALLBACK for Desktop or old browsers
-      window.open(videoUrl, '_blank');
+
+      document.title = s.title + ' \u2014 Harmber';
+
+    } catch (e) {
+      console.error('Failed to load video:', e);
     }
   }
 
-  // 3. Attach Events
-  document.getElementById('openBtn').addEventListener('click', openNativeChooser);
-  document.getElementById('thumbWrap').addEventListener('click', openNativeChooser);
+  load();
 
-  // 4. (Optional) Client-side Data Fetch 
-  // If you don't have a backend server (Node/PHP), keep this. 
-  // If you DO have a backend, delete this and print values in HTML above.
-  async function loadMetadata() {
-    const KEY = 'YOUR_API_KEY'; 
-    try {
-      const res = await fetch(`https://googleapis.com{videoId}&key=${KEY}`);
-      const data = await res.json();
-      if (data.items?.[0]) {
-        const v = data.items[0];
-        document.getElementById('title').textContent = v.snippet.title;
-        document.getElementById('channel').textContent = v.snippet.channelTitle;
-        document.getElementById('views').textContent = Number(v.statistics.viewCount).toLocaleString() + ' views';
-        document.getElementById('thumb').src = v.snippet.thumbnails.high.url;
-        document.getElementById('desc').textContent = v.snippet.description.slice(0, 150) + '...';
-      }
-    } catch (e) { console.error(e); }
+  // ── Fallback helpers ─────────────────────────────────────────────
+  function showFallback() {
+    document.getElementById('fallback').classList.add('visible');
+    document.getElementById('card').classList.add('dim');
   }
 
-  loadMetadata();
+  function hideFallback() {
+    document.getElementById('fallback').classList.remove('visible');
+    document.getElementById('card').classList.remove('dim');
+  }
+
+  document.getElementById('fallbackBack').addEventListener('click', hideFallback);
+
+  // ── Share Sheet Logic ────────────────────────────────────────────
+  function openNativeChooser() {
+    const title   = document.getElementById('title').textContent || 'Watch on Harmber';
+    const channel = document.getElementById('channel').textContent;
+
+    const shareData = {
+      title: title,
+      text: channel
+        ? 'Watch ' + title + ' by ' + channel
+        : 'Check out this video on Harmber',
+      url: harmberUrl
+    };
+
+    if (navigator.share) {
+      navigator.share(shareData).catch((err) => {
+        console.warn('Share failed:', err);
+        showFallback();
+      });
+      return;
+    }
+
+    // No share support
+    showFallback();
+  }
+
+  // ── Event bindings (unchanged behavior) ──────────────────────────
+  document.getElementById('openBtn').addEventListener('click', openNativeChooser);
+  document.getElementById('thumbWrap').addEventListener('click', openNativeChooser);
+  document.getElementById('playBtn').addEventListener('click', function(e) {
+    e.stopPropagation();
+    openNativeChooser();
+  });
 </script>
 
 </body>
