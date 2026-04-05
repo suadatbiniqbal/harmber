@@ -2,41 +2,113 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-  <title>Harmber — Temporarily Unavailable</title>
+  <title>Harmber — Service Unavailable</title>
 
-  <meta name="description" content="Harmber is currently unavailable following a compliance request. We are reviewing and addressing the situation." />
-  <meta name="robots" content="noindex, nofollow" />
+  <meta name="description" content="Harmber service is currently unavailable due to a compliance request." />
+  <meta name="robots" content="noindex, nofollow"/>
 
-  <link rel="stylesheet" href="styles.css" />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #ffffff;
+      color: #111;
+      font-family: Georgia, "Times New Roman", serif;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 80px auto;
+      padding: 40px 20px;
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: normal;
+      margin-bottom: 20px;
+    }
+
+    p {
+      font-size: 15px;
+      margin-bottom: 16px;
+    }
+
+    .divider {
+      border-top: 1px solid #ddd;
+      margin: 30px 0;
+    }
+
+    .logo {
+      margin: 30px 0;
+    }
+
+    .logo img {
+      width: 36px;
+    }
+
+    .note {
+      font-size: 13px;
+      color: #555;
+    }
+
+    .footer {
+      margin-top: 40px;
+      font-size: 13px;
+      color: #666;
+    }
+
+    .status {
+      margin-top: 25px;
+      padding: 10px 14px;
+      border: 1px solid #ccc;
+      display: inline-block;
+      font-size: 13px;
+      color: #333;
+      background: #f5f5f5;
+    }
+  </style>
 </head>
 <body>
 
   <div class="container">
 
-    <div class="card">
+    <h1>Service Unavailable</h1>
 
-      <h1>Harmber is currently unavailable</h1>
+    <p>
+      The Harmber application and its associated services are currently unavailable.
+    </p>
 
-      <p class="main-text">
-        Following a request from Spotify, the Harmber app has been taken offline and is no longer available for download or use.
-      </p>
+    <p>
+      This action has been taken following a compliance request from Spotify regarding platform usage and policy requirements.
+    </p>
 
-      <p class="sub-text">
-        I sincerely apologize for this situation and for any inconvenience caused. We are reviewing everything and taking the necessary steps to comply with platform policies.
-      </p>
+    <p>
+      We acknowledge the matter and are taking appropriate steps to review and address the concerns raised.
+    </p>
 
-      <div class="logo">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/8/84/Spotify_icon.svg" alt="Spotify">
-      </div>
+    <p>
+      We sincerely apologize for any inconvenience caused to users.
+    </p>
 
-      <p class="legal">
-        Spotify is a registered trademark of its respective owner. Harmber is not affiliated with Spotify.
-      </p>
+    <div class="logo">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/8/84/Spotify_icon.svg" alt="Spotify">
+    </div>
 
-      <button disabled>App Unavailable</button>
+    <div class="divider"></div>
 
+    <p class="note">
+      Spotify is a registered trademark of its respective owner. Harmber is an independent project and is not affiliated with Spotify.
+    </p>
+
+    <div class="status">
+      Application status: Unavailable
+    </div>
+
+    <div class="footer">
+      &copy; 2026 Harmber. All rights reserved.
     </div>
 
   </div>
