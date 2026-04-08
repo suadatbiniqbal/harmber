@@ -4,12 +4,12 @@
    THEME TOGGLE
 ══════════════════════════════════════════ */
 (function () {
-  const html    = document.documentElement;
-  const btn     = document.getElementById('themeToggle');
-  const KEY     = 'harmber-theme';
+  const html        = document.documentElement;
+  const btn         = document.getElementById('themeToggle');
+  const KEY         = 'harmber-theme';
   const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const saved   = localStorage.getItem(KEY);
-  const initial = saved || (prefersDark ? 'dark' : 'light');
+  const saved       = localStorage.getItem(KEY);
+  const initial     = saved || (prefersDark ? 'dark' : 'light');
 
   function apply(theme) {
     html.setAttribute('data-theme', theme);
@@ -173,10 +173,10 @@
   (function draw() {
     ctx.clearRect(0, 0, W, H);
     const base = isDark() ? '255,255,255' : '0,0,0';
-    const bw = W / bars.length;
+    const bw   = W / bars.length;
     bars.forEach((b, i) => {
       b.phase += b.speed;
-      const h = b.h * (0.4 + 0.6 * Math.sin(b.phase));
+      const h    = b.h * (0.4 + 0.6 * Math.sin(b.phase));
       const grad = ctx.createLinearGradient(0, H - h, 0, H);
       grad.addColorStop(0, `rgba(${base},.3)`);
       grad.addColorStop(1, `rgba(${base},0)`);
@@ -211,12 +211,12 @@
   }
 
   const SYMBOLS = ['♩', '♪', '♫', '♬', '𝄞', '𝄢'];
-  const notes = Array.from({ length: 26 }, () => ({
+  const notes   = Array.from({ length: 26 }, () => ({
     x:        Math.random() * 1200,
     y:        Math.random() * 900,
     sym:      SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)],
     size:     10 + Math.random() * 14,
-    speed:    0.2 + Math.random() * 0.45,
+    speed:    0.2  + Math.random() * 0.45,
     drift:    (Math.random() - 0.5) * 0.28,
     opacity:  0.04 + Math.random() * 0.065,
     rot:      Math.random() * Math.PI * 2,
@@ -230,9 +230,9 @@
       n.y   -= n.speed;
       n.x   += n.drift;
       n.rot += n.rotSpeed;
-      if (n.y < -30)   { n.y = H + 20;            n.x = Math.random() * W; }
-      if (n.x < -40)   { n.x = W + 20; }
-      if (n.x > W + 40){ n.x = -20; }
+      if (n.y < -30)    { n.y = H + 20; n.x = Math.random() * W; }
+      if (n.x < -40)    { n.x = W + 20; }
+      if (n.x > W + 40) { n.x = -20; }
 
       ctx.save();
       ctx.globalAlpha = n.opacity;
@@ -260,18 +260,18 @@
     p.className   = 'particle';
     p.textContent = syms[i % syms.length];
     p.style.cssText = `
-      left:              ${Math.random() * 100}%;
-      animation-duration:${12 + Math.random() * 16}s;
-      animation-delay:   ${-Math.random() * 22}s;
-      font-size:         ${9 + Math.random() * 10}px;
-      opacity:           ${(0.05 + Math.random() * 0.07).toFixed(3)};
+      left:               ${Math.random() * 100}%;
+      animation-duration: ${12 + Math.random() * 16}s;
+      animation-delay:    ${-Math.random() * 22}s;
+      font-size:          ${9 + Math.random() * 10}px;
+      opacity:            ${(0.05 + Math.random() * 0.07).toFixed(3)};
     `;
     el.appendChild(p);
   }
 })();
 
 /* ══════════════════════════════════════════
-   NOTE SPARKS BURST (global helper)
+   NOTE SPARKS BURST — global helper
 ══════════════════════════════════════════ */
 function spawnSparks(origin, count) {
   count = count || 8;
@@ -282,17 +282,17 @@ function spawnSparks(origin, count) {
   const syms = ['♪', '♫', '♬', '♩'];
 
   for (let i = 0; i < count; i++) {
-    const el   = document.createElement('span');
+    const el       = document.createElement('span');
     el.className   = 'note-spark';
     el.textContent = syms[i % syms.length];
     const angle = (i / count) * Math.PI * 2;
     const dist  = 50 + Math.random() * 60;
     el.style.cssText = `
-      position: fixed;
-      left: ${cx}px;
-      top:  ${cy}px;
-      --sx: ${(Math.cos(angle) * dist).toFixed(1)}px;
-      --sy: ${(Math.sin(angle) * dist).toFixed(1)}px;
+      position:           fixed;
+      left:               ${cx}px;
+      top:                ${cy}px;
+      --sx:               ${(Math.cos(angle) * dist).toFixed(1)}px;
+      --sy:               ${(Math.sin(angle) * dist).toFixed(1)}px;
       font-size:          ${14 + Math.random() * 10}px;
       animation-duration: ${(0.6 + Math.random() * 0.4).toFixed(2)}s;
       pointer-events:     none;
@@ -309,9 +309,11 @@ function spawnSparks(origin, count) {
 ══════════════════════════════════════════ */
 (function () {
   document.addEventListener('click', e => {
-    const fake = { getBoundingClientRect: () => ({
-      left: e.clientX, top: e.clientY, width: 0, height: 0
-    })};
+    const fake = {
+      getBoundingClientRect: () => ({
+        left: e.clientX, top: e.clientY, width: 0, height: 0,
+      }),
+    };
     spawnSparks(fake, 5);
   });
 })();
@@ -337,7 +339,7 @@ function spawnSparks(origin, count) {
 ══════════════════════════════════════════ */
 (function () {
   const items = [...document.querySelectorAll('.scr-item')];
-  const obs = new IntersectionObserver(entries => {
+  const obs   = new IntersectionObserver(entries => {
     entries.forEach(e => {
       if (!e.isIntersecting) return;
       const i = items.indexOf(e.target);
@@ -365,7 +367,8 @@ function spawnSparks(origin, count) {
       if (glow) {
         glow.style.opacity    = '1';
         glow.style.background =
-          `radial-gradient(circle at ${(x/r.width*100).toFixed(1)}% ${(y/r.height*100).toFixed(1)}%,
+          `radial-gradient(circle at ${(x / r.width  * 100).toFixed(1)}%
+                                      ${(y / r.height * 100).toFixed(1)}%,
            color-mix(in srgb, var(--text) 9%, transparent), transparent 55%)`;
       }
     });
@@ -393,18 +396,15 @@ function spawnSparks(origin, count) {
     el.style.userSelect = 'none';
     el.style.cursor     = 'grabbing';
   });
-
   el.addEventListener('mouseleave', () => {
     down = false;
     el.style.cursor = 'grab';
   });
-
   el.addEventListener('mouseup', () => {
     down = false;
     el.style.userSelect = '';
     el.style.cursor     = 'grab';
   });
-
   el.addEventListener('mousemove', e => {
     if (!down) return;
     e.preventDefault();
@@ -418,7 +418,7 @@ function spawnSparks(origin, count) {
    STAT COUNTER ANIMATION
 ══════════════════════════════════════════ */
 (function () {
-  const easeOut = t => 1 - Math.pow(1 - t, 3);
+  function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
 
   const obs = new IntersectionObserver(entries => {
     entries.forEach(e => {
@@ -426,83 +426,19 @@ function spawnSparks(origin, count) {
       const el     = e.target;
       const target = parseFloat(el.dataset.target);
       if (isNaN(target)) return;
-      const dur    = 1600;
-      const start  = performance.now();
-
+      const dur   = 1600;
+      const start = performance.now();
       (function tick(now) {
-        const t   = Math.min((now - start) / dur, 1);
+        const t = Math.min((now - start) / dur, 1);
         el.textContent = Math.round(easeOut(t) * target);
         if (t < 1) requestAnimationFrame(tick);
       })(start);
-
       obs.unobserve(el);
     });
   }, { threshold: 0.5 });
 
   document.querySelectorAll('.sn[data-target]').forEach(el => obs.observe(el));
 })();
-
-/* ══════════════════════════════════════════
-   PHONE PROGRESS BAR ANIMATION
-══════════════════════════════════════════ */
-(function () {
-  const fill    = document.getElementById('phProgressFill');
-  const dot     = document.getElementById('phProgressDot');
-  const timeEl  = document.getElementById('phTimeNow');
-  if (!fill) return;
-
-  let pct = 38;
-  const TOTAL_SECS = 227; // 3:47
-
-  setInterval(() => {
-    pct = pct >= 96 ? 4 : pct + 0.35;
-    fill.style.width = pct + '%';
-    if (dot)    dot.style.left = pct + '%';
-    if (timeEl) {
-      const s = Math.round((pct / 100) * TOTAL_SECS);
-      timeEl.textContent =
-        `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, '0')}`;
-    }
-  }, 120);
-})();
-
-
-
-  let idx = 0;
-
-  function update() {
-    idx = (idx + 1) % peekSets.length;
-
-    // Center phone — peek lyrics
-    document.querySelectorAll('#phLyrics .lyr').forEach((el, i) => {
-      el.style.opacity   = '0';
-      el.style.transform = 'translateY(-6px)';
-      setTimeout(() => {
-        el.textContent     = peekSets[idx][i] || '';
-        el.style.transition = 'opacity .5s ease, transform .5s ease';
-        el.style.opacity   = '1';
-        el.style.transform = 'translateY(0)';
-      }, i * 110);
-    });
-
-    // Right phone — full lyrics (if present)
-    const fullEl = document.getElementById('phLyrFull');
-    if (fullEl) {
-      [...fullEl.querySelectorAll('.ph-lf')].forEach((el, i) => {
-        el.style.opacity = '0';
-        setTimeout(() => {
-          el.textContent = fullSets[idx][i] || '';
-          el.style.transition = 'opacity .4s ease';
-          el.style.opacity = '1';
-        }, i * 55);
-      });
-    }
-  }
-
-  setInterval(update, 3400);
-})();
-
-
 
 /* ══════════════════════════════════════════
    HERO PHONES PARALLAX
@@ -521,7 +457,7 @@ function spawnSparks(origin, count) {
    DOWNLOAD CARD CURSOR GLOW
 ══════════════════════════════════════════ */
 (function () {
-  const card = document.querySelector('.dl-card');
+  const card  = document.querySelector('.dl-card');
   if (!card) return;
   const shine = card.querySelector('.dl-card-shine');
 
@@ -531,7 +467,7 @@ function spawnSparks(origin, count) {
     const y = ((e.clientY - r.top)  / r.height) * 100;
     if (shine) {
       shine.style.background =
-        `radial-gradient(circle at ${x}% ${y}%,
+        `radial-gradient(circle at ${x.toFixed(1)}% ${y.toFixed(1)}%,
          color-mix(in srgb, var(--text) 7%, transparent), transparent 55%)`;
     }
   });
@@ -550,8 +486,7 @@ function spawnSparks(origin, count) {
 (function () {
   document.querySelectorAll('a[href^="#"]').forEach(a => {
     a.addEventListener('click', e => {
-      const id     = a.getAttribute('href');
-      const target = document.querySelector(id);
+      const target = document.querySelector(a.getAttribute('href'));
       if (!target) return;
       e.preventDefault();
       target.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -567,17 +502,16 @@ function spawnSparks(origin, count) {
   if (!vinyl) return;
   vinyl.addEventListener('mouseenter', () => {
     vinyl.style.animationDuration = '3s';
-    vinyl.style.opacity = '0.35';
+    vinyl.style.opacity           = '0.35';
   });
   vinyl.addEventListener('mouseleave', () => {
     vinyl.style.animationDuration = '12s';
-    vinyl.style.opacity = '';
+    vinyl.style.opacity           = '';
   });
 })();
 
 /* ══════════════════════════════════════════
-   MARQUEE PAUSE ON HOVER (already CSS,
-   JS fallback for touch)
+   MARQUEE — touch pause/resume
 ══════════════════════════════════════════ */
 (function () {
   const track = document.querySelector('.marquee-track');
@@ -587,24 +521,6 @@ function spawnSparks(origin, count) {
     (track.style.animationPlayState = 'paused'), { passive: true });
   wrap.addEventListener('touchend', () =>
     (track.style.animationPlayState = 'running'), { passive: true });
-})();
-
-/* ══════════════════════════════════════════
-   EQUALIZER BARS — feature card icons
-   (add pulsing EQ to any .fi with data-eq)
-══════════════════════════════════════════ */
-(function () {
-  document.querySelectorAll('.fi[data-eq]').forEach(fi => {
-    fi.innerHTML = '';
-    const eq = document.createElement('div');
-    eq.className = 'fi-eq';
-    for (let i = 0; i < 4; i++) {
-      const bar = document.createElement('span');
-      bar.style.animationDelay = (i * 0.12) + 's';
-      eq.appendChild(bar);
-    }
-    fi.appendChild(eq);
-  });
 })();
 
 /* ══════════════════════════════════════════
