@@ -13,7 +13,6 @@
   <meta name="theme-color"  content="#000000" />
   <link rel="canonical"     href="https://harmber.xyz/" />
 
-  <!-- Open Graph -->
   <meta property="og:type"        content="website" />
   <meta property="og:url"         content="https://harmber.xyz/" />
   <meta property="og:title"       content="Harmber — Stream smarter. Feel deeper." />
@@ -22,18 +21,15 @@
   <meta property="og:site_name"   content="Harmber" />
   <meta property="og:locale"      content="en_US" />
 
-  <!-- Twitter Card -->
   <meta name="twitter:card"        content="summary_large_image" />
   <meta name="twitter:title"       content="Harmber — Stream smarter. Feel deeper." />
   <meta name="twitter:description" content="Free, ad-free music streaming for Android. Opus audio, synced lyrics, YouTube sync and more." />
   <meta name="twitter:image"       content="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/logo.png" />
 
-  <!-- Favicons -->
   <link rel="icon"             type="image/png" href="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/logo.png" />
   <link rel="apple-touch-icon"                  href="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/logo.png" />
   <link rel="manifest"                          href="/site.webmanifest" />
 
-  <!-- Structured Data -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -48,20 +44,23 @@
   }
   </script>
 
-  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet" />
-
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <!-- Overlays -->
   <div class="noise"        aria-hidden="true"></div>
   <div class="cursor-dot"   id="cursorDot"   aria-hidden="true"></div>
   <div class="cursor-ring"  id="cursorRing"  aria-hidden="true"></div>
   <div class="progress-bar" id="progressBar" aria-hidden="true"></div>
+
+  <!-- Ambient audio visualizer lines (purely decorative) -->
+  <div class="ambient-lines" aria-hidden="true">
+    <span></span><span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span><span></span>
+  </div>
 
   <!-- ── NAV ── -->
   <header class="nav" id="nav" role="banner">
@@ -75,18 +74,9 @@
         <a href="#features">Features</a>
         <a href="#screenshots">Screenshots</a>
         <a href="#download">Download</a>
-        <a href="https://github.com/suadatbiniqbal/harmber"
-           target="_blank" rel="noopener noreferrer" aria-label="Harmber on GitHub">
+        <a href="https://github.com/suadatbiniqbal/harmber" target="_blank" rel="noopener noreferrer" aria-label="Harmber on GitHub">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
-            <path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482
-                     0-.237-.009-.868-.013-1.703-2.782.604-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.463-1.11-1.463
-                     -.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831
-                     .092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683
-                     -.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0 1 12 6.836
-                     a9.59 9.59 0 0 1 2.504.337c1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.202 2.394.1 2.647
-                     .64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852
-                     0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12
-                     c0-5.523-4.477-10-10-10z"/>
+            <path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.013-1.703-2.782.604-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0 1 12 6.836a9.59 9.59 0 0 1 2.504.337c1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/>
           </svg>
           GitHub
         </a>
@@ -99,14 +89,15 @@
 
     <!-- ── HERO ── -->
     <section class="hero" id="hero" aria-labelledby="hero-heading">
-      <img class="hero-bg-gif" src="bg.gif" alt="" aria-hidden="true" loading="eager" fetchpriority="high" />
-      <div class="hero-overlay" aria-hidden="true"></div>
-      <canvas id="waveCanvas" aria-hidden="true"></canvas>
-
-      <div class="orb orb-1" aria-hidden="true"></div>
-      <div class="orb orb-2" aria-hidden="true"></div>
-      <div class="orb orb-3" aria-hidden="true"></div>
-      <div class="particles" id="particles" aria-hidden="true"></div>
+      <div class="hero-grid-bg"    aria-hidden="true"></div>
+      <canvas id="waveCanvas"      aria-hidden="true"></canvas>
+      <canvas id="vizCanvas"       aria-hidden="true"></canvas>
+      <div class="hero-vignette"   aria-hidden="true"></div>
+      <div class="orb orb-1"       aria-hidden="true"></div>
+      <div class="orb orb-2"       aria-hidden="true"></div>
+      <div class="orb orb-3"       aria-hidden="true"></div>
+      <div class="orb orb-4"       aria-hidden="true"></div>
+      <div class="particles"       id="particles" aria-hidden="true"></div>
 
       <div class="hero-content">
         <div class="hero-badge" role="note">
@@ -125,71 +116,230 @@
         </p>
 
         <div class="hero-actions">
-          <a href="#download" class="btn-main btn-glow">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                 stroke-width="2.5" aria-hidden="true" focusable="false">
-              <path d="M12 3v13M5 14l7 7 7-7" />
-              <path d="M3 21h18" />
-            </svg>
+          <a href="https://github.com/suadatbiniqbal/harmber/releases/download/1.1.3/base.apk"
+             class="btn-main btn-glow" download aria-label="Download Harmber APK">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true" focusable="false"><path d="M12 3v13M5 14l7 7 7-7"/><path d="M3 21h18"/></svg>
             Download APK
           </a>
           <a href="#features" class="btn-ghost">
             Explore features
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                 stroke-width="2" aria-hidden="true" focusable="false">
-              <path d="M5 12h14M12 5l7 7-7 7" />
-            </svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           </a>
         </div>
 
         <ul class="hero-trust" aria-label="Key facts">
           <li class="trust-item">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                 stroke-width="2.5" aria-hidden="true" focusable="false">
-              <polyline points="20 6 9 17 4 12" />
-            </svg>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true" focusable="false"><polyline points="20 6 9 17 4 12"/></svg>
             No sign-up
           </li>
           <li class="trust-sep" aria-hidden="true"></li>
           <li class="trust-item">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                 stroke-width="2.5" aria-hidden="true" focusable="false">
-              <polyline points="20 6 9 17 4 12" />
-            </svg>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true" focusable="false"><polyline points="20 6 9 17 4 12"/></svg>
             Android 8.0+
           </li>
           <li class="trust-sep" aria-hidden="true"></li>
           <li class="trust-item">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                 stroke-width="2.5" aria-hidden="true" focusable="false">
-              <polyline points="20 6 9 17 4 12" />
-            </svg>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true" focusable="false"><polyline points="20 6 9 17 4 12"/></svg>
             ~18 MB
           </li>
         </ul>
       </div>
 
+      <!-- Phone Mockups -->
       <div class="hero-mockup-row" aria-hidden="true">
+
+        <!-- Left — Library -->
         <div class="phone-wrap phone-left">
-          <div class="phone">
-            <img src="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/ss2.jpg"
-                 alt="" loading="lazy" width="220" />
+          <div class="phone ph-placeholder">
+            <div class="ph-notch"></div>
+            <div class="ph-screen">
+              <div class="ph-status-bar">
+                <span class="ph-time">9:41</span>
+                <div class="ph-icons">
+                  <svg width="13" height="10" viewBox="0 0 13 10" fill="currentColor" focusable="false"><rect x="0" y="3" width="2" height="7" rx="1" opacity=".4"/><rect x="3" y="2" width="2" height="8" rx="1" opacity=".6"/><rect x="6" y="1" width="2" height="9" rx="1" opacity=".8"/><rect x="9" y="0" width="2" height="10" rx="1"/></svg>
+                  <div class="ph-battery"><div class="ph-battery-fill" style="width:72%"></div></div>
+                </div>
+              </div>
+              <div class="ph-lib-header">
+                <div class="ph-skel ph-skel-text" style="width:60px"></div>
+                <div class="ph-skel ph-skel-circle" style="width:26px;height:26px"></div>
+              </div>
+              <div class="ph-lib-list">
+                <div class="ph-lib-item">
+                  <div class="ph-skel ph-skel-art"></div>
+                  <div class="ph-lib-meta">
+                    <div class="ph-skel ph-skel-text" style="width:88px"></div>
+                    <div class="ph-skel ph-skel-text" style="width:58px;opacity:.45"></div>
+                  </div>
+                </div>
+                <div class="ph-lib-item ph-lib-active">
+                  <div class="ph-skel ph-skel-art ph-art-glow"></div>
+                  <div class="ph-lib-meta">
+                    <div class="ph-skel ph-skel-text" style="width:100px;opacity:1"></div>
+                    <div class="ph-skel ph-skel-text" style="width:68px;opacity:.65"></div>
+                  </div>
+                  <div class="ph-eq"><span></span><span></span><span></span></div>
+                </div>
+                <div class="ph-lib-item">
+                  <div class="ph-skel ph-skel-art"></div>
+                  <div class="ph-lib-meta">
+                    <div class="ph-skel ph-skel-text" style="width:78px"></div>
+                    <div class="ph-skel ph-skel-text" style="width:52px;opacity:.45"></div>
+                  </div>
+                </div>
+                <div class="ph-lib-item">
+                  <div class="ph-skel ph-skel-art"></div>
+                  <div class="ph-lib-meta">
+                    <div class="ph-skel ph-skel-text" style="width:108px"></div>
+                    <div class="ph-skel ph-skel-text" style="width:64px;opacity:.45"></div>
+                  </div>
+                </div>
+                <div class="ph-lib-item">
+                  <div class="ph-skel ph-skel-art"></div>
+                  <div class="ph-lib-meta">
+                    <div class="ph-skel ph-skel-text" style="width:72px"></div>
+                    <div class="ph-skel ph-skel-text" style="width:48px;opacity:.45"></div>
+                  </div>
+                </div>
+              </div>
+              <!-- mini player -->
+              <div class="ph-mini-player">
+                <div class="ph-skel ph-skel-art" style="border-radius:8px;width:34px;height:34px"></div>
+                <div class="ph-lib-meta" style="flex:1">
+                  <div class="ph-skel ph-skel-text" style="width:80px"></div>
+                  <div class="ph-skel ph-skel-text" style="width:50px;opacity:.4"></div>
+                </div>
+                <div class="ph-mini-controls">
+                  <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M8 5v14l11-7z"/></svg>
+                  <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M18 6h-2v12h2zm-3.5 6L6 6v12z"/></svg>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
+
+        <!-- Center — Now Playing -->
         <div class="phone-wrap phone-center">
-          <div class="phone">
-            <img src="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/ss1.jpg"
-                 alt="Harmber player interface" loading="eager" width="260" />
+          <div class="phone ph-placeholder ph-center">
+            <div class="ph-notch"></div>
+            <div class="ph-screen">
+              <div class="ph-status-bar">
+                <span class="ph-time">9:41</span>
+                <div class="ph-icons">
+                  <svg width="13" height="10" viewBox="0 0 13 10" fill="currentColor" focusable="false"><rect x="0" y="3" width="2" height="7" rx="1" opacity=".4"/><rect x="3" y="2" width="2" height="8" rx="1" opacity=".6"/><rect x="6" y="1" width="2" height="9" rx="1" opacity=".8"/><rect x="9" y="0" width="2" height="10" rx="1"/></svg>
+                  <div class="ph-battery"><div class="ph-battery-fill" style="width:72%"></div></div>
+                </div>
+              </div>
+
+              <div class="ph-np-top">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" style="color:rgba(255,255,255,.3)" focusable="false"><polyline points="15 18 9 12 15 6"/></svg>
+                <span style="font-size:.65rem;color:rgba(255,255,255,.35);font-weight:600;letter-spacing:.08em;text-transform:uppercase">Now Playing</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" style="color:rgba(255,255,255,.3)" focusable="false"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+              </div>
+
+              <!-- Artwork -->
+              <div class="ph-artwork-wrap">
+                <div class="ph-artwork">
+                  <div class="ph-artwork-inner" id="phArtwork">
+                    <svg viewBox="0 0 80 80" fill="none" width="52" height="52" opacity=".25" focusable="false">
+                      <circle cx="40" cy="40" r="20" stroke="white" stroke-width="1.5"/>
+                      <circle cx="40" cy="40" r="7"  stroke="white" stroke-width="1.5"/>
+                      <path d="M40 20v4M40 56v4M20 40h4M56 40h4" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                  </div>
+                  <div class="ph-artwork-ring ph-artwork-ring-1"></div>
+                  <div class="ph-artwork-ring ph-artwork-ring-2"></div>
+                  <div class="ph-artwork-ring ph-artwork-ring-3"></div>
+                </div>
+              </div>
+
+              <!-- Track info -->
+              <div class="ph-track-info">
+                <div class="ph-skel ph-skel-text" style="width:140px;height:13px;margin:0 auto 8px"></div>
+                <div class="ph-skel ph-skel-text" style="width:90px;height:10px;margin:0 auto;opacity:.45"></div>
+              </div>
+
+              <!-- Lyrics peek -->
+              <div class="ph-lyrics" id="phLyrics">
+                <p class="ph-lyric-line ph-lyric-dim" id="lyr0">♪ In the silence between the notes</p>
+                <p class="ph-lyric-line ph-lyric-active" id="lyr1">♪ I find the music in my soul</p>
+                <p class="ph-lyric-line ph-lyric-dim" id="lyr2">♪ Every beat a different story</p>
+              </div>
+
+              <!-- Progress -->
+              <div class="ph-progress-wrap">
+                <div class="ph-progress-bar">
+                  <div class="ph-progress-fill" id="phProgressFill"></div>
+                  <div class="ph-progress-thumb" id="phProgressThumb"></div>
+                </div>
+                <div class="ph-progress-times">
+                  <span id="phTimeNow">1:24</span>
+                  <span>3:47</span>
+                </div>
+              </div>
+
+              <!-- Controls -->
+              <div class="ph-controls">
+                <button class="ph-ctrl ph-ctrl-sm" aria-label="Shuffle">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15" focusable="false"><path d="M16 3h5v5M4 20l17-17M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>
+                </button>
+                <button class="ph-ctrl ph-ctrl-md" aria-label="Previous">
+                  <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20" focusable="false"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
+                </button>
+                <button class="ph-ctrl ph-ctrl-lg ph-ctrl-play" aria-label="Play/Pause" id="phPlayBtn">
+                  <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24" focusable="false"><path d="M8 5v14l11-7z"/></svg>
+                </button>
+                <button class="ph-ctrl ph-ctrl-md" aria-label="Next">
+                  <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20" focusable="false"><path d="M18 6h-2v12h2zm-3.5 6L6 6v12z"/></svg>
+                </button>
+                <button class="ph-ctrl ph-ctrl-sm" aria-label="Repeat">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15" focusable="false"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 014-4h14M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>
+                </button>
+              </div>
+
+              <!-- Discord badge -->
+              <div class="ph-discord-badge">
+                <svg viewBox="0 0 24 24" fill="currentColor" width="11" height="11" focusable="false"><path d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 00-.041-.106 13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03z"/></svg>
+                Listening on Discord
+              </div>
+            </div>
           </div>
           <div class="phone-glow" aria-hidden="true"></div>
         </div>
+
+        <!-- Right — Lyrics -->
         <div class="phone-wrap phone-right">
-          <div class="phone">
-            <img src="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/ss3.jpg"
-                 alt="" loading="lazy" width="220" />
+          <div class="phone ph-placeholder">
+            <div class="ph-notch"></div>
+            <div class="ph-screen">
+              <div class="ph-status-bar">
+                <span class="ph-time">9:41</span>
+                <div class="ph-icons">
+                  <svg width="13" height="10" viewBox="0 0 13 10" fill="currentColor" focusable="false"><rect x="0" y="3" width="2" height="7" rx="1" opacity=".4"/><rect x="3" y="2" width="2" height="8" rx="1" opacity=".6"/><rect x="6" y="1" width="2" height="9" rx="1" opacity=".8"/><rect x="9" y="0" width="2" height="10" rx="1"/></svg>
+                  <div class="ph-battery"><div class="ph-battery-fill" style="width:72%"></div></div>
+                </div>
+              </div>
+              <div class="ph-lyr-full">
+                <div class="ph-lyr-title">
+                  <div class="ph-skel ph-skel-text" style="width:90px;margin:0 auto 5px"></div>
+                  <div class="ph-skel ph-skel-text" style="width:60px;margin:0 auto;opacity:.35"></div>
+                </div>
+                <div class="ph-lyr-lines" id="phLyrFull">
+                  <p class="ph-lf ph-lf-dim">In the silence</p>
+                  <p class="ph-lf ph-lf-dim">Between the notes</p>
+                  <p class="ph-lf ph-lf-mid">I find the music</p>
+                  <p class="ph-lf ph-lf-active">In my soul</p>
+                  <p class="ph-lf ph-lf-mid">Every beat tells</p>
+                  <p class="ph-lf ph-lf-dim">A different story</p>
+                  <p class="ph-lf ph-lf-dim">Echoes of a</p>
+                  <p class="ph-lf ph-lf-dim">Forgotten melody</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+
+      </div><!-- /hero-mockup-row -->
 
       <div class="scroll-hint" aria-hidden="true">
         <div class="scroll-mouse"><div class="scroll-wheel"></div></div>
@@ -201,16 +351,15 @@
     <div class="marquee-wrap" aria-hidden="true">
       <div class="marquee-track">
         <div class="marquee-row">
-          <span>Ad-free</span><span class="md" aria-hidden="true">·</span>
-          <span>Opus Audio</span><span class="md" aria-hidden="true">·</span>
-          <span>Lyrics Sync</span><span class="md" aria-hidden="true">·</span>
-          <span>YouTube Sync</span><span class="md" aria-hidden="true">·</span>
-          <span>Discord Rich Presence</span><span class="md" aria-hidden="true">·</span>
-          <span>Playlist Import</span><span class="md" aria-hidden="true">·</span>
-          <span>No Account</span><span class="md" aria-hidden="true">·</span>
-          <span>Free Forever</span><span class="md" aria-hidden="true">·</span>
+          <span>Ad-free</span><span class="md">·</span>
+          <span>Opus Audio</span><span class="md">·</span>
+          <span>Lyrics Sync</span><span class="md">·</span>
+          <span>YouTube Sync</span><span class="md">·</span>
+          <span>Discord Rich Presence</span><span class="md">·</span>
+          <span>Playlist Import</span><span class="md">·</span>
+          <span>No Account</span><span class="md">·</span>
+          <span>Free Forever</span><span class="md">·</span>
         </div>
-        <!-- Duplicate for seamless loop -->
         <div class="marquee-row" aria-hidden="true">
           <span>Ad-free</span><span class="md">·</span>
           <span>Opus Audio</span><span class="md">·</span>
@@ -251,18 +400,14 @@
     <section class="features" id="features" aria-labelledby="feat-h">
       <div class="container">
         <div class="eyebrow" aria-hidden="true"><span class="el"></span>Features<span class="el"></span></div>
-        <h2 class="sh reveal" id="feat-h">Everything you need.<br />Nothing you don't.</h2>
-
+        <h2 class="sh reveal" id="feat-h">Everything you need.<br/>Nothing you don't.</h2>
         <div class="feat-grid">
 
           <article class="fc fc-wide reveal" data-delay="0">
             <div class="fc-bg" aria-hidden="true"></div>
             <div class="fc-inner">
               <div class="fi" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-                     width="22" height="22" focusable="false">
-                  <path d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"/>
-                </svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22" focusable="false"><path d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"/></svg>
               </div>
               <div>
                 <h3>Ad-free music</h3>
@@ -277,11 +422,7 @@
             <div class="fc-bg" aria-hidden="true"></div>
             <div class="fc-inner">
               <div class="fi" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-                     width="22" height="22" focusable="false">
-                  <path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/>
-                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-                </svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22" focusable="false"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
               </div>
               <h3>Opus audio quality</h3>
               <p>High-fidelity Opus codec. Hear every layer and detail in your music.</p>
@@ -294,10 +435,7 @@
             <div class="fc-bg" aria-hidden="true"></div>
             <div class="fc-inner">
               <div class="fi" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-                     width="22" height="22" focusable="false">
-                  <path d="M4 6h16M4 12h10M4 18h7"/>
-                </svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22" focusable="false"><path d="M4 6h16M4 12h10M4 18h7"/></svg>
               </div>
               <h3>Lyrics sync</h3>
               <p>Real-time synchronized lyrics that follow every beat precisely.</p>
@@ -310,11 +448,7 @@
             <div class="fc-bg" aria-hidden="true"></div>
             <div class="fc-inner">
               <div class="fi" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-                     width="22" height="22" focusable="false">
-                  <path d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
-                  <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22" focusable="false"><path d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
               </div>
               <h3>YouTube sync</h3>
               <p>Stream any YouTube track directly inside Harmber seamlessly.</p>
@@ -327,11 +461,7 @@
             <div class="fc-bg" aria-hidden="true"></div>
             <div class="fc-inner">
               <div class="fi" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-                     width="22" height="22" focusable="false">
-                  <circle cx="12" cy="12" r="10"/>
-                  <path d="M8.56 2.75c4.37 6.03 6.02 9.42 8.03 17.72m2.54-15.38c-3.72 4.35-8.94 5.66-16.88 5.85m19.5 1.9c-3.5-.93-6.63-.82-8.94 0-2.58.92-5.01 2.86-7.44 6.32"/>
-                </svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22" focusable="false"><circle cx="12" cy="12" r="10"/><path d="M8.56 2.75c4.37 6.03 6.02 9.42 8.03 17.72m2.54-15.38c-3.72 4.35-8.94 5.66-16.88 5.85m19.5 1.9c-3.5-.93-6.63-.82-8.94 0-2.58.92-5.01 2.86-7.44 6.32"/></svg>
               </div>
               <h3>Discord rich presence</h3>
               <p>Show your currently playing track live on your Discord profile.</p>
@@ -344,10 +474,7 @@
             <div class="fc-bg" aria-hidden="true"></div>
             <div class="fc-inner">
               <div class="fi" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-                     width="22" height="22" focusable="false">
-                  <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
-                </svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22" focusable="false"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
               </div>
               <div>
                 <h3>Playlist import</h3>
@@ -366,54 +493,44 @@
     <section class="scr-section" id="screenshots" aria-labelledby="scr-h">
       <div class="container">
         <div class="eyebrow" aria-hidden="true"><span class="el"></span>Interface<span class="el"></span></div>
-        <h2 class="sh reveal" id="scr-h">A player that disappears.<br />The music stays.</h2>
+        <h2 class="sh reveal" id="scr-h">A player that disappears.<br/>The music stays.</h2>
       </div>
-
       <div class="scr-scroll" id="scrScroll" role="list" aria-label="App screenshots">
         <div class="scr-item reveal" data-delay="0" role="listitem">
           <div class="scr-phone">
-            <img src="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/ss1.jpg"
-                 alt="Now Playing screen" loading="lazy" width="260" />
+            <img src="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/ss1.jpg" alt="Now Playing screen" loading="lazy" width="220" />
             <div class="scr-shine" aria-hidden="true"></div>
             <div class="scr-glow"  aria-hidden="true"></div>
           </div>
           <p>Now Playing</p>
         </div>
-
         <div class="scr-item reveal" data-delay="80" role="listitem">
           <div class="scr-phone">
-            <img src="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/ss2.jpg"
-                 alt="Library screen" loading="lazy" width="260" />
+            <img src="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/ss2.jpg" alt="Library screen" loading="lazy" width="220" />
             <div class="scr-shine" aria-hidden="true"></div>
             <div class="scr-glow"  aria-hidden="true"></div>
           </div>
           <p>Library</p>
         </div>
-
         <div class="scr-item reveal" data-delay="160" role="listitem">
           <div class="scr-phone">
-            <img src="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/ss3.jpg"
-                 alt="Lyrics screen" loading="lazy" width="260" />
+            <img src="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/ss3.jpg" alt="Lyrics screen" loading="lazy" width="220" />
             <div class="scr-shine" aria-hidden="true"></div>
             <div class="scr-glow"  aria-hidden="true"></div>
           </div>
           <p>Lyrics</p>
         </div>
-
         <div class="scr-item reveal" data-delay="240" role="listitem">
           <div class="scr-phone">
-            <img src="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/ss5.jpg"
-                 alt="Discover screen" loading="lazy" width="260" />
+            <img src="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/ss5.jpg" alt="Discover screen" loading="lazy" width="220" />
             <div class="scr-shine" aria-hidden="true"></div>
             <div class="scr-glow"  aria-hidden="true"></div>
           </div>
           <p>Discover</p>
         </div>
-
         <div class="scr-item reveal" data-delay="320" role="listitem">
           <div class="scr-phone">
-            <img src="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/ss4.jpg"
-                 alt="Playlists screen" loading="lazy" width="260" />
+            <img src="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/ss4.jpg" alt="Playlists screen" loading="lazy" width="220" />
             <div class="scr-shine" aria-hidden="true"></div>
             <div class="scr-glow"  aria-hidden="true"></div>
           </div>
@@ -427,38 +544,28 @@
       <div class="dl-grid-bg" aria-hidden="true"></div>
       <div class="dl-orb dl-o1" aria-hidden="true"></div>
       <div class="dl-orb dl-o2" aria-hidden="true"></div>
-
       <div class="dl-inner reveal">
         <div class="eyebrow" aria-hidden="true"><span class="el"></span>Get the app<span class="el"></span></div>
         <h2 class="dl-h" id="dl-h">Ready to listen?</h2>
         <p class="dl-sub">Free. No account. No tracking. Just install and go.</p>
-
         <div class="dl-card">
           <div class="dl-card-row">
             <div class="dl-icon">
-              <img src="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/logo.png"
-                   alt="Harmber logo" width="32" height="32" />
+              <img src="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/logo.png" alt="Harmber logo" width="32" height="32" />
             </div>
             <div class="dl-info">
               <strong>Harmber</strong>
               <span>v1.1.3 &nbsp;·&nbsp; ~18 MB &nbsp;·&nbsp; Android 8.0+</span>
             </div>
             <a href="https://github.com/suadatbiniqbal/harmber/releases/download/1.1.3/base.apk"
-               class="btn-main btn-glow"
-               id="apk-btn"
-               aria-label="Download Harmber APK v1.1.3"
-               download>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                   stroke-width="2.5" aria-hidden="true" focusable="false">
-                <path d="M12 3v13M5 14l7 7 7-7" />
-                <path d="M3 21h18" />
-              </svg>
+               class="btn-main btn-glow" id="apk-btn"
+               aria-label="Download Harmber APK v1.1.3" download>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true" focusable="false"><path d="M12 3v13M5 14l7 7 7-7"/><path d="M3 21h18"/></svg>
               Download APK
             </a>
           </div>
           <div class="dl-card-shine" aria-hidden="true"></div>
         </div>
-
         <p class="dl-note">
           By downloading you agree to our
           <a href="/terms.html">Terms of Use</a> and
@@ -474,8 +581,7 @@
     <div class="ft-top">
       <div class="ft-brand">
         <a href="/" class="wordmark" aria-label="Harmber home">
-          <img src="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/logo.png"
-               alt="Harmber logo" class="wordmark-img" width="28" height="28" />
+          <img src="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/logo.png" alt="Harmber logo" class="wordmark-img" width="28" height="28" />
           Harmber
         </a>
         <p>Stream smarter. Feel deeper.</p>
@@ -494,8 +600,7 @@
         </div>
         <div class="ft-col">
           <h4>Links</h4>
-          <a href="https://github.com/suadatbiniqbal/harmber"
-             target="_blank" rel="noopener noreferrer">GitHub</a>
+          <a href="https://github.com/suadatbiniqbal/harmber" target="_blank" rel="noopener noreferrer">GitHub</a>
         </div>
       </nav>
     </div>
