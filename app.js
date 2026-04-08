@@ -466,25 +466,7 @@ function spawnSparks(origin, count) {
   }, 120);
 })();
 
-/* ══════════════════════════════════════════
-   PHONE LYRICS ANIMATION
-══════════════════════════════════════════ */
-(function () {
-  const peekSets = [
-    ['♪ In the silence between',      '♪ I find the music in my soul',   '♪ Every beat a new story'],
-    ['♪ Echoes fill the empty room',   '♪ A melody that lights the dark', '♪ Sound becomes a second home'],
-    ['♪ Turn the volume to the sky',   '♪ Let the rhythm carry you',      '♪ Nothing else but music now'],
-    ['♪ Colors in a minor key',        '♪ Dancing through frequencies',   '♪ This is where I belong'],
-    ['♪ Bass drops low, highs soar',   '♪ Drifting on the endless wave',  '♪ Music fills the empty night'],
-  ];
 
-  const fullSets = [
-    ['In the silence', 'Between the notes', 'I find the music', 'In my soul', 'Every beat tells', 'A different story', 'Echoes of a', 'Forgotten melody'],
-    ['Echoes dancing',  'In empty rooms',   'A melody shines',  'Through the gloom', 'Sound becomes', 'A second home', 'Music fills', 'The night alone'],
-    ['Turn the volume', 'To the sky',       'Let the rhythm',   'Carry you and I', 'Nothing else', 'But music now', 'Drifting through', 'The endless sound'],
-    ['Colors paint',    'A minor key',      'Frequencies',      'Setting spirits free', 'The bass drops', 'The highs take flight', 'Music fills', 'This endless night'],
-    ['Bass drops low',  'Highs take flight','Drifting on',      'An endless wave', 'Every note', 'A stepping stone', 'Towards the sound', 'I call my home'],
-  ];
 
   let idx = 0;
 
@@ -520,27 +502,7 @@ function spawnSparks(origin, count) {
   setInterval(update, 3400);
 })();
 
-/* ══════════════════════════════════════════
-   PHONE PLAY / PAUSE TOGGLE
-══════════════════════════════════════════ */
-(function () {
-  const btn = document.getElementById('phPlayBtn');
-  if (!btn) return;
 
-  const PAUSE = `<svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20" focusable="false"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`;
-  const PLAY  = `<svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20" focusable="false"><path d="M8 5v14l11-7z"/></svg>`;
-
-  let playing = true;
-  btn.innerHTML = PAUSE;
-
-  btn.addEventListener('click', () => {
-    playing       = !playing;
-    btn.innerHTML = playing ? PAUSE : PLAY;
-    btn.style.transform = 'scale(.88)';
-    setTimeout(() => (btn.style.transform = ''), 140);
-    spawnSparks(btn, 5);
-  });
-})();
 
 /* ══════════════════════════════════════════
    HERO PHONES PARALLAX
