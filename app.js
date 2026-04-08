@@ -150,3 +150,37 @@
     window.location.href='https://github.com/suadatbiniqbal/harmber/releases/download/1.1.3/base.apk';
   });
 })();
+/* spotlight */
+document.addEventListener("mousemove", e=>{
+  document.body.style.setProperty("--cx", e.clientX + "px");
+  document.body.style.setProperty("--cy", e.clientY + "px");
+});
+
+/* 3D tilt cards */
+document.querySelectorAll(".fc").forEach(card=>{
+  card.addEventListener("mousemove", e=>{
+    const rect = card.getBoundingClientRect();
+
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    const midX = rect.width / 2;
+    const midY = rect.height / 2;
+
+    const rotateX = ((y - midY) / midY) * 6;
+    const rotateY = ((x - midX) / midX) * -6;
+
+    card.style.transform = `
+      rotateX(${rotateX}deg)
+      rotateY(${rotateY}deg)
+      scale(1.03)
+    `;
+
+    card.style.setProperty("--x", x + "px");
+    card.style.setProperty("--y", y + "px");
+  });
+
+  card.addEventListener("mouseleave", ()=>{
+    card.style.transform = "rotateX(0) rotateY(0) scale(1)";
+  });
+});
