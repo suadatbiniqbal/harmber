@@ -302,22 +302,23 @@
           </div>
           <div class="s24-glow"></div>
         </div>
-<!-- CENTER — ss1 -->
-<div class="s24-wrap s24-center">
-  <div class="s24-frame s24-frame-hero">
-    <div class="s24-pill"></div>
-    <div class="s24-screen">
-      <img src="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/ss1.jpg"
-           alt="Now Playing" class="s24-img" loading="eager" />
-      <div class="s24-shine"></div>
-    </div>
-    <div class="s24-btn s24-vol-up"></div>
-    <div class="s24-btn s24-vol-dn"></div>
-    <div class="s24-btn s24-power"></div>
-    <div class="s24-spen"></div>
-  </div>
-  <div class="s24-glow s24-glow-center"></div>
-</div>
+
+        <!-- CENTER — ss1 -->
+        <div class="s24-wrap s24-center">
+          <div class="s24-frame s24-frame-hero">
+            <div class="s24-pill"></div>
+            <div class="s24-screen">
+              <img src="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/ss1.jpg"
+                   alt="Now Playing" class="s24-img" loading="eager" />
+              <div class="s24-shine"></div>
+            </div>
+            <div class="s24-btn s24-vol-up"></div>
+            <div class="s24-btn s24-vol-dn"></div>
+            <div class="s24-btn s24-power"></div>
+            <div class="s24-spen"></div>
+          </div>
+          <div class="s24-glow s24-glow-center"></div>
+        </div>
 
         <!-- RIGHT — ss3 -->
         <div class="s24-wrap s24-right">
@@ -651,6 +652,210 @@
       <p>Made with care for music lovers.</p>
     </div>
   </footer>
+
+  <!-- ══════════════ MOVIES APP PROMO DIALOG ══════════════ -->
+  <div id="promoOverlay" style="
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    animation: promoOverlayIn 0.4s ease forwards;
+  " role="dialog" aria-modal="true" aria-labelledby="promoTitle">
+
+    <div style="
+      position: relative;
+      background: linear-gradient(135deg, #0f0f0f 0%, #1a1a2e 50%, #0f0f0f 100%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 24px;
+      max-width: 480px;
+      width: 100%;
+      padding: 40px 32px 32px;
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.04),
+        0 32px 80px rgba(0,0,0,0.8),
+        0 0 60px rgba(99,60,255,0.15),
+        inset 0 1px 0 rgba(255,255,255,0.06);
+      animation: promoDialogUp 0.45s cubic-bezier(0.34,1.56,0.64,1) forwards;
+      overflow: hidden;
+    ">
+
+      <!-- Top-right glow orb -->
+      <div style="
+        position: absolute; top: -40px; right: -40px;
+        width: 180px; height: 180px; border-radius: 50%;
+        background: radial-gradient(circle, rgba(99,60,255,0.35) 0%, transparent 70%);
+        pointer-events: none;
+      "></div>
+
+      <!-- Bottom-left glow orb -->
+      <div style="
+        position: absolute; bottom: -40px; left: -40px;
+        width: 160px; height: 160px; border-radius: 50%;
+        background: radial-gradient(circle, rgba(220,40,100,0.25) 0%, transparent 70%);
+        pointer-events: none;
+      "></div>
+
+      <!-- Close button -->
+      <button
+        onclick="document.getElementById('promoOverlay').style.display='none'"
+        onmouseover="this.style.background='rgba(255,255,255,0.12)';this.style.color='#fff'"
+        onmouseout="this.style.background='rgba(255,255,255,0.06)';this.style.color='rgba(255,255,255,0.5)'"
+        aria-label="Close dialog"
+        style="
+          position: absolute; top: 14px; right: 14px; z-index: 2;
+          background: rgba(255,255,255,0.06);
+          border: 1px solid rgba(255,255,255,0.1);
+          border-radius: 50%; width: 32px; height: 32px;
+          display: flex; align-items: center; justify-content: center;
+          cursor: pointer; color: rgba(255,255,255,0.5);
+          font-size: 16px; line-height: 1;
+          transition: background 0.2s, color 0.2s;
+        ">✕</button>
+
+      <!-- Live badge -->
+      <div style="
+        display: inline-flex; align-items: center; gap: 6px;
+        background: rgba(99,60,255,0.15);
+        border: 1px solid rgba(99,60,255,0.3);
+        border-radius: 100px; padding: 4px 12px;
+        font-size: 11px; font-weight: 600; color: #a78bfa;
+        letter-spacing: 0.06em; text-transform: uppercase;
+        margin-bottom: 20px; position: relative; z-index: 2;
+        font-family: inherit;
+      ">
+        <span style="
+          width: 6px; height: 6px; border-radius: 50%;
+          background: #a78bfa; display: inline-block;
+          animation: promoPulse 1.5s ease-in-out infinite;
+          box-shadow: 0 0 6px #a78bfa;
+        "></span>
+        🎬 Free Streaming App
+      </div>
+
+      <!-- Heading -->
+      <h2 id="promoTitle" style="
+        font-size: clamp(22px, 5vw, 28px); font-weight: 800;
+        line-height: 1.2; color: #ffffff;
+        margin: 0 0 12px; position: relative; z-index: 2;
+        font-family: inherit;
+      ">
+        Download Our Free<br/>
+        <span style="
+          background: linear-gradient(90deg, #a78bfa, #f472b6, #fb923c);
+          -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+          background-clip: text;
+        ">Movies Streaming App</span>
+      </h2>
+
+      <!-- Description -->
+      <p style="
+        font-size: 14px; color: rgba(255,255,255,0.55);
+        line-height: 1.6; margin: 0 0 24px;
+        position: relative; z-index: 2; font-family: inherit;
+      ">
+        Over <strong style="color:rgba(255,255,255,0.85);">100,000 movies</strong> and
+        <strong style="color:rgba(255,255,255,0.85);">70,000 web series</strong> in high quality —
+        completely free with <strong style="color:rgba(255,255,255,0.85);">zero annoying ads</strong>.
+      </p>
+
+      <!-- Stats row -->
+      <div style="
+        display: grid; grid-template-columns: repeat(3,1fr);
+        gap: 10px; margin-bottom: 28px;
+        position: relative; z-index: 2;
+      ">
+        <div style="
+          background: rgba(255,255,255,0.04);
+          border: 1px solid rgba(255,255,255,0.07);
+          border-radius: 12px; padding: 12px 8px; text-align: center;
+        ">
+          <div style="font-size:18px;font-weight:800;color:#a78bfa;font-family:inherit;">100K+</div>
+          <div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px;font-family:inherit;">Movies</div>
+        </div>
+        <div style="
+          background: rgba(255,255,255,0.04);
+          border: 1px solid rgba(255,255,255,0.07);
+          border-radius: 12px; padding: 12px 8px; text-align: center;
+        ">
+          <div style="font-size:18px;font-weight:800;color:#f472b6;font-family:inherit;">70K+</div>
+          <div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px;font-family:inherit;">Web Series</div>
+        </div>
+        <div style="
+          background: rgba(255,255,255,0.04);
+          border: 1px solid rgba(255,255,255,0.07);
+          border-radius: 12px; padding: 12px 8px; text-align: center;
+        ">
+          <div style="font-size:18px;font-weight:800;color:#34d399;font-family:inherit;">0 Ads</div>
+          <div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px;font-family:inherit;">Zero Ads</div>
+        </div>
+      </div>
+
+      <!-- CTA Button -->
+      <a
+        href="https://download.harmber.xyz/"
+        target="_blank" rel="noopener noreferrer"
+        onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 32px rgba(124,58,237,0.6),0 1px 0 rgba(255,255,255,0.12) inset'"
+        onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 24px rgba(124,58,237,0.45),0 1px 0 rgba(255,255,255,0.12) inset'"
+        style="
+          display: flex; align-items: center; justify-content: center; gap: 8px;
+          width: 100%; padding: 14px 24px;
+          background: linear-gradient(135deg, #7c3aed, #a855f7, #ec4899);
+          border-radius: 14px; color: #ffffff;
+          font-size: 15px; font-weight: 700; text-decoration: none;
+          font-family: inherit; letter-spacing: 0.01em;
+          box-shadow: 0 4px 24px rgba(124,58,237,0.45), 0 1px 0 rgba(255,255,255,0.12) inset;
+          transition: transform 0.2s, box-shadow 0.2s;
+          position: relative; z-index: 2;
+          box-sizing: border-box;
+        ">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+          <path d="M12 3v13M5 14l7 7 7-7"/><path d="M3 21h18"/>
+        </svg>
+        Download Free App
+      </a>
+
+      <!-- Skip -->
+      <p style="
+        text-align:center; margin:14px 0 0;
+        font-size:12px; position:relative; z-index:2; font-family:inherit;
+      ">
+        <button
+          onclick="document.getElementById('promoOverlay').style.display='none'"
+          onmouseover="this.style.color='rgba(255,255,255,0.6)'"
+          onmouseout="this.style.color='rgba(255,255,255,0.3)'"
+          style="
+            background:none; border:none; padding:0; cursor:pointer;
+            color:rgba(255,255,255,0.3); font-size:12px;
+            text-decoration:underline; text-underline-offset:2px;
+            font-family:inherit; transition:color 0.2s;
+          ">No thanks, continue to Harmber</button>
+      </p>
+
+    </div>
+  </div>
+
+  <!-- Dialog-only keyframe animations -->
+  <style>
+    @keyframes promoOverlayIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    @keyframes promoDialogUp {
+      from { opacity: 0; transform: translateY(40px) scale(0.95); }
+      to   { opacity: 1; transform: translateY(0)    scale(1);    }
+    }
+    @keyframes promoPulse {
+      0%, 100% { transform: scale(1);   opacity: 1;   }
+      50%       { transform: scale(1.4); opacity: 0.6; }
+    }
+  </style>
 
   <script src="app.js" defer></script>
 </body>
