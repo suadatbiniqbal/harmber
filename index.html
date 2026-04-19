@@ -652,91 +652,103 @@
       <p>Made with care for music lovers.</p>
     </div>
   </footer>
+<!-- ══════════════ MINIMAL MOVIES PROMO ══════════════ -->
+<div id="promoOverlay" style="
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+">
 
-  <!-- ══════════════ MOVIES APP PROMO DIALOG ══════════════ -->
-  <div id="promoOverlay" style="
-    position: fixed;
-    inset: 0;
-    z-index: 9999;
-    background: rgba(0, 0, 0, 0.75);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 16px;
-    animation: promoOverlayIn 0.4s ease forwards;
-  " role="dialog" aria-modal="true" aria-labelledby="promoTitle">
+  <div style="
+    position: relative;
+    background: #0a0a0a;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    max-width: 340px;
+    width: 100%;
+    padding: 24px 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+    font-family: Inter, sans-serif;
+    text-align: center;
+  ">
 
+    <!-- Close -->
+    <button onclick="document.getElementById('promoOverlay').style.display='none'"
+      style="
+        position:absolute;
+        top:10px;
+        right:10px;
+        width:28px;
+        height:28px;
+        border-radius:50%;
+        border:1px solid rgba(255,255,255,0.1);
+        background:transparent;
+        color:#888;
+        cursor:pointer;
+        font-size:14px;
+      ">✕</button>
+
+    <!-- Badge -->
     <div style="
-      position: relative;
-      background: linear-gradient(135deg, #0f0f0f 0%, #1a1a2e 50%, #0f0f0f 100%);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 24px;
-      max-width: 480px;
-      width: 100%;
-      padding: 40px 32px 32px;
-      box-shadow:
-        0 0 0 1px rgba(255,255,255,0.04),
-        0 32px 80px rgba(0,0,0,0.8),
-        0 0 60px rgba(99,60,255,0.15),
-        inset 0 1px 0 rgba(255,255,255,0.06);
-      animation: promoDialogUp 0.45s cubic-bezier(0.34,1.56,0.64,1) forwards;
-      overflow: hidden;
+      display:inline-block;
+      padding:4px 10px;
+      border-radius:999px;
+      font-size:10px;
+      letter-spacing:0.08em;
+      text-transform:uppercase;
+      border:1px solid rgba(255,255,255,0.15);
+      color:#aaa;
+      margin-bottom:16px;
     ">
+      Free Streaming
+    </div>
 
-      <!-- Top-right glow orb -->
-      <div style="
-        position: absolute; top: -40px; right: -40px;
-        width: 180px; height: 180px; border-radius: 50%;
-        background: radial-gradient(circle, rgba(99,60,255,0.35) 0%, transparent 70%);
-        pointer-events: none;
-      "></div>
+    <!-- Title -->
+    <h2 style="
+      color:#fff;
+      font-size:18px;
+      font-weight:600;
+      margin-bottom:10px;
+    ">
+      Harmber Movies
+    </h2>
 
-      <!-- Bottom-left glow orb -->
-      <div style="
-        position: absolute; bottom: -40px; left: -40px;
-        width: 160px; height: 160px; border-radius: 50%;
-        background: radial-gradient(circle, rgba(220,40,100,0.25) 0%, transparent 70%);
-        pointer-events: none;
-      "></div>
+    <!-- Description -->
+    <p style="
+      color:#888;
+      font-size:13px;
+      line-height:1.5;
+      margin-bottom:20px;
+    ">
+      Watch movies, anime, and series in a clean and fast experience.
+    </p>
 
-      <!-- Close button -->
-      <button
-        onclick="document.getElementById('promoOverlay').style.display='none'"
-        onmouseover="this.style.background='rgba(255,255,255,0.12)';this.style.color='#fff'"
-        onmouseout="this.style.background='rgba(255,255,255,0.06)';this.style.color='rgba(255,255,255,0.5)'"
-        aria-label="Close dialog"
-        style="
-          position: absolute; top: 14px; right: 14px; z-index: 2;
-          background: rgba(255,255,255,0.06);
-          border: 1px solid rgba(255,255,255,0.1);
-          border-radius: 50%; width: 32px; height: 32px;
-          display: flex; align-items: center; justify-content: center;
-          cursor: pointer; color: rgba(255,255,255,0.5);
-          font-size: 16px; line-height: 1;
-          transition: background 0.2s, color 0.2s;
-        ">✕</button>
+    <!-- Button -->
+    <button style="
+      width:100%;
+      padding:10px;
+      border-radius:10px;
+      border:none;
+      background:#fff;
+      color:#000;
+      font-weight:600;
+      font-size:13px;
+      cursor:pointer;
+      transition:0.2s;
+    "
+    onmouseover="this.style.opacity='0.8'"
+    onmouseout="this.style.opacity='1'">
+      Explore App
+    </button>
 
-      <!-- Live badge -->
-      <div style="
-        display: inline-flex; align-items: center; gap: 6px;
-        background: rgba(99,60,255,0.15);
-        border: 1px solid rgba(99,60,255,0.3);
-        border-radius: 100px; padding: 4px 12px;
-        font-size: 11px; font-weight: 600; color: #a78bfa;
-        letter-spacing: 0.06em; text-transform: uppercase;
-        margin-bottom: 20px; position: relative; z-index: 2;
-        font-family: inherit;
-      ">
-        <span style="
-          width: 6px; height: 6px; border-radius: 50%;
-          background: #a78bfa; display: inline-block;
-          animation: promoPulse 1.5s ease-in-out infinite;
-          box-shadow: 0 0 6px #a78bfa;
-        "></span>
-        🎬 Free Streaming App
-      </div>
+  </div>
+</div>
 
       <!-- Heading -->
       <h2 id="promoTitle" style="
