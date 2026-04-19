@@ -5,294 +5,269 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
-  <title>Harmber — Stream smarter. Feel deeper.</title>
-  <meta name="description"  content="Harmber is a free, ad-free music streaming app for Android. High-quality Opus audio, synced lyrics, YouTube sync, Discord rich presence and playlist import. No sign-up required." />
-  <meta name="keywords"     content="harmber, music app, ad-free music, android music player, opus audio, lyrics sync, youtube music, discord rich presence, free music streaming" />
-  <meta name="author"       content="Harmber" />
-  <meta name="robots"       content="index, follow" />
-  <meta name="theme-color"  content="#000000" />
-  <link rel="canonical"     href="https://harmber.xyz/" />
+  <title>Harmber — Pure music, zero distractions.</title>
+  <meta
+    name="description"
+    content="Harmber is a free, ad-free music streaming app for Android with high-quality audio, synced lyrics, YouTube sync, Discord presence, and playlist import."
+  />
+  <meta
+    name="keywords"
+    content="Harmber, Android music app, ad-free music, music streaming app, synced lyrics, YouTube music sync, Discord rich presence, free APK"
+  />
+  <meta name="author" content="Harmber" />
+  <meta name="robots" content="index, follow" />
+  <meta name="theme-color" content="#000000" />
+  //harmber.xyz/" />
 
-  <meta property="og:type"        content="website" />
-  <meta property="og:url"         content="https://harmber.xyz/" />
-  <meta property="og:title"       content="Harmber — Stream smarter. Feel deeper." />
-  <meta property="og:description" content="Free ad-free music for Android. Opus audio, lyrics sync, YouTube sync and more." />
-  <meta property="og:image"       content="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/logo.png" />
-  <meta property="og:site_name"   content="Harmber" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://harmber.xyz/" />
+  <meta property="og:title" content="Harmber — Pure music, zero distractions." />
+  <meta
+    property="og:description"
+    content="A free Android music app with no ads, synced lyrics, YouTube sync, playlist import, and high-quality audio."
+  />
+  <meta
+    property="og:image"
+    content="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/logo.png"
+  />
+  <meta property="og:site_name" content="Harmber" />
 
-  <meta name="twitter:card"        content="summary_large_image" />
-  <meta name="twitter:title"       content="Harmber — Stream smarter. Feel deeper." />
-  <meta name="twitter:description" content="Free, ad-free music for Android." />
-  <meta name="twitter:image"       content="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/logo.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Harmber — Pure music, zero distractions." />
+  <meta
+    name="twitter:description"
+    content="Free, ad-free music streaming for Android."
+  />
+  <meta
+    name="twitter:image"
+    content="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/logo.png"
+  g"
+  />
 
-  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/logo.png" />
-  <link rel="apple-touch-icon"      href="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/logo.png" />
+  
+    type="image/png"
+    href="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/logo.png"
+  g"
+  />
+  
+    href="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/logo.png"
+  />
 
   <script type="application/ld+json">
   {
-    "@context":"https://schema.org","@type":"SoftwareApplication",
-    "name":"Harmber","operatingSystem":"Android",
-    "applicationCategory":"MusicApplication",
-    "offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},
-    "description":"Free ad-free music streaming for Android.",
-    "url":"https://harmber.xyz",
-    "logo":"https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/logo.png"
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Harmber",
+    "operatingSystem": "Android",
+    "applicationCategory": "MusicApplication",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "description": "Free ad-free music streaming for Android with synced lyrics, YouTube sync, and playlist import.",
+    "url": "https://harmber.xyz",
+    "logo": "https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/logo.png"
   }
   </script>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
+  //fonts.googleapis.com" />
+  //fonts.gstatic.com" crossorigin n />
+  //fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap"
+    rel="stylesheet"
+  t"
+  />
+  " />
 </head>
 <body>
-
-  <div class="noise"        aria-hidden="true"></div>
-  <div class="cursor-dot"   id="cursorDot"   aria-hidden="true"></div>
-  <div class="cursor-ring"  id="cursorRing"  aria-hidden="true"></div>
+  <div class="noise" aria-hidden="true"></div>
+  <div class="cursor-dot" id="cursorDot" aria-hidden="true"></div>
+  <div class="cursor-ring" id="cursorRing" aria-hidden="true"></div>
   <div class="progress-bar" id="progressBar" aria-hidden="true"></div>
 
-  <!-- Music note rain canvas -->
-  <canvas id="musicCanvas" aria-hidden="true"></canvas>
+  anvas id="musicCanvas" aria-hidden="true"></canvas>
 
-  <!-- Ambient horizontal lines -->
   <div class="ambient-lines" aria-hidden="true">
     <span></span><span></span><span></span><span></span><span></span>
     <span></span><span></span><span></span><span></span><span></span>
   </div>
 
-<header class="nav" id="nav" role="banner">
-  <div class="nav-inner">
-
-    <!-- Wordmark -->
-    <a href="/" class="wordmark" aria-label="Harmber home">
-      <img
-        src="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/logo.png"
-        alt="Harmber logo" class="wordmark-img" width="28" height="28"
-      />
-      <span class="wordmark-text">Harmber</span>
-    </a>
-
-    <!-- Desktop links -->
-    <nav class="nav-links" aria-label="Main navigation">
-      <a href="#features"     class="nav-link">Features</a>
-      <a href="#screenshots"  class="nav-link">Screenshots</a>
-      <a href="#download"     class="nav-link">Download</a>
-      <a
-        href="https://github.com/suadatbiniqbal/harmber"
-        target="_blank" rel="noopener noreferrer"
-        class="nav-link nav-github"
-        aria-label="GitHub"
-      >
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482
-            0-.237-.009-.868-.013-1.703-2.782.604-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.463-1.11-1.463
-            -.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831
-            .092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683
-            -.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0 1 12 6.836a9.59 9.59
-            0 0 1 2.504.337c1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.202 2.394.1 2.647.64.699
-            1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852
-            0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12
-            c0-5.523-4.477-10-10-10z"/>
-        </svg>
-        <span class="nav-gh-label">GitHub</span>
+  <header class="nav" id="nav" role="banner">
+    <div class="nav-inner">
+      <a href="/" class="wordmark" aria-label="Harmber home">
+        <img
+          src="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/logo.png"
+          alt="Harmber logo"
+          class="wordmark-img"
+          width="28"
+          height="28"
+        />
+        <span class="wordmark-text">Harmber</span>
       </a>
 
-      <!-- Theme toggle -->
-      <button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark mode">
-        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-             stroke-width="2" width="15" height="15" aria-hidden="true">
-          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-        </svg>
-        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-             stroke-width="2" width="15" height="15" aria-hidden="true">
-          <circle cx="12" cy="12" r="5"/>
-          <line x1="12" y1="1"  x2="12" y2="3"/>
-          <line x1="12" y1="21" x2="12" y2="23"/>
-          <line x1="4.22"  y1="4.22"  x2="5.64"  y2="5.64"/>
-          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-          <line x1="1"  y1="12" x2="3"  y2="12"/>
-          <line x1="21" y1="12" x2="23" y2="12"/>
-          <line x1="4.22"  y1="19.78" x2="5.64"  y2="18.36"/>
-          <line x1="18.36" y1="5.64"  x2="19.78" y2="4.22"/>
-        </svg>
-      </button>
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="#features" class="nav-link">Features</a>
+        <a href="#screenshots" class="nav-link">Screenshots</a>
+        <a href="#download" class="nav-link">Download</a>
 
-      <a href="#download" class="nav-pill">Get App</a>
-    </nav>
+        <a
+          href="https://github.com/suadatbiniqbal/harmber"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="nav-link nav-github"
+          aria-label="GitHub"
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482
+              0-.237-.009-.868-.013-1.703-2.782.604-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.463-1.11-1.463
+              -.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831
+              .092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683
+              -.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0 1 12 6.836a9.59 9.59
+              0 0 1 2.504.337c1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.202 2.394.1 2.647.64.699
+              1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852
+              0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12
+              c0-5.523-4.477-10-10-10z"/>
+          </svg>
+          <span class="nav-gh-label">GitHub</span>
+        </a>
 
-    <!-- Mobile right side -->
-    <div class="nav-mobile">
-      <button class="theme-toggle theme-toggle-mob" id="themeToggleMob" aria-label="Toggle theme">
-        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-             stroke-width="2" width="15" height="15" aria-hidden="true">
-          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-        </svg>
-        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-             stroke-width="2" width="15" height="15" aria-hidden="true">
-          <circle cx="12" cy="12" r="5"/>
-          <line x1="12" y1="1"  x2="12" y2="3"/>
-          <line x1="12" y1="21" x2="12" y2="23"/>
-          <line x1="4.22"  y1="4.22"  x2="5.64"  y2="5.64"/>
-          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-          <line x1="1"  y1="12" x2="3"  y2="12"/>
-          <line x1="21" y1="12" x2="23" y2="12"/>
-          <line x1="4.22"  y1="19.78" x2="5.64"  y2="18.36"/>
-          <line x1="18.36" y1="5.64"  x2="19.78" y2="4.22"/>
-        </svg>
-      </button>
-      <a href="#download" class="nav-pill-mob">Get App</a>
-      <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">
-        <span></span><span></span><span></span>
-      </button>
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle light and dark mode">
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15" aria-hidden="true">
+            ircle cx="12" cy="12" r="5"/>
+            e x1="12" y1="1" x2="12" y2="3"/>
+            e x1="12" y1="21" x2="12" y2="23"/>
+            e x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            e x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            e x1="1" y1="12" x2="3" y2="12"/>
+            e x1="21" y1="12" x2="23" y2="12"/>
+            e x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            e x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+        </button>
+
+        <a href="#download" class="nav-pill">Get App</a>
+      </nav>
+
+      <div class="nav-mobile">
+        <button class="theme-toggle theme-toggle-mob" id="themeToggleMob" aria-label="Toggle theme">
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15" aria-hidden="true">
+            ircle cx="12" cy="12" r="5"/>
+            e x1="12" y1="1" x2="12" y2="3"/>
+            e x1="12" y1="21" x2="12" y2="23"/>
+            e x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            e x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            e x1="1" y1="12" x2="3" y2="12"/>
+            e x1="21" y1="12" x2="23" y2="12"/>
+            e x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            e x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+        </button>
+
+        <a href="#download" class="nav-pill-mob">Get App</a>
+
+        <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
     </div>
 
-  </div>
-
-  <!-- Mobile drawer -->
-  <div class="mobile-drawer" id="mobileDrawer" aria-hidden="true">
-    <nav class="drawer-links" aria-label="Mobile navigation">
-      <a href="#features"    class="drawer-link" data-close>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-             width="16" height="16"><path d="M4 6h16M4 12h10M4 18h7"/></svg>
-        Features
-      </a>
-      <a href="#screenshots" class="drawer-link" data-close>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-             width="16" height="16"><rect x="5" y="2" width="14" height="20" rx="3"/></svg>
-        Screenshots
-      </a>
-      <a href="#download"    class="drawer-link" data-close>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-             width="16" height="16"><path d="M12 3v13M5 14l7 7 7-7"/><path d="M3 21h18"/></svg>
-        Download
-      </a>
-      <a
-        href="https://github.com/suadatbiniqbal/harmber"
-        target="_blank" rel="noopener noreferrer"
-        class="drawer-link"
-      >
-        <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-          <path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482
-            0-.237-.009-.868-.013-1.703-2.782.604-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.463-1.11-1.463
-            -.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831
-            .092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683
-            -.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0 1 12 6.836a9.59 9.59
-            0 0 1 2.504.337c1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.202 2.394.1 2.647.64.699
-            1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852
-            0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12
-            c0-5.523-4.477-10-10-10z"/>
-        </svg>
-        GitHub
-      </a>
-      <a
-        href="https://github.com/suadatbiniqbal/harmber/releases/download/1.1.3/base.apk"
-        class="drawer-cta" download
-      >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-             width="15" height="15"><path d="M12 3v13M5 14l7 7 7-7"/><path d="M3 21h18"/></svg>
-        Get App
-      </a>
-    </nav>
-  </div>
-</header>
+    <div class="mobile-drawer" id="mobileDrawer" aria-hidden="true">
+      <nav class="drawer-links" aria-label="Mobile navigation">
+        <a href="#features" class="drawer-link" data-close>Features</a>
+        <a href="#screenshots" class="drawer-link" data-close>Screenshots</a>
+        <a href="#download" class="drawer-link" data-close>Download</a>
+        <a
+          href="https://github.com/suadatbiniqbal/harmber"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="drawer-link"
+        >GitHub</a>
+        <a
+          href="https://github.com/suadatbiniqbal/harmber/releases/download/1.1.3/base.apk"
+          class="drawer-cta"
+          download
+        >Get App</a>
+      </nav>
+    </div>
+  </header>
 
   <main id="main-content">
-
-    <!-- ══════════════ HERO ══════════════ -->
     <section class="hero" id="hero" aria-labelledby="hero-heading">
+      <img class="hero-bg-gif" src="bg.gif" alt="" aria-hidden="true" loading="eager" fetchpriority="high" />
 
-      <img class="hero-bg-gif" src="bg.gif" alt="" aria-hidden="true"
-           loading="eager" fetchpriority="high" />
-
-      <div class="hero-grid-bg"  aria-hidden="true"></div>
-      <canvas id="waveCanvas"    aria-hidden="true"></canvas>
-      <canvas id="vizCanvas"     aria-hidden="true"></canvas>
+      <div class="hero-grid-bg" aria-hidden="true"></div>
+      anvas id="waveCanvas" aria-hidden="true"></canvas>
+      anvas id="vizCanvas" aria-hidden="true"></canvas>
       <div class="hero-vignette" aria-hidden="true"></div>
-      <div class="orb orb-1"     aria-hidden="true"></div>
-      <div class="orb orb-2"     aria-hidden="true"></div>
-      <div class="orb orb-3"     aria-hidden="true"></div>
-      <div class="particles"     id="particles" aria-hidden="true"></div>
+      <div class="orb orb-1" aria-hidden="true"></div>
+      <div class="orb orb-2" aria-hidden="true"></div>
+      <div class="orb orb-3" aria-hidden="true"></div>
+      <div class="particles" id="particles" aria-hidden="true"></div>
 
-      <!-- Vinyl record decoration -->
       <div class="vinyl" aria-hidden="true">
         <div class="vinyl-grooves"></div>
         <div class="vinyl-label"></div>
         <div class="vinyl-hole"></div>
       </div>
 
-      <!-- Floating note sparks -->
       <div class="note-sparks" id="noteSparks" aria-hidden="true"></div>
 
-      <!-- Hero text -->
       <div class="hero-content">
         <div class="hero-badge">
           <span class="badge-dot" aria-hidden="true"></span>
-          Free &nbsp;·&nbsp; Ad-free &nbsp;·&nbsp; Android
+          Free · Ad-free · Android
         </div>
 
         <h1 id="hero-heading">
-          <span class="line-wrap"><span class="line anim-l1">Stream smarter.</span></span>
-          <span class="line-wrap"><span class="line anim-l2 line-dim">Feel deeper.</span></span>
+          <span class="line-wrap"><span class="line anim-l1">Pure music.</span></span>
+          <span class="line-wrap"><span class="line anim-l2 line-dim">Zero distractions.</span></span>
         </h1>
 
         <p class="hero-sub">
-          The music player built for people who actually care about listening.
-          Zero ads. Zero noise. Pure music.
+          Harmber is built for people who actually love listening.
+          No ads, no clutter, no forced sign-up — just music that starts fast and stays out of your way.
         </p>
 
         <div class="hero-actions">
-          <a href="https://github.com/suadatbiniqbal/harmber/releases/download/1.1.3/base.apk"
-             class="btn-main btn-glow" download>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                 stroke="currentColor" stroke-width="2.5" aria-hidden="true">
-              <path d="M12 3v13M5 14l7 7 7-7"/><path d="M3 21h18"/>
-            </svg>
+          <a
+            href="https://github.com/suadatbiniqbal/harmber/releases/download/1.1.3/base.apk"
+            class="btn-main btn-glow"
+            download
+          >
             Download APK
           </a>
+
           <a href="#features" class="btn-ghost">
-            See features
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
-                 stroke="currentColor" stroke-width="2" aria-hidden="true">
-              <path d="M5 12h14M12 5l7 7-7 7"/>
-            </svg>
+            Explore features
           </a>
         </div>
 
-        <ul class="hero-trust">
-          <li class="trust-item">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
-                 stroke="currentColor" stroke-width="2.5" aria-hidden="true">
-              <polyline points="20 6 9 17 4 12"/>
-            </svg>No sign-up
-          </li>
-          <li class="trust-sep" aria-hidden="true"></li>
-          <li class="trust-item">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
-                 stroke="currentColor" stroke-width="2.5" aria-hidden="true">
-              <polyline points="20 6 9 17 4 12"/>
-            </svg>Android 8.0+
-          </li>
-          <li class="trust-sep" aria-hidden="true"></li>
-          <li class="trust-item">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
-                 stroke="currentColor" stroke-width="2.5" aria-hidden="true">
-              <polyline points="20 6 9 17 4 12"/>
-            </svg>~18 MB
-          </li>
+        <ul class="hero-trustst">
+          >No sign-up</l/li>
+          ></l/li>
+          >Android 8.0+</l/li>
+          ></l/li>
+          >~18 MB</li>
         </ul>
       </div>
 
-      <!-- ══ S24 ULTRA TRIO ══ -->
       <div class="hero-phones" aria-hidden="true">
-
-        <!-- LEFT — ss2 -->
         <div class="s24-wrap s24-left">
           <div class="s24-frame">
             <div class="s24-pill"></div>
             <div class="s24-screen">
-              <img src="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/ss2.jpg"
-                   alt="Library" class="s24-img" loading="eager" />
+              <img
+                src="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/ss2.jpg"
+                alt="Library screen"
+                class="s24-img"
+                loading="eager"
+              />
               <div class="s24-shine"></div>
             </div>
             <div class="s24-btn s24-vol-up"></div>
@@ -303,13 +278,16 @@
           <div class="s24-glow"></div>
         </div>
 
-        <!-- CENTER — ss1 -->
         <div class="s24-wrap s24-center">
           <div class="s24-frame s24-frame-hero">
             <div class="s24-pill"></div>
             <div class="s24-screen">
-              <img src="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/ss1.jpg"
-                   alt="Now Playing" class="s24-img" loading="eager" />
+              <img
+                src="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/ss1.jpg"
+                alt="Now playing screen"
+                class="s24-img"
+                loading="eager"
+              />
               <div class="s24-shine"></div>
             </div>
             <div class="s24-btn s24-vol-up"></div>
@@ -320,13 +298,16 @@
           <div class="s24-glow s24-glow-center"></div>
         </div>
 
-        <!-- RIGHT — ss3 -->
         <div class="s24-wrap s24-right">
           <div class="s24-frame">
             <div class="s24-pill"></div>
             <div class="s24-screen">
-              <img src="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/ss3.jpg"
-                   alt="Lyrics" class="s24-img" loading="eager" />
+              <img
+                src="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/ss3.jpg"
+                alt="Lyrics screen"
+                class="s24-img"
+                loading="eager"
+              />
               <div class="s24-shine"></div>
             </div>
             <div class="s24-btn s24-vol-up"></div>
@@ -336,8 +317,7 @@
           </div>
           <div class="s24-glow"></div>
         </div>
-
-      </div><!-- /hero-phones -->
+      </div>
 
       <div class="scroll-hint" aria-hidden="true">
         <div class="scroll-mouse"><div class="scroll-wheel"></div></div>
@@ -345,37 +325,35 @@
       </div>
     </section>
 
-    <!-- ══════════════ MARQUEE ══════════════ -->
     <div class="marquee-wrap" aria-hidden="true">
       <div class="marquee-track">
         <div class="marquee-row">
           <span>Ad-free</span><span class="md">·</span>
-          <span>Opus Audio</span><span class="md">·</span>
-          <span>Lyrics Sync</span><span class="md">·</span>
-          <span>YouTube Sync</span><span class="md">·</span>
-          <span>Discord Presence</span><span class="md">·</span>
-          <span>Playlist Import</span><span class="md">·</span>
-          <span>No Account</span><span class="md">·</span>
-          <span>Free Forever</span><span class="md">·</span>
+          <span>High-quality audio</span><span class="md">·</span>
+          <span>Lyrics sync</span><span class="md">·</span>
+          <span>YouTube sync</span><span class="md">·</span>
+          <span>Discord presence</span><span class="md">·</span>
+          <span>Playlist import</span><span class="md">·</span>
+          <span>No account</span><span class="md">·</span>
+          <span>Free forever</span><span class="md">·</span>
           <span>18 MB</span><span class="md">·</span>
           <span>Android 8+</span><span class="md">·</span>
         </div>
         <div class="marquee-row" aria-hidden="true">
           <span>Ad-free</span><span class="md">·</span>
-          <span>Opus Audio</span><span class="md">·</span>
-          <span>Lyrics Sync</span><span class="md">·</span>
-          <span>YouTube Sync</span><span class="md">·</span>
-          <span>Discord Presence</span><span class="md">·</span>
-          <span>Playlist Import</span><span class="md">·</span>
-          <span>No Account</span><span class="md">·</span>
-          <span>Free Forever</span><span class="md">·</span>
+          <span>High-quality audio</span><span class="md">·</span>
+          <span>Lyrics sync</span><span class="md">·</span>
+          <span>YouTube sync</span><span class="md">·</span>
+          <span>Discord presence</span><span class="md">·</span>
+          <span>Playlist import</span><span class="md">·</span>
+          <span>No account</span><span class="md">·</span>
+          <span>Free forever</span><span class="md">·</span>
           <span>18 MB</span><span class="md">·</span>
           <span>Android 8+</span><span class="md">·</span>
         </div>
       </div>
     </div>
 
-    <!-- ══════════════ STATS ══════════════ -->
     <div class="stats-bar">
       <div class="stat reveal">
         <span class="sn" data-target="100">0</span><span class="ss">%</span>
@@ -389,31 +367,28 @@
       <div class="sdiv" aria-hidden="true"></div>
       <div class="stat reveal" data-delay="200">
         <span class="sn" data-target="0">0</span>
-        <p>Accounts needed</p>
+        <p>Accounts required</p>
       </div>
       <div class="sdiv" aria-hidden="true"></div>
       <div class="stat reveal" data-delay="300">
         <span class="sn sw">18 MB</span>
-        <p>App size</p>
+        <p>Lightweight app</p>
       </div>
     </div>
 
-    <!-- ══════════════ FEATURES ══════════════ -->
     <section class="features" id="features" aria-labelledby="feat-h">
       <div class="container">
         <div class="eyebrow"><span class="el"></span>Features<span class="el"></span></div>
-        <h2 class="sh reveal" id="feat-h">Everything you need.<br/>Nothing you don't.</h2>
-        <div class="feat-grid">
+        <h2 class="sh reveal" id="feat-h">Everything that matters.<br />Nothing that gets in the way.</h2>
 
+        <div class="feat-grid">
           <article class="fc fc-wide reveal" data-delay="0">
             <div class="fc-bg"></div><div class="fc-glow"></div><div class="fc-edge"></div>
             <div class="fc-inner">
-              <div class="fi">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22"><path d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"/></svg>
-              </div>
+              <div class="fi">♪</div>
               <div class="fc-text">
-                <h3>Ad-free music — always</h3>
-                <p>Every track, every time. Zero interruptions, zero ads, zero compromise. Music the way it was meant to be heard, from first note to last.</p>
+                <h3>Ad-free listening</h3>
+                <p>Listen without interruptions. No popups, no pre-rolls, no breaking the mood between tracks.</p>
               </div>
             </div>
           </article>
@@ -421,12 +396,10 @@
           <article class="fc reveal" data-delay="80">
             <div class="fc-bg"></div><div class="fc-glow"></div><div class="fc-edge"></div>
             <div class="fc-inner">
-              <div class="fi">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22"><path d="M12 2a3 3 0 013 3v7a3 3 0 01-6 0V5a3 3 0 013-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/></svg>
-              </div>
+              <div class="fi">◉</div>
               <div class="fc-text">
                 <h3>Opus audio</h3>
-                <p>High-fidelity codec. Hear every detail, every layer in your music.</p>
+                <p>Enjoy efficient, high-quality playback designed to sound clean while staying lightweight.</p>
               </div>
             </div>
           </article>
@@ -434,12 +407,10 @@
           <article class="fc reveal" data-delay="160">
             <div class="fc-bg"></div><div class="fc-glow"></div><div class="fc-edge"></div>
             <div class="fc-inner">
-              <div class="fi">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22"><path d="M4 6h16M4 12h10M4 18h7"/></svg>
-              </div>
+              <div class="fi">≡</div>
               <div class="fc-text">
-                <h3>Lyrics sync</h3>
-                <p>Real-time synced lyrics following every beat with pixel precision.</p>
+                <h3>Synced lyrics</h3>
+                <p>Follow every line in real time with lyrics that move with the song.</p>
               </div>
             </div>
           </article>
@@ -447,12 +418,10 @@
           <article class="fc reveal" data-delay="240">
             <div class="fc-bg"></div><div class="fc-glow"></div><div class="fc-edge"></div>
             <div class="fc-inner">
-              <div class="fi">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22"><path d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-              </div>
+              <div class="fi">▶</div>
               <div class="fc-text">
                 <h3>YouTube sync</h3>
-                <p>Stream any YouTube track directly inside Harmber. No switching apps.</p>
+                <p>Play YouTube tracks directly inside the app without jumping between services.</p>
               </div>
             </div>
           </article>
@@ -460,12 +429,10 @@
           <article class="fc reveal" data-delay="320">
             <div class="fc-bg"></div><div class="fc-glow"></div><div class="fc-edge"></div>
             <div class="fc-inner">
-              <div class="fi">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22"><circle cx="12" cy="12" r="10"/><path d="M8.56 2.75c4.37 6.03 6.02 9.42 8.03 17.72m2.54-15.38c-3.72 4.35-8.94 5.66-16.88 5.85m19.5 1.9c-3.5-.93-6.63-.82-8.94 0-2.58.92-5.01 2.86-7.44 6.32"/></svg>
-              </div>
+              <div class="fi">◎</div>
               <div class="fc-text">
                 <h3>Discord presence</h3>
-                <p>Show your track live on your Discord profile automatically.</p>
+                <p>Share what you're listening to automatically on your Discord profile.</p>
               </div>
             </div>
           </article>
@@ -473,33 +440,29 @@
           <article class="fc fc-wide reveal" data-delay="400">
             <div class="fc-bg"></div><div class="fc-glow"></div><div class="fc-edge"></div>
             <div class="fc-inner">
-              <div class="fi">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-              </div>
+              <div class="fi">⇪</div>
               <div class="fc-text">
-                <h3>Playlist import</h3>
-                <p>Import playlists from Spotify, YouTube and more in seconds. No rebuilding, no friction — just start listening immediately.</p>
+                <h3>Fast playlist import</h3>
+                <p>Bring in playlists from Spotify, YouTube, and more so you can start listening right away.</p>
               </div>
             </div>
           </article>
-
         </div>
       </div>
     </section>
 
-    <!-- ══════════════ SCREENSHOTS ══════════════ -->
     <section class="scr-section" id="screenshots" aria-labelledby="scr-h">
       <div class="container">
         <div class="eyebrow"><span class="el"></span>Interface<span class="el"></span></div>
-        <h2 class="sh reveal" id="scr-h">A player that disappears.<br/>The music stays.</h2>
+        <h2 class="sh reveal" id="scr-h">Built to stay out of the way.<br />Made to keep you in the music.</h2>
       </div>
-      <div class="scr-scroll" id="scrScroll">
 
+      <div class="scr-scroll" id="scrScroll">
         <div class="scr-item reveal" data-delay="0">
           <div class="scr-s24">
             <div class="scr-s24-frame">
               <div class="scr-pill"></div>
-              <img src="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/ss1.jpg" alt="Now Playing" loading="lazy" />
+              <img src="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/ss1.jpg" alt="Now Playing screen" loading="lazy" />
               <div class="scr-shine"></div>
               <div class="scr-btn scr-vol-up"></div>
               <div class="scr-btn scr-vol-dn"></div>
@@ -515,7 +478,7 @@
           <div class="scr-s24">
             <div class="scr-s24-frame">
               <div class="scr-pill"></div>
-              <img src="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/ss2.jpg" alt="Library" loading="lazy" />
+              <img src="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/ss2.jpg" alt="Library screen" loading="lazy" />
               <div class="scr-shine"></div>
               <div class="scr-btn scr-vol-up"></div>
               <div class="scr-btn scr-vol-dn"></div>
@@ -531,7 +494,7 @@
           <div class="scr-s24">
             <div class="scr-s24-frame">
               <div class="scr-pill"></div>
-              <img src="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/ss3.jpg" alt="Lyrics" loading="lazy" />
+              <img src="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/ss3.jpg" alt="Lyrics screen" loading="lazy" />
               <div class="scr-shine"></div>
               <div class="scr-btn scr-vol-up"></div>
               <div class="scr-btn scr-vol-dn"></div>
@@ -547,7 +510,7 @@
           <div class="scr-s24">
             <div class="scr-s24-frame">
               <div class="scr-pill"></div>
-              <img src="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/ss5.jpg" alt="Discover" loading="lazy" />
+              <img src="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/ss5.jpg" alt="Discover screen" loading="lazy" />
               <div class="scr-shine"></div>
               <div class="scr-btn scr-vol-up"></div>
               <div class="scr-btn scr-vol-dn"></div>
@@ -563,7 +526,7 @@
           <div class="scr-s24">
             <div class="scr-s24-frame">
               <div class="scr-pill"></div>
-              <img src="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/ss4.jpg" alt="Playlists" loading="lazy" />
+              <img src="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/ss4.jpg" alt="Playlists screen" loading="lazy" />
               <div class="scr-shine"></div>
               <div class="scr-btn scr-vol-up"></div>
               <div class="scr-btn scr-vol-dn"></div>
@@ -574,61 +537,72 @@
           </div>
           <p>Playlists</p>
         </div>
-
       </div>
     </section>
 
-    <!-- ══════════════ DOWNLOAD ══════════════ -->
     <section class="dl-section" id="download" aria-labelledby="dl-h">
       <div class="dl-grid-bg" aria-hidden="true"></div>
       <div class="dl-orb dl-o1" aria-hidden="true"></div>
       <div class="dl-orb dl-o2" aria-hidden="true"></div>
+
       <div class="dl-inner reveal">
-        <div class="eyebrow"><span class="el"></span>Get the app<span class="el"></span></div>
-        <h2 class="dl-h" id="dl-h">Ready to listen?</h2>
-        <p class="dl-sub">Free. No account. No tracking. Install and go.</p>
+        <div class="eyebrow"><span class="el"></span>Download<span class="el"></span></div>
+        <h2 class="dl-h" id="dl-h">Ready to press play?</h2>
+        <p class="dl-sub">Free to download. No account required. Install and start listening.</p>
+
         <div class="dl-card">
           <div class="dl-card-row">
             <div class="dl-icon">
-              <img src="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/logo.png"
-                   alt="Harmber" width="44" height="44" />
+              <img
+                src="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/logo.png"
+                alt="Harmber icon"
+                width="44"
+                height="44"
+              />
             </div>
+
             <div class="dl-info">
               <strong>Harmber</strong>
-              <span>v1.1.3 &nbsp;·&nbsp; ~18 MB &nbsp;·&nbsp; Android 8.0+</span>
+              <span>v1.1.3 · ~18 MB · Android 8.0+</span>
             </div>
-            <a href="https://github.com/suadatbiniqbal/harmber/releases/download/1.1.3/base.apk"
-               class="btn-main btn-glow" id="apk-btn" download>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-                   stroke="currentColor" stroke-width="2.5" aria-hidden="true">
-                <path d="M12 3v13M5 14l7 7 7-7"/><path d="M3 21h18"/>
-              </svg>
+
+            <a
+              href="https://github.com/suadatbiniqbal/harmber/releases/download/1.1.3/base.apk"
+              class="btn-main btn-glow"
+              id="apk-btn"
+              download
+            >
               Download APK
             </a>
           </div>
           <div class="dl-card-shine"></div>
         </div>
+
         <p class="dl-note">
-          By downloading you agree to our
+          By downloading, you agree to our
           <a href="/terms.html">Terms</a> and
           <a href="/privacy.html">Privacy Policy</a>.
         </p>
       </div>
     </section>
-
   </main>
 
-  <!-- ══════════════ FOOTER ══════════════ -->
   <footer class="footer">
     <div class="ft-top">
       <div class="ft-brand">
         <a href="/" class="wordmark">
-          <img src="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/logo.png"
-               alt="Harmber" class="wordmark-img" width="28" height="28" />
+          <img
+            src="https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/main/logo.png"
+            alt="Harmber"
+            class="wordmark-img"
+            width="28"
+            height="28"
+          />
           Harmber
         </a>
-        <p>Stream smarter. Feel deeper.</p>
+        <p>Pure music, zero distractions.</p>
       </div>
+
       <nav class="ft-cols">
         <div class="ft-col">
           <h4>App</h4>
@@ -636,238 +610,25 @@
           <a href="#screenshots">Screenshots</a>
           <a href="#download">Download</a>
         </div>
+
         <div class="ft-col">
           <h4>Legal</h4>
           <a href="/privacy.html">Privacy Policy</a>
           <a href="/terms.html">Terms of Use</a>
         </div>
+
         <div class="ft-col">
           <h4>Links</h4>
           <a href="https://github.com/suadatbiniqbal/harmber" target="_blank" rel="noopener noreferrer">GitHub</a>
         </div>
       </nav>
     </div>
+
     <div class="ft-bottom">
       <p>&copy; 2025 Harmber. All rights reserved.</p>
-      <p>Made with care for music lovers.</p>
+      <p>Made for people who love music.</p>
     </div>
   </footer>
-<!-- ══════════════ MINIMAL MOVIES PROMO ══════════════ -->
-<div id="promoOverlay" style="
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  background: rgba(0,0,0,0.75);
-  backdrop-filter: blur(6px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 12px;
-">
-
-  <div style="
-    position: relative;
-    background: #0a0a0a;
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 16px;
-    max-width: 340px;
-    width: 100%;
-    padding: 24px 20px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.8);
-    font-family: Inter, sans-serif;
-    text-align: center;
-  ">
-
-    <!-- Close -->
-    <button onclick="document.getElementById('promoOverlay').style.display='none'"
-      style="
-        position:absolute;
-        top:10px;
-        right:10px;
-        width:28px;
-        height:28px;
-        border-radius:50%;
-        border:1px solid rgba(255,255,255,0.1);
-        background:transparent;
-        color:#888;
-        cursor:pointer;
-        font-size:14px;
-      ">✕</button>
-
-    <!-- Badge -->
-    <div style="
-      display:inline-block;
-      padding:4px 10px;
-      border-radius:999px;
-      font-size:10px;
-      letter-spacing:0.08em;
-      text-transform:uppercase;
-      border:1px solid rgba(255,255,255,0.15);
-      color:#aaa;
-      margin-bottom:16px;
-    ">
-      Free Streaming
-    </div>
-
-    <!-- Title -->
-    <h2 style="
-      color:#fff;
-      font-size:18px;
-      font-weight:600;
-      margin-bottom:10px;
-    ">
-      Harmber Movies
-    </h2>
-
-    <!-- Description -->
-    <p style="
-      color:#888;
-      font-size:13px;
-      line-height:1.5;
-      margin-bottom:20px;
-    ">
-      Watch movies, anime, and series in a clean and fast experience.
-    </p>
-
-    <!-- Button -->
-    <button style="
-      width:100%;
-      padding:10px;
-      border-radius:10px;
-      border:none;
-      background:#fff;
-      color:#000;
-      font-weight:600;
-      font-size:13px;
-      cursor:pointer;
-      transition:0.2s;
-    "
-    onmouseover="this.style.opacity='0.8'"
-    onmouseout="this.style.opacity='1'">
-      Explore App
-    </button>
-
-  </div>
-</div>
-
-      <!-- Heading -->
-      <h2 id="promoTitle" style="
-        font-size: clamp(22px, 5vw, 28px); font-weight: 800;
-        line-height: 1.2; color: #ffffff;
-        margin: 0 0 12px; position: relative; z-index: 2;
-        font-family: inherit;
-      ">
-        Download Our Free<br/>
-        <span style="
-          background: linear-gradient(90deg, #a78bfa, #f472b6, #fb923c);
-          -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-          background-clip: text;
-        ">Movies Streaming App</span>
-      </h2>
-
-      <!-- Description -->
-      <p style="
-        font-size: 14px; color: rgba(255,255,255,0.55);
-        line-height: 1.6; margin: 0 0 24px;
-        position: relative; z-index: 2; font-family: inherit;
-      ">
-        Over <strong style="color:rgba(255,255,255,0.85);">100,000 movies</strong> and
-        <strong style="color:rgba(255,255,255,0.85);">70,000 web series</strong> in high quality —
-        completely free with <strong style="color:rgba(255,255,255,0.85);">zero annoying ads</strong>.
-      </p>
-
-      <!-- Stats row -->
-      <div style="
-        display: grid; grid-template-columns: repeat(3,1fr);
-        gap: 10px; margin-bottom: 28px;
-        position: relative; z-index: 2;
-      ">
-        <div style="
-          background: rgba(255,255,255,0.04);
-          border: 1px solid rgba(255,255,255,0.07);
-          border-radius: 12px; padding: 12px 8px; text-align: center;
-        ">
-          <div style="font-size:18px;font-weight:800;color:#a78bfa;font-family:inherit;">100K+</div>
-          <div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px;font-family:inherit;">Movies</div>
-        </div>
-        <div style="
-          background: rgba(255,255,255,0.04);
-          border: 1px solid rgba(255,255,255,0.07);
-          border-radius: 12px; padding: 12px 8px; text-align: center;
-        ">
-          <div style="font-size:18px;font-weight:800;color:#f472b6;font-family:inherit;">70K+</div>
-          <div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px;font-family:inherit;">Web Series</div>
-        </div>
-        <div style="
-          background: rgba(255,255,255,0.04);
-          border: 1px solid rgba(255,255,255,0.07);
-          border-radius: 12px; padding: 12px 8px; text-align: center;
-        ">
-          <div style="font-size:18px;font-weight:800;color:#34d399;font-family:inherit;">0 Ads</div>
-          <div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px;font-family:inherit;">Zero Ads</div>
-        </div>
-      </div>
-
-      <!-- CTA Button -->
-      <a
-        href="https://download.harmber.xyz/"
-        target="_blank" rel="noopener noreferrer"
-        onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 32px rgba(124,58,237,0.6),0 1px 0 rgba(255,255,255,0.12) inset'"
-        onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 24px rgba(124,58,237,0.45),0 1px 0 rgba(255,255,255,0.12) inset'"
-        style="
-          display: flex; align-items: center; justify-content: center; gap: 8px;
-          width: 100%; padding: 14px 24px;
-          background: linear-gradient(135deg, #7c3aed, #a855f7, #ec4899);
-          border-radius: 14px; color: #ffffff;
-          font-size: 15px; font-weight: 700; text-decoration: none;
-          font-family: inherit; letter-spacing: 0.01em;
-          box-shadow: 0 4px 24px rgba(124,58,237,0.45), 0 1px 0 rgba(255,255,255,0.12) inset;
-          transition: transform 0.2s, box-shadow 0.2s;
-          position: relative; z-index: 2;
-          box-sizing: border-box;
-        ">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2.5" aria-hidden="true">
-          <path d="M12 3v13M5 14l7 7 7-7"/><path d="M3 21h18"/>
-        </svg>
-        Download Free App
-      </a>
-
-      <!-- Skip -->
-      <p style="
-        text-align:center; margin:14px 0 0;
-        font-size:12px; position:relative; z-index:2; font-family:inherit;
-      ">
-        <button
-          onclick="document.getElementById('promoOverlay').style.display='none'"
-          onmouseover="this.style.color='rgba(255,255,255,0.6)'"
-          onmouseout="this.style.color='rgba(255,255,255,0.3)'"
-          style="
-            background:none; border:none; padding:0; cursor:pointer;
-            color:rgba(255,255,255,0.3); font-size:12px;
-            text-decoration:underline; text-underline-offset:2px;
-            font-family:inherit; transition:color 0.2s;
-          ">No thanks, continue to Harmber</button>
-      </p>
-
-    </div>
-  </div>
-
-  <!-- Dialog-only keyframe animations -->
-  <style>
-    @keyframes promoOverlayIn {
-      from { opacity: 0; }
-      to   { opacity: 1; }
-    }
-    @keyframes promoDialogUp {
-      from { opacity: 0; transform: translateY(40px) scale(0.95); }
-      to   { opacity: 1; transform: translateY(0)    scale(1);    }
-    }
-    @keyframes promoPulse {
-      0%, 100% { transform: scale(1);   opacity: 1;   }
-      50%       { transform: scale(1.4); opacity: 0.6; }
-    }
-  </style>
 
   <script src="app.js" defer></script>
 </body>
