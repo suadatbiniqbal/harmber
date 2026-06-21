@@ -1,0 +1,106 @@
+{
+  "project_info": {
+    "project_number": "227933260927",
+    "firebase_url": "https://harmber-default-rtdb.firebaseio.com",
+    "project_id": "harmber",
+    "storage_bucket": "harmber.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:227933260927:android:5531cf42554b693338034a",
+        "android_client_info": {
+          "package_name": "com.harmber.admin"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyApubO067JYW1ih6AUii86Nu0jC6WpFcVI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:227933260927:android:0c101c91d898b86738034a",
+        "android_client_info": {
+          "package_name": "com.harmber.suadat"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyApubO067JYW1ih6AUii86Nu0jC6WpFcVI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:227933260927:android:0c101c91d898b86738034a",
+        "android_client_info": {
+          "package_name": "com.harmber2.suadat"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyApubO067JYW1ih6AUii86Nu0jC6WpFcVI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:227933260927:android:0c101c91d898b86738034a",
+        "android_client_info": {
+          "package_name": "com.harmber2.suadat.debug"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyApubO067JYW1ih6AUii86Nu0jC6WpFcVI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:227933260927:android:d0902085d37eb89738034a",
+        "android_client_info": {
+          "package_name": "com.movies.harmber"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyApubO067JYW1ih6AUii86Nu0jC6WpFcVI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

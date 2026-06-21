@@ -1,0 +1,28 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="512dp"
+    android:height="512dp"
+    android:viewportWidth="512"
+    android:viewportHeight="512">
+
+    <!-- Black background -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M0,0H512V512H0Z" />
+
+    <!-- White waveform -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="16"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="
+            M36,256
+            C78,256 102,250 132,230
+            C160,212 184,222 205,285
+            C220,330 238,360 255,325
+            C272,290 285,120 305,150
+            C325,180 330,350 355,300
+            C378,250 395,210 420,230
+            C445,250 465,256 476,256" />
+
+</vector>
