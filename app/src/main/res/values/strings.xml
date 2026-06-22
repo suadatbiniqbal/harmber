@@ -595,6 +595,9 @@ InnerTune's Weblate instead. -->
     <string name="audio_quality_auto">Auto</string>
     <string name="audio_quality_high">High</string>
     <string name="audio_quality_low">Low</string>
+    <string name="audio_quality_lossless">Lossless</string>
+    <string name="audio_quality_opus">Opus</string>
+    <string name="lossless_fallback_opus">Lossless unavailable, playing Opus</string>
     <string name="low_data_mode_title">Low Data Mode</string>
     <string name="low_data_mode_description">Reduces mobile data usage by using low-quality streams
         and disabling playback cache, canvas, and background lyrics preloading on metered networks</string>

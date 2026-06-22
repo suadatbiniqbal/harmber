@@ -141,3 +141,16 @@
 # Keep GlanceAppWidget and its receiver
 -keep class * extends androidx.glance.appwidget.GlanceAppWidget { *; }
 -keep class * extends androidx.glance.appwidget.GlanceAppWidgetReceiver { *; }
+
+## Protobuf / Firebase In-App Messaging Fix
+# Prevents "Field messages_ for ... not found" crashes by keeping Protobuf Lite fields
+-keep class com.google.protobuf.GeneratedMessageLite { *; }
+-keep class * extends com.google.protobuf.GeneratedMessageLite { *; }
+-keep class com.google.firebase.inappmessaging.** { *; }
+-dontwarn com.google.protobuf.**
+
+## Google Type (for Firebase/Protobuf)
+-dontwarn com.google.type.Date$Builder
+-dontwarn com.google.type.Date
+-dontwarn com.google.type.TimeOfDay$Builder
+-dontwarn com.google.type.TimeOfDay

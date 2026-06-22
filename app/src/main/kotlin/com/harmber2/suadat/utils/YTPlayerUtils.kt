@@ -8,9 +8,9 @@
 package com.harmber2.suadat.utils
 
 import android.net.ConnectivityManager
+import android.widget.Toast
 import androidx.media3.common.PlaybackException
-import io.ktor.client.plugins.ClientRequestException
-import io.ktor.http.HttpStatusCode
+import com.harmber2.suadat.App
 import com.harmber2.suadat.constants.AudioQuality
 import com.harmber2.suadat.constants.PlayerStreamClient
 import com.harmber2.suadat.innertube.NewPipeUtils
@@ -35,7 +35,12 @@ import com.harmber2.suadat.innertube.models.YouTubeClient.Companion.WEB
 import com.harmber2.suadat.innertube.models.YouTubeClient.Companion.WEB_CREATOR
 import com.harmber2.suadat.innertube.models.YouTubeClient.Companion.WEB_REMIX
 import com.harmber2.suadat.innertube.models.response.PlayerResponse
+import com.harmber2.suadat.playback.qobuz.QobuzManager
 import com.harmber2.suadat.utils.potoken.BotGuardTokenGenerator
+import io.ktor.client.plugins.ClientRequestException
+import io.ktor.http.HttpStatusCode
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
 import timber.log.Timber
@@ -450,6 +455,45 @@ object YTPlayerUtils {
         networkMetered: Boolean? = null,
     ): Result<PlaybackData> =
         runCatching {
+            if (audioQuality == AudioQuality.LOSSLESS) {
+                val metadata =
+                    playerResponseForPlaybackOnce(
+                        videoId = videoId,
+                        playlistId = playlistId,
+                        audioQuality = AudioQuality.LOW,
+                        connectivityManager = connectivityManager,
+                        preferredStreamClient = preferredStreamClient,
+                        networkMetered = networkMetered,
+                    )
+
+                val qobuzData =
+                    QobuzManager.tryQobuz(
+                        title = metadata.videoDetails?.title ?: "",
+                        artist = metadata.videoDetails?.author ?: "",
+                        durationSeconds = metadata.videoDetails?.lengthSeconds?.toIntOrNull(),
+                    )
+
+                if (qobuzData != null) {
+                    return@runCatching qobuzData.copy(
+                        audioConfig = metadata.audioConfig,
+                        videoDetails = metadata.videoDetails,
+                        playbackTracking = metadata.playbackTracking,
+                    )
+                } else {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(App.instance, "Lossless unavailable, playing Opus", Toast.LENGTH_SHORT).show()
+                    }
+                    return@runCatching playerResponseForPlaybackOnce(
+                        videoId = videoId,
+                        playlistId = playlistId,
+                        audioQuality = AudioQuality.OPUS,
+                        connectivityManager = connectivityManager,
+                        preferredStreamClient = preferredStreamClient,
+                        networkMetered = networkMetered,
+                    )
+                }
+            }
+
             val attempts =
                 when (audioQuality) {
                     AudioQuality.HIGHEST -> listOf(AudioQuality.HIGHEST, AudioQuality.HIGH, AudioQuality.LOW)
@@ -1101,7 +1145,7 @@ object YTPlayerUtils {
             when (effectiveQuality) {
                 AudioQuality.LOW -> 70_000
                 AudioQuality.HIGH -> 160_000
-                AudioQuality.HIGHEST -> 320_000
+                AudioQuality.HIGHEST, AudioQuality.LOSSLESS, AudioQuality.OPUS -> 320_000
                 AudioQuality.AUTO -> null
             }
 

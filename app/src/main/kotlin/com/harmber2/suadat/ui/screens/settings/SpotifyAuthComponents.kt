@@ -23,6 +23,8 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -135,7 +137,6 @@ fun SpotifyLoginSheet(
     onDismiss: () -> Unit,
     onCookiesCaptured: (spDc: String, spKey: String) -> Unit,
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var webView by remember { mutableStateOf<WebView?>(null) }
     var mainWebView by remember { mutableStateOf<WebView?>(null) }
     var captured by remember { mutableStateOf(false) }
@@ -169,139 +170,138 @@ fun SpotifyLoginSheet(
         }
     }
 
-    val content: @Composable () -> Unit = {
-        Column(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight()
-                    .padding(horizontal = 20.dp)
-                    .padding(bottom = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false,
+            decorFitsSystemWindows = false
+        )
+    ) {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.surface,
         ) {
-            Text(
-                text = stringResource(R.string.spotify_login_title),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-            )
-            Text(
-                text = stringResource(R.string.spotify_waiting_for_login),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            AndroidView(
+            Column(
                 modifier =
                     Modifier
+                        .fillMaxSize()
+                        .padding(bottom = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Row(
+                    modifier = Modifier
                         .fillMaxWidth()
-                        .weight(1f)
-                        .clip(MaterialTheme.shapes.large),
-                factory = { context ->
-                    val container = FrameLayout(context)
-                    val spotifyWebView =
-                        WebView(context).apply {
-                            val cookieManager = CookieManager.getInstance()
-                            cookieManager.setAcceptCookie(true)
-                            cookieManager.setAcceptThirdPartyCookies(this, true)
-                            configureSpotifyLoginWebView()
+                        .windowInsetsPadding(WindowInsets.statusBars)
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    androidx.compose.material3.IconButton(onClick = onDismiss) {
+                        Icon(painterResource(R.drawable.close), contentDescription = null)
+                    }
+                    Column(modifier = Modifier.padding(start = 8.dp)) {
+                        Text(
+                            text = stringResource(R.string.spotify_login_title),
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                        )
+                        Text(
+                            text = stringResource(R.string.spotify_waiting_for_login),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+                AndroidView(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                    factory = { context ->
+                        val container = FrameLayout(context)
+                        val spotifyWebView =
+                            WebView(context).apply {
+                                val cookieManager = CookieManager.getInstance()
+                                cookieManager.setAcceptCookie(true)
+                                cookieManager.setAcceptThirdPartyCookies(this, true)
+                                configureSpotifyLoginWebView()
 
-                            fun captureCookies(url: String?): Boolean {
-                                if (captured) return true
-                                val cookies = readSpotifyCookies(cookieManager, url)
-                                val spDc = cookies["sp_dc"].orEmpty()
-                                if (spDc.isBlank()) return false
-                                captured = true
-                                cookieManager.flush()
-                                onCookiesCaptured(spDc, cookies["sp_key"].orEmpty())
-                                return true
-                            }
-
-                            webViewClient =
-                                object : WebViewClient() {
-                                    override fun shouldOverrideUrlLoading(
-                                        view: WebView,
-                                        request: WebResourceRequest,
-                                    ): Boolean =
-                                        shouldOverrideSpotifyLoginUrl(
-                                            view = view,
-                                            url = request.url?.toString(),
-                                            captureCookies = { url -> captureCookies(url) },
-                                        )
-
-                                    @Deprecated("Deprecated in Java")
-                                    override fun shouldOverrideUrlLoading(
-                                        view: WebView,
-                                        url: String?,
-                                    ): Boolean =
-                                        shouldOverrideSpotifyLoginUrl(
-                                            view = view,
-                                            url = url,
-                                            captureCookies = { targetUrl -> captureCookies(targetUrl) },
-                                        )
-
-                                    override fun onPageStarted(
-                                        view: WebView,
-                                        url: String?,
-                                        favicon: android.graphics.Bitmap?,
-                                    ) {
-                                        captureCookies(url)
-                                    }
-
-                                    override fun onPageFinished(
-                                        view: WebView,
-                                        url: String?,
-                                    ) {
-                                        captureCookies(url)
-                                    }
+                                fun captureCookies(url: String?): Boolean {
+                                    if (captured) return true
+                                    val cookies = readSpotifyCookies(cookieManager, url)
+                                    val spDc = cookies["sp_dc"].orEmpty()
+                                    if (spDc.isBlank()) return false
+                                    captured = true
+                                    cookieManager.flush()
+                                    onCookiesCaptured(spDc, cookies["sp_key"].orEmpty())
+                                    return true
                                 }
-                            webChromeClient =
-                                SpotifyLoginWebChromeClient(
-                                    container = container,
-                                    parentWebView = this,
-                                    captureCookies = { url -> captureCookies(url) },
-                                    onActiveWebViewChanged = { activeWebView -> webView = activeWebView },
-                                )
-                            webView = this
-                            mainWebView = this
-                            resetAuthWebViewSession(context, this) {
-                                loadUrl(SpotifyAuth.LOGIN_URL)
-                            }
-                        }
-                    container.addView(
-                        spotifyWebView,
-                        FrameLayout.LayoutParams(
-                            ViewGroup.LayoutParams.MATCH_PARENT,
-                            ViewGroup.LayoutParams.MATCH_PARENT,
-                        ),
-                    )
-                    container
-                },
-                update = {
-                    webView = webView ?: mainWebView
-                },
-            )
-        }
-    }
 
-    if (context.isTvDevice()) {
-        Dialog(
-            onDismissRequest = onDismiss,
-            properties = DialogProperties(usePlatformDefaultWidth = false)
-        ) {
-            Surface(
-                modifier = Modifier.fillMaxSize(),
-                color = MaterialTheme.colorScheme.surface,
-                content = content
-            )
+                                webViewClient =
+                                    object : WebViewClient() {
+                                        override fun shouldOverrideUrlLoading(
+                                            view: WebView,
+                                            request: WebResourceRequest,
+                                        ): Boolean =
+                                            shouldOverrideSpotifyLoginUrl(
+                                                view = view,
+                                                url = request.url?.toString(),
+                                                captureCookies = { url -> captureCookies(url) },
+                                            )
+
+                                        @Deprecated("Deprecated in Java")
+                                        override fun shouldOverrideUrlLoading(
+                                            view: WebView,
+                                            url: String?,
+                                        ): Boolean =
+                                            shouldOverrideSpotifyLoginUrl(
+                                                view = view,
+                                                url = url,
+                                                captureCookies = { targetUrl -> captureCookies(targetUrl) },
+                                            )
+
+                                        override fun onPageStarted(
+                                            view: WebView,
+                                            url: String?,
+                                            favicon: android.graphics.Bitmap?,
+                                        ) {
+                                            captureCookies(url)
+                                        }
+
+                                        override fun onPageFinished(
+                                            view: WebView,
+                                            url: String?,
+                                        ) {
+                                            captureCookies(url)
+                                        }
+                                    }
+                                webChromeClient =
+                                    SpotifyLoginWebChromeClient(
+                                        container = container,
+                                        parentWebView = this,
+                                        captureCookies = { url -> captureCookies(url) },
+                                        onActiveWebViewChanged = { activeWebView -> webView = activeWebView },
+                                    )
+                                webView = this
+                                mainWebView = this
+                                resetAuthWebViewSession(context, this) {
+                                    loadUrl(SpotifyAuth.LOGIN_URL)
+                                }
+                            }
+                        container.addView(
+                            spotifyWebView,
+                            FrameLayout.LayoutParams(
+                                ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.MATCH_PARENT,
+                            ),
+                        )
+                        container
+                    },
+                    update = {
+                        webView = webView ?: mainWebView
+                    },
+                )
+            }
         }
-    } else {
-        ModalBottomSheet(
-            modifier = Modifier.fillMaxSize(),
-            onDismissRequest = onDismiss,
-            sheetState = sheetState,
-            shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
-            containerColor = MaterialTheme.colorScheme.surface,
-            content = { content() }
-        )
     }
 }
 

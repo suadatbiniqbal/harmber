@@ -582,7 +582,7 @@ fun Thumbnail(
                                             contentAlignment = Alignment.Center,
                                         ) {
                                             Icon(
-                                                painter = painterResource(R.drawable.app_icon_small),
+                                                painter = painterResource(R.drawable.harmber_logo_custom),
                                                 contentDescription = stringResource(R.string.hide_player_thumbnail),
                                                 tint = textBackgroundColor.copy(alpha = 0.7f),
                                                 modifier = Modifier.size(120.dp),

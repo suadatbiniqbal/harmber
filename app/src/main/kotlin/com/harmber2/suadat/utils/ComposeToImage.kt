@@ -693,7 +693,7 @@ object ComposeToImage {
         val baseSize = minOf(canvasWidth, canvasHeight).toFloat()
         val logoSize = (baseSize * 0.045f).toInt()
 
-        val rawLogo = context.getDrawable(R.drawable.small_icon)?.toBitmap(logoSize, logoSize)
+        val rawLogo = context.getDrawable(R.drawable.harmber_logo_custom)?.toBitmap(logoSize, logoSize)
         val logo =
             rawLogo?.let { source ->
                 val colored = Bitmap.createBitmap(source.width, source.height, Bitmap.Config.ARGB_8888)

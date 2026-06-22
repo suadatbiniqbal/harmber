@@ -1,0 +1,66 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build All Variants
+        run: |
+          ./gradlew assembleRelease --stacktrace
+
+      - name: Prepare APKs
+        run: |
+          mkdir -p release_apks
+          # Find all release APKs and copy them with better names
+          # They are usually in app/build/outputs/apk/<flavor>/release/
+          find app/build/outputs/apk -name "*release.apk" -exec cp {} release_apks/ \;
+          cd release_apks
+          # Clean up names: remove "app-" prefix and "-release" suffix if they exist
+          for f in *.apk; do
+            new_name=$(echo "$f" | sed 's/^app-//' | sed 's/-release.apk$/.apk/')
+            mv "$f" "Harmber-${new_name}"
+          done
+          ls -lh
+
+      - name: Generate Release Notes
+        run: |
+          # Try to get changes since last tag, fallback to all commits if no tags exist
+          if git describe --tags --abbrev=0 > /dev/null 2>&1; then
+            git log $(git describe --tags --abbrev=0 --always)^..HEAD --oneline --pretty=format:"* %s" > CHANGELOG.md
+          else
+            git log --oneline --pretty=format:"* %s" > CHANGELOG.md
+          fi
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: release_apks/*.apk
+          body_path: CHANGELOG.md
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

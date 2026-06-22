@@ -435,7 +435,7 @@ class AboutViewModel
                             id = "discord",
                             iconResId = R.drawable.discord,
                             labelResId = R.string.about_content_desc_discord,
-                            url = "https://discord.gg/wsuRK2pN8J",
+                            url = "https://discord.gg/FUQNZpN9WG",
                         ),
                     ),
                 leadDeveloper =
@@ -456,7 +456,7 @@ class AboutViewModel
                                     id = "discord",
                                     iconResId = R.drawable.discord,
                                     labelResId = R.string.about_content_desc_discord,
-                                    url = "https://discord.gg/wsuRK2pN8J",
+                                    url = "https://discord.gg/FUQNZpN9WG",
                                 ),
                             ),
                     ),

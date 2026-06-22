@@ -234,7 +234,7 @@ fun AddToPlaylistDialog(
                             isEditable = true
                         ),
                         songCount = sp.tracks?.total ?: 0,
-                        songThumbnails = emptyList()
+                        songThumbnails = sp.images.mapNotNull { it.url }
                     )
                 }
             } else emptyList()

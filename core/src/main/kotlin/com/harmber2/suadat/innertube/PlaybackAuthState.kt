@@ -1,0 +1,101 @@
+/*
+ * harmber (2026)
+ * © Rukamori — github.com/suadatbiniqbal
+ * GPL-3.0 License | Contributors: see git history
+ * Do not remove or alter this notice. - Per GPL-3.0 Section 4 & Section 5
+ */
+
+package com.harmber2.suadat.innertube
+
+import com.harmber2.suadat.innertube.models.YouTubeClient
+import com.harmber2.suadat.innertube.utils.hasYouTubeLoginCookie
+import com.harmber2.suadat.innertube.utils.sha1
+import java.util.Locale
+
+data class PlaybackAuthState(
+    val cookie: String? = null,
+    val visitorData: String? = null,
+    val dataSyncId: String? = null,
+    val poToken: String? = null,
+    val poTokenGvs: String? = null,
+    val poTokenPlayer: String? = null,
+    val webClientPoTokenEnabled: Boolean = false,
+) {
+    val hasLoginCookie: Boolean
+        get() = hasYouTubeLoginCookie(cookie)
+
+    val hasPlaybackLoginContext: Boolean
+        get() = hasLoginCookie && !dataSyncId.isNullOrBlank()
+
+    val sessionId: String?
+        get() = if (hasPlaybackLoginContext) dataSyncId else visitorData
+
+    val fingerprint: String
+        get() =
+            sha1(
+                listOf(
+                    cookie.orEmpty(),
+                    visitorData.orEmpty(),
+                    dataSyncId.orEmpty(),
+                    poToken.orEmpty(),
+                    poTokenGvs.orEmpty(),
+                    poTokenPlayer.orEmpty(),
+                    webClientPoTokenEnabled.toString(),
+                ).joinToString(separator = "\u0000"),
+            )
+
+    fun normalized(): PlaybackAuthState =
+        copy(
+            cookie = cookie.normalizeAuthValue(),
+            visitorData = visitorData.normalizeAuthValue(),
+            dataSyncId = dataSyncId.normalizeDataSyncId(),
+            poToken = poToken.normalizeAuthValue(),
+            poTokenGvs = poTokenGvs.normalizeAuthValue(),
+            poTokenPlayer = poTokenPlayer.normalizeAuthValue(),
+        )
+
+    fun resolvePlayerPoToken(
+        client: YouTubeClient,
+        explicitPoToken: String? = null,
+    ): String? {
+        val explicit = explicitPoToken.normalizeAuthValue()
+        if (explicit != null) return explicit
+        if (!webClientPoTokenEnabled) return null
+        if (!needsServiceIntegrity(client)) return null
+        return poTokenPlayer ?: poToken
+    }
+
+    fun resolveGvsPoToken(client: YouTubeClient? = null): String? {
+        if (client != null && !needsServiceIntegrity(client)) return null
+        if (!webClientPoTokenEnabled) return null
+        return poTokenGvs ?: poToken
+    }
+
+    companion object {
+        val EMPTY = PlaybackAuthState()
+
+        internal fun needsServiceIntegrity(client: YouTubeClient): Boolean {
+            val name = client.clientName.uppercase(Locale.US)
+            return name == "WEB" ||
+                name == "WEB_REMIX" ||
+                name == "WEB_CREATOR" ||
+                name == "MWEB" ||
+                name == "WEB_EMBEDDED_PLAYER" ||
+                name == "TVHTML5" ||
+                name == "TVHTML5_SIMPLY_EMBEDDED_PLAYER" ||
+                name == "TVHTML5_SIMPLY"
+        }
+    }
+}
+
+private fun String?.normalizeAuthValue(): String? {
+    val trimmed = this?.trim()
+    return trimmed?.takeIf { it.isNotEmpty() && !it.equals("null", ignoreCase = true) }
+}
+
+private fun String?.normalizeDataSyncId(): String? {
+    val normalized = this.normalizeAuthValue() ?: return null
+    return normalized.takeIf { !it.contains("||") }
+        ?: normalized.takeIf { it.endsWith("||") }?.substringBefore("||")
+        ?: normalized.substringAfter("||")
+}

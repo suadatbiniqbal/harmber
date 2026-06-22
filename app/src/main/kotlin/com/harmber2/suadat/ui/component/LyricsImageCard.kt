@@ -366,7 +366,7 @@ fun LyricsImageCard(
                             contentAlignment = Alignment.Center,
                         ) {
                             Image(
-                                painter = painterResource(id = R.drawable.app_icon_small),
+                                painter = painterResource(id = R.drawable.harmber_logo_custom),
                                 contentDescription = null,
                                 modifier = Modifier.size(15.dp),
                                 colorFilter =

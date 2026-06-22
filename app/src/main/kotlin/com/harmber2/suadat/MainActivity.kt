@@ -9,16 +9,14 @@
 
 package com.harmber2.suadat
 
-import com.harmber2.suadat.R
+import com.harmber2.suadat.utils.isTvDevice
 
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.ComponentName
-import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
-import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -406,7 +404,7 @@ class MainActivity : ComponentActivity() {
             bindService(
                 Intent(this, MusicService::class.java),
                 serviceConnection,
-                Context.BIND_AUTO_CREATE,
+                BIND_AUTO_CREATE,
             )
         playPendingDeepLinkQueueIfReady()
     }
@@ -415,7 +413,7 @@ class MainActivity : ComponentActivity() {
         if (!isMusicServiceBound) return
         try {
             unbindService(serviceConnection)
-        } catch (e: IllegalArgumentException) {
+        } catch (_: IllegalArgumentException) {
         } catch (e: Exception) {
             reportException(e)
         } finally {
@@ -622,7 +620,7 @@ class MainActivity : ComponentActivity() {
                             .verticalScroll(rememberScrollState()),
                 ) {
                     val notes = releaseNotesState.value
-                    if (notes != null && notes.isNotBlank()) {
+                    if (notes?.isNotBlank() == true) {
                         MarkdownText(
                             markdown = notes,
                             modifier =
@@ -731,7 +729,7 @@ class MainActivity : ComponentActivity() {
                         try {
                             val colorString = customThemeColorValue.removePrefix("#")
                             Color(android.graphics.Color.parseColor("#$colorString"))
-                        } catch (e: Exception) {
+                        } catch (_: Exception) {
                             DefaultThemeColor
                         }
                     } else {
@@ -811,7 +809,6 @@ class MainActivity : ComponentActivity() {
                     val windowsInsets = WindowInsets.systemBars
                     val topInset = with(density) { windowsInsets.getTop(density).toDp() }
                     val bottomInset = with(density) { windowsInsets.getBottom(density).toDp() }
-                    val bottomInsetDp = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()
 
                     val isTvDevice = remember { applicationContext.isTvDevice() }
                     val useRail =
@@ -824,26 +821,19 @@ class MainActivity : ComponentActivity() {
                     val coroutineScope = rememberCoroutineScope()
                     val homeViewModel: HomeViewModel = hiltViewModel()
                     val networkBannerViewModel: NetworkBannerViewModel = hiltViewModel()
-                    val newsViewModel: NewsViewModel = hiltViewModel()
                     val allLocalItems by homeViewModel.allLocalItems.collectAsState()
                     val allYtItems by homeViewModel.allYtItems.collectAsState()
                     val networkBannerState by networkBannerViewModel.bannerState.collectAsStateWithLifecycle()
-                    val hasUnreadNews by newsViewModel.hasUnreadNews.collectAsStateWithLifecycle()
                     val navBackStackEntry by navController.currentBackStackEntryAsState()
-                    val (previousTab) = rememberSaveable { mutableStateOf("home") }
                     val currentRoute = navBackStackEntry?.destination?.route
+                    var previousTab by rememberSaveable { mutableStateOf("home") }
                     val onlineSearchViewModel: OnlineSearchViewModel? =
                         if (currentRoute?.startsWith(OnlineSearchResultRoutePrefix) == true && navBackStackEntry != null) {
                             hiltViewModel(navBackStackEntry!!)
                         } else {
                             null
                         }
-                    val onlineSearchSort =
-                        if (onlineSearchViewModel != null) {
-                            onlineSearchViewModel.sort.collectAsStateWithLifecycle().value
-                        } else {
-                            OnlineSearchSort.DEFAULT
-                        }
+                    val onlineSearchSort = onlineSearchViewModel?.sort?.collectAsStateWithLifecycle()?.value ?: OnlineSearchSort.DEFAULT
                     val isYearInMusicScreen = currentRoute?.startsWith("year_in_music") == true
 
                     val navigationItems =
@@ -1050,7 +1040,6 @@ class MainActivity : ComponentActivity() {
 
                     LaunchedEffect(isYearInMusicScreen, playerConnection) {
                         val connection = playerConnection ?: return@LaunchedEffect
-                        val player = connection.player
 
                         if (isYearInMusicScreen) {
                             if (yearInMusicSavedPlayerAnchor == -1) {
@@ -1179,6 +1168,10 @@ class MainActivity : ComponentActivity() {
                         }
 
                         previousRoute = currentRoute
+
+                        if (navigationItems.fastAny { it.route == currentRoute }) {
+                            previousTab = currentRoute!!
+                        }
 
                         if ((
                                 currentRoute?.startsWith("artist/") == true ||
@@ -1336,7 +1329,7 @@ class MainActivity : ComponentActivity() {
                     var showSpotifyConnectDialog by remember { mutableStateOf(false) }
 
                     LaunchedEffect(Unit) {
-                        kotlinx.coroutines.delay(2000)
+                        delay(2000)
 
                         val isAuthenticated = withContext(Dispatchers.IO) {
                             !dataStore[SpotifySpDcKey].isNullOrBlank()
@@ -1455,15 +1448,6 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
-                    val currentTitleRes =
-                        remember(navBackStackEntry) {
-                            when (navBackStackEntry?.destination?.route) {
-                                Screens.Home.route -> R.string.home
-                                Screens.Search.route -> R.string.search
-                                Screens.Library.route -> R.string.filter_library
-                                else -> null
-                            }
-                        }
                     var showCreatePlaylistDialog by rememberSaveable { mutableStateOf(false) }
 
                     val haptic = LocalHapticFeedback.current
@@ -1489,8 +1473,8 @@ class MainActivity : ComponentActivity() {
                         LocalDownloadUtil provides downloadUtil,
                         LocalShimmerTheme provides ShimmerTheme,
                         LocalSyncUtils provides syncUtils,
-                        com.harmber2.suadat.ui.component.LocalBottomSheetPageState provides bottomSheetPageState,
-                        com.harmber2.suadat.ui.component.LocalMenuState provides menuState,
+                        LocalBottomSheetPageState provides bottomSheetPageState,
+                        LocalMenuState provides menuState,
                     ) {
                         if (showCreatePlaylistDialog) {
                             CreatePlaylistDialog(
@@ -1658,10 +1642,10 @@ class MainActivity : ComponentActivity() {
                                                     }
                                                 },
                                                 actions = {
-                                                    IconButton(onClick = { uriHandler.openUri("https://discord.gg/XF2fpb9rTq") }) {
+                                                    IconButton(onClick = { uriHandler.openUri("https://discord.gg/FUQNZpN9WG") }) {
                                                         Icon(
                                                             painter = painterResource(R.drawable.discord),
-                                                            contentDescription = "Discord",
+                                                            contentDescription = "Harmber Discord",
                                                             modifier = Modifier.size(24.dp)
                                                         )
                                                     }
@@ -2033,11 +2017,11 @@ class MainActivity : ComponentActivity() {
                                                                         }
 
                                                                         is Artist -> {
-                                                                            Unit
+                                                                            // do nothing
                                                                         }
 
                                                                         is Playlist -> {
-                                                                            Unit
+                                                                            // do nothing
                                                                         }
                                                                     }
                                                                 } else {
@@ -2111,33 +2095,6 @@ class MainActivity : ComponentActivity() {
                                         .fillMaxSize()
                                         .nestedScroll(searchBarScrollBehavior.nestedScrollConnection),
                             ) {
-                                var transitionDirection =
-                                    AnimatedContentTransitionScope.SlideDirection.Left
-
-                                if (navigationItems.fastAny { it.route == navBackStackEntry?.destination?.route }) {
-                                    if (navigationItems.fastAny { it.route == previousTab }) {
-                                        val curIndex =
-                                            navigationItems.indexOf(
-                                                navigationItems.fastFirstOrNull {
-                                                    it.route == navBackStackEntry?.destination?.route
-                                                },
-                                            )
-
-                                        val prevIndex =
-                                            navigationItems.indexOf(
-                                                navigationItems.fastFirstOrNull {
-                                                    it.route == previousTab
-                                                },
-                                            )
-
-                                        if (prevIndex > curIndex) {
-                                            AnimatedContentTransitionScope.SlideDirection.Right.also {
-                                                transitionDirection = it
-                                            }
-                                        }
-                                    }
-                                }
-
                                 NavHost(
                                     navController = navController,
                                     startDestination =

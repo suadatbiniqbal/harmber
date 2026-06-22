@@ -486,11 +486,13 @@ fun SpeedDialSection(
             pageCount = { tilePages.size },
         )
 
+    val speedDialTitle = stringResource(R.string.speed_dial)
+
     fun playSpeedDialQueue(startIndex: Int) {
         if (speedDialSongs.isEmpty()) return
         playerConnection.playQueue(
             ListQueue(
-                title = context.getString(R.string.speed_dial),
+                title = speedDialTitle,
                 items = speedDialSongs.map { it.toMediaItem() },
                 startIndex = startIndex,
             ),
@@ -1401,13 +1403,9 @@ fun LazyListScope.AccountPlaylistsContainer(
 }
 
 @OptIn(ExperimentalFoundationApi::class)
-fun LazyListScope.SpotifyPlaylistsContainer(
+fun LazyListScope.spotifyPlaylistsContainer(
     viewModel: HomeViewModel,
-    mediaMetadata: MediaMetadata?,
-    isPlaying: Boolean,
     navController: NavController,
-    playerConnection: PlayerConnection,
-    menuState: MenuState,
     haptic: HapticFeedback,
     scope: CoroutineScope,
 ) {
@@ -1435,7 +1433,7 @@ fun LazyListScope.SpotifyPlaylistsContainer(
                             item = PlaylistItem(
                                 id = item.id,
                                 title = item.name,
-                                author = item.owner?.displayName?.let { com.harmber2.suadat.innertube.models.Artist(name = it, id = item.owner?.id ?: "") },
+                                author = item.owner?.displayName?.let { com.harmber2.suadat.innertube.models.Artist(name = it, id = item.owner?.id.orEmpty()) },
                                 songCountText = item.tracks?.total?.toString(),
                                 thumbnail = item.images.firstOrNull()?.url,
                                 playEndpoint = null,

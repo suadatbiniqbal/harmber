@@ -405,13 +405,9 @@ fun HomeScreen(
                         scope = scope,
                     )
 
-                    SpotifyPlaylistsContainer(
+                    spotifyPlaylistsContainer(
                         viewModel = viewModel,
-                        mediaMetadata = mediaMetadata,
-                        isPlaying = isPlaying,
                         navController = navController,
-                        playerConnection = playerConnection,
-                        menuState = menuState,
                         haptic = haptic,
                         scope = scope,
                     )

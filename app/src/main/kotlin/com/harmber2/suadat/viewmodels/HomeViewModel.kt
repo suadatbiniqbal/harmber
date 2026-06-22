@@ -48,7 +48,6 @@ import com.harmber2.suadat.innertube.utils.completed
 import com.harmber2.suadat.innertube.utils.hasYouTubeLoginCookie
 import com.harmber2.suadat.models.SimilarRecommendation
 import com.harmber2.suadat.spotify.SpotifyLibraryRepository
-import com.harmber2.suadat.spotify.models.SpotifyPlaylist
 import com.harmber2.suadat.utils.SavedAccount
 import com.harmber2.suadat.utils.SpeedDialPinType
 import com.harmber2.suadat.utils.SyncUtils
@@ -119,9 +118,6 @@ class HomeViewModel
         val explorePage = MutableStateFlow<ExplorePage?>(null)
         val selectedChip = MutableStateFlow<HomePage.Chip?>(null)
         private val previousHomePage = MutableStateFlow<HomePage?>(null)
-
-        val recentActivity = MutableStateFlow<List<YTItem>?>(null)
-        val recentPlaylistsDb = MutableStateFlow<List<Playlist>?>(null)
 
         val allLocalItems = MutableStateFlow<List<LocalItem>>(emptyList())
         val allYtItems = MutableStateFlow<List<YTItem>>(emptyList())
@@ -379,6 +375,7 @@ class HomeViewModel
                 updateAllLocalItems()
 
                 viewModelScope.launch(Dispatchers.IO) {
+                    spotifyRepository.restoreCachedPlaylists()
                     kotlinx.coroutines.delay(5000)
                     loadSimilarRecommendations()
                 }

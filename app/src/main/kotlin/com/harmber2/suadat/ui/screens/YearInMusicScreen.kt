@@ -1240,7 +1240,7 @@ private fun HarmberBrand(
         horizontalArrangement = Arrangement.spacedBy(7.dp),
     ) {
         Image(
-            painter = painterResource(R.drawable.app_icon_small),
+            painter = painterResource(R.drawable.harmber_logo_custom),
             contentDescription = null,
             modifier = Modifier.size(20.dp),
         )

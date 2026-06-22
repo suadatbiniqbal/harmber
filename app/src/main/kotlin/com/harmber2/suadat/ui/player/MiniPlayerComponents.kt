@@ -374,7 +374,7 @@ private fun MiniPlayerArtwork(
                 )
             } else {
                 Image(
-                    painter = painterResource(R.drawable.app_icon_small),
+                    painter = painterResource(R.drawable.harmber_logo_custom),
                     contentDescription = null,
                     modifier = Modifier.size(22.dp),
                 )
