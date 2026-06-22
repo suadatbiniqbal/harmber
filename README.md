@@ -5,7 +5,7 @@ A modern Material 3 music streaming experience for Android.
 </p>
 
 <p align="center">
-<img src="assets/icon.png" width="160">
+<img src="assets/logo.png" width="160">
 </p>
 
 <p align="center">
@@ -47,14 +47,14 @@ A modern Material 3 music streaming experience for Android.
 # 📸 Screenshots
 
 <p align="center">
-<img src="assets/ss1.png" width="220">
-<img src="assets/ss2.png" width="220">
-<img src="assets/ss3.png" width="220">
+<img src="assets/ss1.jpg" width="220">
+<img src="assets/ss2.jpg" width="220">
+<img src="assets/ss3.jpg" width="220">
 </p>
 
 <p align="center">
-<img src="assets/ss4.png" width="220">
-<img src="assets/ss5.png" width="220">
+<img src="assets/ss4.jpg" width="220">
+<img src="assets/ss5.jpg" width="220">
 </p>
 
 ---
