@@ -209,5 +209,5 @@ This project is licensed under the [MIT License](LICENSE).
 ---
 
 <p align="center">
-  Made with Kotlin — for music lovers everywhere.
+  Made with Kotlin for music lovers everywhere.
 </p>
