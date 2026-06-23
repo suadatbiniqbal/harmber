@@ -171,18 +171,6 @@ Developer: **Suadat Bin Iqbal**
 Email: **[vetraisgod@gmail.com](mailto:vetraisgod@gmail.com)**
 
 ---
-
-# 📜 License
-
-This project is licensed under the MIT License.
-
----
-
-<p align="center">
-Made with ❤️ and Kotlin
-<br>
-For music lovers everywhere 🎶
-</p>
 ## Star History
 
 <a href="https://www.star-history.com/?repos=suadatbiniqbal%2Fharmber&type=date&legend=top-left">
@@ -192,3 +180,23 @@ For music lovers everywhere 🎶
    <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=suadatbiniqbal/harmber&type=date&legend=top-left" />
  </picture>
 </a>
+
+# 📜 License
+
+This project is licensed under the MIT License.
+
+---
+> [!NOTE]
+> **Harmber is under active daily development.**
+>
+> I'm committed to maintaining and improving the project, but because of ongoing health-related challenges, I may not be able to address all issues right away. Please be patient—every report and contribution helps make Harmber better.
+>
+> Thank you for supporting the project and being part of the community. 🎵❤️
+
+
+<p align="center">
+Made with ❤️ and Kotlin
+<br>
+For music lovers everywhere 🎶
+</p>
+
