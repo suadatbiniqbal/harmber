@@ -306,27 +306,20 @@ class GatewayClient {
     }
 
     private fun sendIdentify() {
-        val capabilities = GatewayCapabilitiesFlags.FLAGS
-        val intents = IntentsFlags.FLAGS
-
-        val capsBitfield = capabilities.values.reduce { a, b -> a or b }
-        val intentsBitfield = intents.values.reduce { a, b -> a or b }
-
         val d = JSONObject()
-        d.put("capabilities", capsBitfield)
-        d.put("intents", intentsBitfield)
         d.put("token", token)
         val properties = JSONObject()
-        properties.put("os", "Android")
-        properties.put("browser", "Harmber")
-        properties.put("device", "Android")
-        properties.put("browser_user_agent", "Harmber")
-        properties.put("browser_version", "1.0")
-        properties.put("client_version", "1.0")
-        properties.put("client_build_number", 1)
-        properties.put("native_build_number", 1)
-        properties.put("release_channel", "unknown")
+        properties.put("os", "linux")
+        properties.put("browser", "Discord Client")
+        properties.put("release_channel", "stable")
+        properties.put("client_version", "0.0.309")
+        properties.put("os_version", "10.0.0")
+        properties.put("os_arch", "x64")
+        properties.put("system_locale", "en-US")
+        properties.put("client_build_number", 66528)
         d.put("properties", properties)
+        d.put("compress", false)
+        d.put("large_threshold", 250)
         debug("sending IDENTIFY")
         send(GatewayOp.IDENTIFY, d)
     }

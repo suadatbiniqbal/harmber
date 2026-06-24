@@ -30,7 +30,7 @@ import kotlin.math.floor
  * Reference: https://github.com/sonic-liberation/spotube-plugin-spotify
  */
 object SpotifyAuth {
-    private const val TOKEN_URL = "https://open.spotify.com/get_access_token"
+    private const val TOKEN_URL = "https://open.spotify.com/api/token"
     private const val SERVER_TIME_URL = "https://open.spotify.com/api/server-time"
     private const val NUANCE_GIST_URL =
         "https://api.github.com/gists/22ed9c6ba463899e933427f7de1f0eef"
@@ -79,6 +79,9 @@ object SpotifyAuth {
         spKey: String = "",
     ): Result<SpotifyInternalToken> =
         runCatching {
+            val cleanSpDc = spDc.trim().removeSurrounding("\"").removeSurrounding("'")
+            val cleanSpKey = spKey.trim().removeSurrounding("\"").removeSurrounding("'")
+
             val nuance = fetchNuance()
             val serverTimeSec = fetchServerTime()
             val totp = generateTotp(nuance.s, serverTimeSec)
@@ -95,15 +98,22 @@ object SpotifyAuth {
 
             val cookieHeader =
                 buildString {
-                    append("sp_dc=$spDc")
-                    if (spKey.isNotEmpty()) {
-                        append("; sp_key=$spKey")
+                    append("sp_dc=$cleanSpDc")
+                    if (cleanSpKey.isNotEmpty()) {
+                        append("; sp_key=$cleanSpKey")
                     }
                 }
 
+            val headers =
+                mapOf(
+                    "Cookie" to cookieHeader,
+                    "Origin" to "https://open.spotify.com",
+                    "Referer" to "https://open.spotify.com/"
+                )
+
             val body =
                 withContext(Dispatchers.IO) {
-                    httpGet(tokenUrl, mapOf("Cookie" to cookieHeader))
+                    httpGet(tokenUrl, headers)
                 }
 
             val token = json.decodeFromString<SpotifyInternalToken>(body)
@@ -131,9 +141,8 @@ object SpotifyAuth {
                 }
             val gist = json.decodeFromString<GistFiles>(body)
             val nuancesJson =
-                gist.files.values
-                    .firstOrNull()
-                    ?.content
+                gist.files["spotify_nuance.json"]?.content
+                    ?: gist.files.values.firstOrNull()?.content
                     ?: throw Spotify.SpotifyException(500, "Gist has no files")
             val nuances = json.decodeFromString<List<Nuance>>(nuancesJson)
             nuances.maxByOrNull { it.v }

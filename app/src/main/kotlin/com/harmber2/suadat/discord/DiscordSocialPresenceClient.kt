@@ -82,7 +82,7 @@ object DiscordSocialPresenceClient {
             }
         }
 
-    private fun ensureConnected(token: String): Result<Unit> {
+    private suspend fun ensureConnected(token: String): Result<Unit> {
         if (activeToken == token && gateway != null) return Result.success(Unit)
 
         gateway?.disconnect()
@@ -94,9 +94,7 @@ object DiscordSocialPresenceClient {
         val newGateway = GatewayClient()
 
         return runCatching {
-            runBlocking {
-                newGateway.connect(token)
-            }
+            newGateway.connect(token)
             scope = newScope
             gateway = newGateway
             activeToken = token

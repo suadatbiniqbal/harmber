@@ -143,6 +143,7 @@ fun SpotifyLoginSheet(
     var webView by remember { mutableStateOf<WebView?>(null) }
     var mainWebView by remember { mutableStateOf<WebView?>(null) }
     var captured by remember { mutableStateOf(false) }
+    var showManualEntry by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
     DisposableEffect(Unit) {
@@ -152,6 +153,16 @@ fun SpotifyLoginSheet(
             webView = null
             mainWebView = null
         }
+    }
+
+    if (showManualEntry) {
+        SpotifyManualCookieDialog(
+            onDismiss = { showManualEntry = false },
+            onConfirm = { spDc, spKey ->
+                onCookiesCaptured(spDc, spKey)
+                onDismiss()
+            }
+        )
     }
 
     BackHandler(enabled = webView != null) {
@@ -201,7 +212,7 @@ fun SpotifyLoginSheet(
                     androidx.compose.material3.IconButton(onClick = onDismiss) {
                         Icon(painterResource(R.drawable.close), contentDescription = null)
                     }
-                    Column(modifier = Modifier.padding(start = 8.dp)) {
+                    Column(modifier = Modifier.padding(start = 8.dp).weight(1f)) {
                         Text(
                             text = stringResource(R.string.spotify_login_title),
                             style = MaterialTheme.typography.titleLarge,
@@ -212,6 +223,9 @@ fun SpotifyLoginSheet(
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
+                    }
+                    TextButton(onClick = { showManualEntry = true }) {
+                        Text("Manual Entry")
                     }
                 }
                 AndroidView(
@@ -304,6 +318,48 @@ fun SpotifyLoginSheet(
                     },
                 )
             }
+        }
+    }
+}
+
+@Composable
+fun SpotifyManualCookieDialog(
+    onDismiss: () -> Unit,
+    onConfirm: (spDc: String, spKey: String) -> Unit,
+) {
+    var spDc by remember { mutableStateOf("") }
+    var spKey by remember { mutableStateOf("") }
+
+    DefaultDialog(
+        onDismiss = onDismiss,
+        title = { Text("Manual Spotify Cookies") },
+        buttons = {
+            TextButton(onClick = onDismiss) { Text(stringResource(android.R.string.cancel)) }
+            TextButton(
+                onClick = { if (spDc.isNotBlank()) onConfirm(spDc, spKey) },
+                enabled = spDc.isNotBlank()
+            ) { Text(stringResource(android.R.string.ok)) }
+        },
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Text(
+                "Enter your Spotify session cookies below. These are usually found in your browser's developer tools under Application > Cookies.",
+                style = MaterialTheme.typography.bodySmall
+            )
+            androidx.compose.material3.OutlinedTextField(
+                value = spDc,
+                onValueChange = { spDc = it },
+                label = { Text("sp_dc cookie") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
+            )
+            androidx.compose.material3.OutlinedTextField(
+                value = spKey,
+                onValueChange = { spKey = it },
+                label = { Text("sp_key cookie (optional)") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
+            )
         }
     }
 }
@@ -464,6 +520,7 @@ fun readSpotifyCookies(
             "https://open.spotify.com",
             "https://accounts.spotify.com",
             "https://spotify.com",
+            "https://.spotify.com",
         )
     currentUrl?.toSpotifyCookieOrigin()?.let(urls::add)
     val cookies = linkedMapOf<String, String>()

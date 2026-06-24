@@ -123,8 +123,8 @@ object DiscordOAuthRepository {
                 require(redirect.scheme == BuildConfig.DISCORD_REDIRECT_SCHEME) {
                     "Unexpected Discord redirect scheme: ${redirect.scheme}"
                 }
-                val isCorrectTarget = (redirect.host == "authorize" && (redirect.path == "/callback" || redirect.path == "/callback/")) ||
-                        (redirect.host == null && (redirect.path == "/authorize/callback" || redirect.path == "/authorize/callback/"))
+                val isCorrectTarget = redirect.path?.contains("/authorize/callback") == true || 
+                                     (redirect.host == "authorize" && redirect.path?.contains("callback") == true)
                 
                 require(isCorrectTarget) {
                     "Unexpected Discord redirect target: host=${redirect.host}, path=${redirect.path}"
@@ -160,19 +160,20 @@ object DiscordOAuthRepository {
             }
 
             val expiresAt = prefs[DiscordTokenExpiresAtKey] ?: 0L
-            if (expiresAt == 0L || System.currentTimeMillis() + EXPIRY_SKEW_MS < expiresAt) {
-                return@withContext currentToken
-            }
-
             val refreshToken = prefs[DiscordRefreshTokenKey]?.trim().orEmpty()
-            if (refreshToken.isBlank()) {
+            
+            if (expiresAt != 0L && System.currentTimeMillis() + EXPIRY_SKEW_MS < expiresAt) {
                 return@withContext currentToken
             }
 
-            refreshAccessToken(context, refreshToken)
-                .getOrNull()
-                ?.accessToken
-                ?: currentToken
+            if (refreshToken.isNotBlank()) {
+                refreshAccessToken(context, refreshToken)
+                    .getOrNull()
+                    ?.accessToken
+                    ?: currentToken
+            } else {
+                currentToken
+            }
         }
 
     suspend fun fetchAccount(accessToken: String): DiscordAccount =

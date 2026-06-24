@@ -16,9 +16,7 @@ import io.ktor.client.plugins.compression.ContentEncoding
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.get
-import io.ktor.client.request.header
 import io.ktor.client.request.parameter
-import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
@@ -27,7 +25,7 @@ import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
 
 object HarmberCanvas {
-    private const val BASE_URL = "https://artwork-harmber.koiiverse.cloud/"
+    private const val BASE_URL = "https://artwork.boidu.dev/"
     private const val FALLBACK_URL = "https://artwork.boidu.dev/"
 
     @Volatile

@@ -164,7 +164,7 @@ fun Thumbnail(
             defaultValue = 16f,
         )
     val cropThumbnailToSquare by rememberPreference(CropThumbnailToSquareKey, false)
-    val (disableBlur) = rememberPreference(DisableBlurKey, false)
+    val (disableBlur) = rememberPreference(DisableBlurKey, true)
     val (backdropEnabled) = rememberPreference(BackdropEnabledKey, defaultValue = true)
     val (backdropBlurAmount) = rememberPreference(BackdropBlurAmountKey, defaultValue = 60)
     val canSkipPrevious by playerConnection.canSkipPrevious.collectAsState()

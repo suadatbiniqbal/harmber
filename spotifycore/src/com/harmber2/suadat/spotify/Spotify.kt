@@ -51,6 +51,8 @@ import com.harmber2.suadat.spotify.models.SpotifySavedTrack
 import com.harmber2.suadat.spotify.models.SpotifySearchResult
 import com.harmber2.suadat.spotify.models.SpotifyCanvasResponse
 import com.harmber2.suadat.spotify.models.SpotifyCanvas
+import com.harmber2.suadat.spotify.models.SpotifyLyricsResponse
+import com.harmber2.suadat.spotify.models.SpotifyLyrics
 import com.harmber2.suadat.spotify.models.SpotifySimpleAlbum
 import com.harmber2.suadat.spotify.models.SpotifySimpleArtist
 import com.harmber2.suadat.spotify.models.SpotifyTrack
@@ -72,18 +74,7 @@ object Spotify {
     private const val GQL_URL = "https://api-partner.spotify.com/pathfinder/v2/query"
 
     private fun randomUserAgent(): String {
-        val osOptions =
-            arrayOf(
-                "Windows NT 10.0; Win64; x64",
-                "Macintosh; Intel Mac OS X 10_15_7",
-                "X11; Linux x86_64",
-            )
-        val chromeBase = 140
-        val chromeMajor = chromeBase - (0..4).random()
-        val chromePatch = (0..499).random()
-        val os = osOptions.random()
-        return "Mozilla/5.0 ($os) AppleWebKit/537.36 (KHTML, like Gecko) " +
-            "Chrome/$chromeMajor.0.$chromePatch.0 Safari/537.36"
+        return "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36"
     }
 
     private val json =
@@ -1742,6 +1733,26 @@ object Spotify {
                 val body = response.bodyAsText()
                 val canvasResponse = json.decodeFromString<SpotifyCanvasResponse>(body)
                 canvasResponse.canvases.firstOrNull()
+            } else {
+                null
+            }
+        }
+
+    suspend fun lyrics(trackId: String): Result<SpotifyLyrics?> =
+        runCatching {
+            val token = accessToken ?: throw SpotifyException(401, "Not authenticated")
+            val response =
+                restClient.get("https://spclient.wg.spotify.com/color-lyrics/v2/track/$trackId") {
+                    header("Authorization", "Bearer $token")
+                    header("Accept", "application/json")
+                    parameter("format", "json")
+                    parameter("vocalRemoval", "false")
+                }
+
+            if (response.status == HttpStatusCode.OK) {
+                val body = response.bodyAsText()
+                val lyricsResponse = json.decodeFromString<SpotifyLyricsResponse>(body)
+                lyricsResponse.lyrics
             } else {
                 null
             }

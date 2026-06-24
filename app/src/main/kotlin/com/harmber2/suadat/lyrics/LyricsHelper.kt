@@ -41,6 +41,7 @@ class LyricsHelper
     ) {
         private val baseProviders =
             listOf(
+                SpotifyDirectLyricsProvider,
                 BetterLyricsProvider,
                 LrcLibLyricsProvider,
                 KuGouLyricsProvider,
@@ -251,6 +252,7 @@ class LyricsHelper
                     PreferredLyricsProvider.PAXSENIX_MUSIXMATCH to PaxsenixMusixmatchLyricsProvider,
                     PreferredLyricsProvider.PAXSENIX_YOUTUBE to PaxsenixYouTubeLyricsProvider,
                     PreferredLyricsProvider.UNISON to UnisonLyricsProvider,
+                    PreferredLyricsProvider.SPOTIFY_DIRECT to SpotifyDirectLyricsProvider,
                 )
             val userOrdered = orderedEnums.mapNotNull { providerMap[it] }
             val rest = baseProviders.filterNot { it in userOrdered }

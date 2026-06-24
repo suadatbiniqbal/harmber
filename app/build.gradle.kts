@@ -214,6 +214,8 @@ dependencies {
     implementation(libs.firebase.messaging)
     implementation(libs.firebase.inappmessaging)
 
+    implementation(libs.play.ads)
+
     implementation(libs.guava)
 
     implementation(libs.coroutines.guava)

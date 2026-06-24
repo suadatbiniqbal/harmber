@@ -46,7 +46,7 @@ androidsvg = "1.4"
 aboutLibraries = "15.0.0-rc01"
 google-services = "4.4.2"
 firebase-bom = "33.1.2"
-
+play-services-ads = "24.0.0"
 
 [libraries]
 annotation = { module = "androidx.annotation:annotation", version.ref = "annotation" }
@@ -151,6 +151,7 @@ firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "fir
 firebase-analytics = { module = "com.google.firebase:firebase-analytics-ktx" }
 firebase-messaging = { module = "com.google.firebase:firebase-messaging-ktx" }
 firebase-inappmessaging = { module = "com.google.firebase:firebase-inappmessaging-display-ktx" }
+play-ads = { module = "com.google.android.gms:play-services-ads", version.ref = "play-services-ads" }
 
 
 

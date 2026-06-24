@@ -89,7 +89,7 @@ fun HomeScreen(
     val accountName by viewModel.accountName.collectAsStateWithLifecycle()
     val accountImageUrl by viewModel.accountImageUrl.collectAsStateWithLifecycle()
     val innerTubeCookie by rememberPreference(InnerTubeCookieKey, "")
-    val (disableBlur) = rememberPreference(DisableBlurKey, false)
+    val (disableBlur) = rememberPreference(DisableBlurKey, true)
     val (showHomeCategoryChips) = rememberPreference(ShowHomeCategoryChipsKey, true)
     val (quickPicksDisplayMode) = rememberEnumPreference(QuickPicksDisplayModeKey, QuickPicksDisplayMode.CARD)
     val (spotifyRecommendationsEnabled) = rememberPreference(com.harmber2.suadat.constants.SpotifyRecommendationsEnabledKey, false)

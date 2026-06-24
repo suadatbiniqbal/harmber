@@ -479,22 +479,28 @@ class HomeViewModel
 
         fun loadSpotifyRecommendations(mediaId: String? = null, title: String? = null, artist: String? = null, duration: Int? = null) {
             viewModelScope.launch(Dispatchers.IO) {
-                if (!Spotify.isAuthenticated()) return@launch
-                
-                val (tId, tTitle, tArtist, tDuration) = if (mediaId != null) {
-                    listOf(mediaId, title ?: "", artist ?: "", duration)
-                } else {
-                    val lastSong = database.recentSongs(limit = 1).first().firstOrNull() ?: return@launch
-                    listOf(lastSong.id, lastSong.song.title, lastSong.artists.firstOrNull()?.name ?: "", lastSong.song.duration)
+                try {
+                    if (!Spotify.isAuthenticated()) return@launch
+
+                    val (tId, tTitle, tArtist, tDuration) = if (mediaId != null) {
+                        listOf(mediaId, title ?: "", artist ?: "", duration)
+                    } else {
+                        val lastSong = database.recentSongs(limit = 1).first().firstOrNull() ?: return@launch
+                        listOf(lastSong.id, lastSong.song.title, lastSong.artists.firstOrNull()?.name ?: "", lastSong.song.duration)
+                    }
+
+                    if (tId == null || tTitle == null || tArtist == null) return@launch
+
+                    spotifyRecommendations.value = SpotifyCanvasManager.getRecommendations(
+                        context = context,
+                        mediaId = tId as String,
+                        title = tTitle as String,
+                        artist = tArtist as String,
+                        durationSec = tDuration as? Int
+                    )
+                } catch (e: Exception) {
+                    reportException(e)
                 }
-                
-                spotifyRecommendations.value = SpotifyCanvasManager.getRecommendations(
-                    context = context,
-                    mediaId = tId as String,
-                    title = tTitle as String,
-                    artist = tArtist as String,
-                    durationSec = tDuration as? Int
-                )
             }
         }
 

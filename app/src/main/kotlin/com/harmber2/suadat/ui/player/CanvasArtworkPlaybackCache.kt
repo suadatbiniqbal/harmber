@@ -77,7 +77,18 @@ object CanvasArtworkPlaybackCache {
         return OkHttpClient
             .Builder()
             .apply {
-                if (proxy != null) this.proxy(proxy)
+                if (proxy != null) {
+                    proxySelector(object : java.net.ProxySelector() {
+                        override fun select(uri: java.net.URI?): MutableList<Proxy> {
+                            val host = uri?.host?.lowercase(Locale.ROOT).orEmpty()
+                            val isSpotifyHost = host.endsWith("spotify.com") || host.endsWith("spotifycdn.com")
+                            return if (isSpotifyHost) mutableListOf(Proxy.NO_PROXY) else mutableListOf(proxy)
+                        }
+
+                        override fun connectFailed(uri: java.net.URI?, sa: java.net.SocketAddress?, ioe: IOException?) {
+                        }
+                    })
+                }
             }.connectTimeout(12, TimeUnit.SECONDS)
             .readTimeout(45, TimeUnit.SECONDS)
             .callTimeout(3, TimeUnit.MINUTES)

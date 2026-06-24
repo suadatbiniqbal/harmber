@@ -1171,4 +1171,14 @@ InnerTune's Weblate instead. -->
     <string name="spotify_canvas_desc">Show Spotify Canvas as an animated background</string>
     <string name="spotify_recommendations">Spotify Recommendations</string>
     <string name="spotify_recommendations_desc">Get song recommendations from Spotify based on currently playing song</string>
+    <string name="support_harmber">Support Harmber</string>
+    <string name="support_harmber_desc">Harmber is free and open-source. You can support the development by watching a short ad.</string>
+    <string name="watch_ad_to_support">Watch Ad to Support</string>
+    <string name="watch_ad_to_support_dev">Watch a rewarded ad to support dev</string>
+    <string name="thank_you_support">Thank you for supporting Harmber!</string>
+    <string name="navigation_glassmorphism">Navigation Glassmorphism</string>
+    <string name="navigation_glassmorphism_desc">Apply glassmorphism effect to the navigation bar</string>
+    <string name="no_continue_anyway">No, continue anyway</string>
+    <string name="mood_and_genres_card">Mood &amp; Genres</string>
+    <string name="mood_and_genres_desc">Explore music by mood or genre</string>
 </resources>

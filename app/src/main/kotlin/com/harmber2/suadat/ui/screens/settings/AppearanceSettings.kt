@@ -90,6 +90,7 @@ import com.harmber2.suadat.constants.HidePlayerThumbnailKey
 import com.harmber2.suadat.constants.LibraryFilter
 import com.harmber2.suadat.constants.MiniPlayerBackgroundStyle
 import com.harmber2.suadat.constants.MiniPlayerBackgroundStyleKey
+import com.harmber2.suadat.constants.NavigationGlassmorphismKey
 import com.harmber2.suadat.constants.PlayerBackgroundStyle
 import com.harmber2.suadat.constants.PlayerBackgroundStyleKey
 import com.harmber2.suadat.constants.PlayerButtonsStyle
@@ -186,8 +187,8 @@ fun AppearanceSettings(
             MiniPlayerBackgroundStyleKey,
             defaultValue = MiniPlayerBackgroundStyle.GRADIENT,
         )
-    val (pureBlack, onPureBlackChange) = rememberPreference(PureBlackKey, defaultValue = false)
-    val (disableBlur, onDisableBlurChange) = rememberPreference(DisableBlurKey, defaultValue = false)
+    val (pureBlack, onPureBlackChange) = rememberPreference(PureBlackKey, defaultValue = true)
+    val (disableBlur, onDisableBlurChange) = rememberPreference(DisableBlurKey, defaultValue = true)
     val (disableAnimations, onDisableAnimationsChange) =
         rememberPreference(
             DisableAnimationsKey,
@@ -278,7 +279,7 @@ fun AppearanceSettings(
     val (quickPicksDisplayMode, onQuickPicksDisplayModeChange) =
         rememberEnumPreference(
             QuickPicksDisplayModeKey,
-            defaultValue = QuickPicksDisplayMode.CARD,
+            defaultValue = QuickPicksDisplayMode.LIST,
         )
 
     val customFontPickerLauncher =
@@ -351,6 +352,12 @@ fun AppearanceSettings(
             onPlayerBackgroundChange(PlayerBackgroundStyle.DEFAULT)
         }
     }
+
+    val (navigationGlassmorphism, onNavigationGlassmorphismChange) =
+        rememberPreference(
+            NavigationGlassmorphismKey,
+            defaultValue = false,
+        )
 
     if (showSliderOptionDialog) {
         val sliderStyles =
@@ -895,6 +902,16 @@ fun AppearanceSettings(
                     icon = { Icon(painterResource(R.drawable.filter_alt), null) },
                     checked = showTagsInLibrary,
                     onCheckedChange = onShowTagsInLibraryChange,
+                )
+            }
+
+            item {
+                SwitchPreference(
+                    title = { Text(stringResource(R.string.navigation_glassmorphism)) },
+                    description = stringResource(R.string.navigation_glassmorphism_desc),
+                    icon = { Icon(painterResource(R.drawable.nav_bar), null) },
+                    checked = navigationGlassmorphism,
+                    onCheckedChange = onNavigationGlassmorphismChange,
                 )
             }
 

@@ -196,7 +196,7 @@ internal fun CanvasArtworkPlayer(
         val mimeType =
             when {
                 lowercaseUrl.contains("m3u8") -> MimeTypes.APPLICATION_M3U8
-                lowercaseUrl.contains("mp4") -> MimeTypes.VIDEO_MP4
+                lowercaseUrl.contains("mp4") || lowercaseUrl.contains("spotify") -> MimeTypes.VIDEO_MP4
                 primary != null && currentUrl == primary -> MimeTypes.APPLICATION_M3U8
                 fallback != null && currentUrl == fallback -> MimeTypes.VIDEO_MP4
                 else -> MimeTypes.APPLICATION_M3U8

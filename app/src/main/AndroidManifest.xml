@@ -351,6 +351,10 @@
             android:name="com.harmber2.suadat.ui.screens.settings.PoTokenExtractionActivity"
             android:exported="false"
             android:theme="@style/Theme.Harmber" />
+
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-4253536927389825~9584202357" />
     </application>
 
 </manifest>

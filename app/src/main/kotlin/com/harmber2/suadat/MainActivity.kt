@@ -9,6 +9,7 @@
 
 package com.harmber2.suadat
 
+import com.harmber2.suadat.utils.AdManager
 import com.harmber2.suadat.utils.isTvDevice
 
 import android.Manifest
@@ -195,6 +196,7 @@ import com.harmber2.suadat.constants.FloatingToolbarHeight
 import com.harmber2.suadat.constants.FloatingToolbarHorizontalPadding
 import com.harmber2.suadat.constants.FontPreferenceKey
 import com.harmber2.suadat.constants.HasPressedStarKey
+import com.harmber2.suadat.constants.LastSupportAdShownTimeKey
 import com.harmber2.suadat.constants.LaunchCountKey
 import com.harmber2.suadat.constants.MiniPlayerBottomSpacing
 import com.harmber2.suadat.constants.MiniPlayerHeight
@@ -253,6 +255,7 @@ import com.harmber2.suadat.ui.component.LocalBottomSheetPageState
 import com.harmber2.suadat.ui.component.LocalMenuState
 import com.harmber2.suadat.ui.component.MarkdownText
 import com.harmber2.suadat.ui.component.NetworkStatusBanner
+import com.harmber2.suadat.ui.component.SupportHarmberDialog
 import com.harmber2.suadat.ui.component.StarDialog
 import com.harmber2.suadat.ui.component.SpotifyConnectDialog
 import com.harmber2.suadat.ui.component.TopSearch
@@ -296,6 +299,7 @@ import com.harmber2.suadat.viewmodels.NetworkBannerViewModel
 import com.harmber2.suadat.viewmodels.NewsViewModel
 import com.harmber2.suadat.viewmodels.OnlineSearchSort
 import com.harmber2.suadat.viewmodels.OnlineSearchViewModel
+import timber.log.Timber
 import java.util.Locale
 import javax.inject.Inject
 import kotlin.random.Random
@@ -465,6 +469,7 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        AdManager.initialize(this)
         window.decorView.layoutDirection = View.LAYOUT_DIRECTION_LTR
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
@@ -534,9 +539,17 @@ class MainActivity : ComponentActivity() {
                     notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                 }
 
-                while (playerConnection == null) {
+                // Wait for player connection with timeout
+                var attempts = 0
+                while (playerConnection == null && attempts < 50) {
                     delay(100)
+                    attempts++
                 }
+
+                if (playerConnection == null) {
+                    Timber.w("Player connection timed out during initialization")
+                }
+
                 delay(500)
 
                 if (
@@ -1326,6 +1339,7 @@ class MainActivity : ComponentActivity() {
 
                     var showStarDialog by remember { mutableStateOf(false) }
                     var showSpotifyConnectDialog by remember { mutableStateOf(false) }
+                    var showSupportDialog by remember { mutableStateOf(false) }
 
                     LaunchedEffect(Unit) {
                         delay(2000)
@@ -1348,22 +1362,32 @@ class MainActivity : ComponentActivity() {
                         // For now, if Spotify is shown, we wait for it to be handled before showing Star.
                         
                         if (!showSpotifyConnectDialog) {
-                            val shouldShowStar =
-                                withContext(Dispatchers.IO) {
-                                    val hasPressed = dataStore[HasPressedStarKey] ?: false
-                                    val remindAfter = dataStore[RemindAfterKey] ?: 3
-                                    !hasPressed && (dataStore[LaunchCountKey] ?: 0) >= remindAfter
-                                }
+                            val currentTime = System.currentTimeMillis()
+                            val lastShown = withContext(Dispatchers.IO) {
+                                dataStore[LastSupportAdShownTimeKey] ?: 0L
+                            }
+                            
+                            // 6 hours = 21600000 ms
+                            if (currentTime - lastShown > 21600000L) {
+                                showSupportDialog = true
+                            } else {
+                                val shouldShowStar =
+                                    withContext(Dispatchers.IO) {
+                                        val hasPressed = dataStore[HasPressedStarKey] ?: false
+                                        val remindAfter = dataStore[RemindAfterKey] ?: 3
+                                        !hasPressed && (dataStore[LaunchCountKey] ?: 0) >= remindAfter
+                                    }
 
-                            if (shouldShowStar) {
-                                var waited = 0L
-                                val waitStep = 500L
-                                val maxWait = 10_000L
-                                while (bottomSheetPageState.isVisible && waited < maxWait) {
-                                    delay(waitStep)
-                                    waited += waitStep
+                                if (shouldShowStar) {
+                                    var waited = 0L
+                                    val waitStep = 500L
+                                    val maxWait = 10_000L
+                                    while (bottomSheetPageState.isVisible && waited < maxWait) {
+                                        delay(waitStep)
+                                        waited += waitStep
+                                    }
+                                    showStarDialog = true
                                 }
-                                showStarDialog = true
                             }
                         }
 
@@ -1376,9 +1400,9 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                     
-                    // Re-check for star dialog after spotify is closed
-                    LaunchedEffect(showSpotifyConnectDialog) {
-                        if (!showSpotifyConnectDialog) {
+                    // Re-check for star dialog after spotify or support dialog is closed
+                    LaunchedEffect(showSpotifyConnectDialog, showSupportDialog) {
+                        if (!showSpotifyConnectDialog && !showSupportDialog) {
                              val hasPressed = withContext(Dispatchers.IO) { dataStore[HasPressedStarKey] ?: false }
                              val remindAfter = withContext(Dispatchers.IO) { dataStore[RemindAfterKey] ?: 3 }
                              val launchCount = withContext(Dispatchers.IO) { dataStore[LaunchCountKey] ?: 0 }
@@ -1388,6 +1412,25 @@ class MainActivity : ComponentActivity() {
                                  showStarDialog = true
                              }
                         }
+                    }
+
+                    if (showSupportDialog) {
+                        SupportHarmberDialog(
+                            onDismissRequest = {
+                                coroutineScope.launch {
+                                    dataStore.edit { it[LastSupportAdShownTimeKey] = System.currentTimeMillis() }
+                                    showSupportDialog = false
+                                }
+                            },
+                            onWatchAdClick = {
+                                AdManager.showRewardedAd(this@MainActivity) {
+                                    coroutineScope.launch {
+                                        dataStore.edit { it[LastSupportAdShownTimeKey] = System.currentTimeMillis() }
+                                        showSupportDialog = false
+                                    }
+                                }
+                            }
+                        )
                     }
 
                     if (showSpotifyConnectDialog) {

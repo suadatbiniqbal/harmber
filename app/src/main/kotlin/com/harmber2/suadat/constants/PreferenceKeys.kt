@@ -278,6 +278,7 @@ val ExternalDownloaderPackageKey = stringPreferencesKey("externalDownloaderPacka
 val PlaylistTagsFilterKey = stringPreferencesKey("playlistTagsFilter")
 val ShowHomeCategoryChipsKey = booleanPreferencesKey("showHomeCategoryChips")
 val ShowTagsInLibraryKey = booleanPreferencesKey("showTagsInLibrary")
+val NavigationGlassmorphismKey = booleanPreferencesKey("navigationGlassmorphism")
 
 val EqualizerEnabledKey = booleanPreferencesKey("equalizerEnabled")
 val EqualizerBandLevelsMbKey = stringPreferencesKey("equalizerBandLevelsMb")
@@ -559,10 +560,12 @@ enum class PreferredLyricsProvider {
     PAXSENIX_SPOTIFY,
     PAXSENIX_MUSIXMATCH,
     PAXSENIX_YOUTUBE,
+    SPOTIFY_DIRECT,
 }
 
 val DefaultLyricsProviderOrder =
     listOf(
+        PreferredLyricsProvider.SPOTIFY_DIRECT,
         PreferredLyricsProvider.BETTER_LYRICS,
         PreferredLyricsProvider.LRCLIB,
         PreferredLyricsProvider.KUGOU,
@@ -827,6 +830,7 @@ val LaunchCountKey = intPreferencesKey("launch_count")
 val HasPressedStarKey = booleanPreferencesKey("has_pressed_star")
 val RemindAfterKey = intPreferencesKey("remind_after")
 val SpotifyConnectShownKey = booleanPreferencesKey("spotify_connect_shown")
+val LastSupportAdShownTimeKey = longPreferencesKey("last_support_ad_shown_time")
 
 // Update settings
 val EnableUpdateNotificationKey = booleanPreferencesKey("enableUpdateNotification")

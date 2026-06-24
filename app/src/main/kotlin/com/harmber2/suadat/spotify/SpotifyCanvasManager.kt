@@ -43,22 +43,17 @@ object SpotifyCanvasManager {
             if (!it.preferredAnimationUrl.isNullOrBlank()) return@withContext it
         }
 
-        val spotifyTrackId = getSpotifyTrackId(mediaId, title, artist, durationSec) ?: return@withContext null
-        val spotifyTrackUri = "spotify:track:$spotifyTrackId"
-
-        val canvas = Spotify.canvas(spotifyTrackUri).getOrNull() ?: run {
-            Timber.tag("SpotifyCanvas").w("Spotify returned no canvas for $spotifyTrackUri")
-            return@withContext null
-        }
+        val canvas = CanvasRepository.getCanvas(context, mediaId, title, artist, durationSec) ?: return@withContext null
         
-        Timber.tag("SpotifyCanvas").d("Found canvas for $title: ${canvas.url}")
+        Timber.tag("SpotifyCanvas").d("Found canvas for $title: ${canvas.videoUrl}")
 
         val artwork = CanvasArtwork(
             name = title,
-            artist = artist,
-            animated = canvas.url.takeIf { canvas.type.equals("VIDEO", ignoreCase = true) },
-            videoUrl = canvas.url.takeIf { canvas.type.equals("VIDEO", ignoreCase = true) },
-            static = canvas.url.takeIf { canvas.type.equals("IMAGE", ignoreCase = true) }
+            artist = canvas.artist,
+            animated = canvas.videoUrl,
+            videoUrl = canvas.videoUrl,
+            animatedVertical = canvas.videoUrl,
+            videoUrlVertical = canvas.videoUrl,
         )
 
         if (artwork.preferredAnimationUrl != null) {
@@ -68,7 +63,7 @@ object SpotifyCanvasManager {
         artwork
     }
 
-    private suspend fun getSpotifyTrackId(
+    internal suspend fun getSpotifyTrackId(
         mediaId: String,
         title: String,
         artist: String,
@@ -89,7 +84,7 @@ object SpotifyCanvasManager {
                 candidateArtist = track.artists.joinToString(" ") { it.name },
                 candidateDurationSec = track.durationMs / 1000
             )
-        }.filter { it.second > 0.5 }.maxByOrNull { it.second }
+        }.filter { it.second > 0.4 }.maxByOrNull { it.second }
 
         val trackId = bestMatch?.first?.id
         if (trackId != null) {
