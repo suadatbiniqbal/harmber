@@ -203,6 +203,11 @@ If you find Harmber useful:
 
 ---
 
+##Special Thanks
+Inner tune
+metrolist
+archive tune
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
