@@ -29,8 +29,8 @@ android {
     applicationId = "com.harmber2.suadat"
         minSdk = 26
         targetSdk = 37
-        versionCode = 200
-        versionName = "2.0"
+        versionCode = 202
+        versionName = "2.0.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
@@ -213,8 +213,6 @@ dependencies {
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.messaging)
     implementation(libs.firebase.inappmessaging)
-
-    implementation(libs.play.ads)
 
     implementation(libs.guava)
 

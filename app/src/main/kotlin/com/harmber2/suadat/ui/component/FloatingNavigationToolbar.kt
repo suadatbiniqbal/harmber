@@ -25,6 +25,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -84,6 +85,7 @@ fun FloatingNavigationToolbar(
     items: List<Screens>,
     pureBlack: Boolean,
     modifier: Modifier = Modifier,
+    glassmorphism: Boolean = false,
     onFabClick: (() -> Unit)? = null,
     fabIconRes: Int? = null,
     fabContentDescription: String = "",
@@ -96,13 +98,29 @@ fun FloatingNavigationToolbar(
     isSelected: (Screens) -> Boolean,
     onItemClick: (Screens, Boolean) -> Unit,
 ) {
-    val toolbarContainerColor = floatingToolbarContainerColor(pureBlack = pureBlack)
+    val toolbarContainerColor =
+        if (glassmorphism) {
+            if (pureBlack) Color.Black.copy(alpha = 0.7f) else Color.White.copy(alpha = 0.7f)
+        } else {
+            floatingToolbarContainerColor(pureBlack = pureBlack)
+        }
     val toolbarColors =
         FloatingToolbarDefaults.standardFloatingToolbarColors(
             toolbarContainerColor = toolbarContainerColor,
         )
     val hasOverflowAction = onShuffleClick != null && shuffleIconRes != null
     val hasFabAction = onFabClick != null && fabIconRes != null
+
+    val glassModifier = if (glassmorphism) {
+        Modifier
+            .border(
+                width = 0.5.dp,
+                color = if (pureBlack) Color.White.copy(alpha = 0.15f) else Color.Black.copy(alpha = 0.1f),
+                shape = RoundedCornerShape(28.dp)
+            )
+    } else {
+        Modifier
+    }
 
     BoxWithConstraints(
         modifier = modifier.fillMaxWidth(),
@@ -123,7 +141,7 @@ fun FloatingNavigationToolbar(
                         musicRecognitionContentDescription = musicRecognitionContentDescription,
                     )
                 },
-                modifier = Modifier.widthIn(max = 480.dp),
+                modifier = Modifier.widthIn(max = 480.dp).then(glassModifier),
                 colors = toolbarColors,
                 scrollBehavior = scrollBehavior,
                 animationSpec = FloatingToolbarDefaults.animationSpec(),
@@ -147,7 +165,7 @@ fun FloatingNavigationToolbar(
                         contentDescription = fabContentDescription,
                     )
                 },
-                modifier = Modifier.widthIn(max = 480.dp),
+                modifier = Modifier.widthIn(max = 480.dp).then(glassModifier),
                 colors = toolbarColors,
                 scrollBehavior = scrollBehavior,
                 animationSpec = FloatingToolbarDefaults.animationSpec(),
@@ -163,7 +181,7 @@ fun FloatingNavigationToolbar(
         } else {
             HorizontalFloatingToolbar(
                 expanded = true,
-                modifier = Modifier.widthIn(max = 420.dp),
+                modifier = Modifier.widthIn(max = 420.dp).then(glassModifier),
                 colors = toolbarColors,
                 scrollBehavior = scrollBehavior,
             ) {

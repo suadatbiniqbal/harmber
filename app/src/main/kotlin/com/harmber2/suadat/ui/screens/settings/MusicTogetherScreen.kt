@@ -315,11 +315,14 @@ fun MusicTogetherScreen(
             isInputValid = { if (joinModeOnline) it.trim().isNotBlank() else TogetherLink.decode(it) != null },
             onDone = { raw ->
                 val trimmed = raw.trim()
-                joinInput = trimmed
-                setLastJoinLink(trimmed)
                 if (joinModeOnline) {
-                    playerConnection?.service?.joinTogetherOnline(trimmed, displayName)
+                    val code = TogetherLink.decodeOnlineCode(trimmed) ?: trimmed
+                    joinInput = code
+                    setLastJoinLink(code)
+                    playerConnection?.service?.joinTogetherOnline(code, displayName)
                 } else {
+                    joinInput = trimmed
+                    setLastJoinLink(trimmed)
                     playerConnection?.service?.joinTogether(trimmed, displayName)
                 }
             },
@@ -1628,12 +1631,13 @@ private fun StatusCard(
                     }
 
                     is TogetherSessionState.HostingOnline -> {
+                        val onlineLink = remember(state.code) { TogetherLink.encodeOnline(state.code) }
                         SessionInfoCard(
                             label = stringResource(R.string.session_code),
                             value = state.code,
                             maxLines = 2,
                             onCopy = { onCopyText(R.string.session_code, state.code) },
-                            onShare = { onShareLink(state.code) },
+                            onShare = { onShareLink(onlineLink) },
                         )
                     }
 

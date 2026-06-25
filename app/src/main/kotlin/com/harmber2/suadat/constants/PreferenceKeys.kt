@@ -565,9 +565,8 @@ enum class PreferredLyricsProvider {
 
 val DefaultLyricsProviderOrder =
     listOf(
-        PreferredLyricsProvider.SPOTIFY_DIRECT,
-        PreferredLyricsProvider.BETTER_LYRICS,
         PreferredLyricsProvider.LRCLIB,
+        PreferredLyricsProvider.BETTER_LYRICS,
         PreferredLyricsProvider.KUGOU,
         PreferredLyricsProvider.SIMPMUSIC,
         PreferredLyricsProvider.UNISON,
@@ -576,6 +575,7 @@ val DefaultLyricsProviderOrder =
         PreferredLyricsProvider.PAXSENIX_SPOTIFY,
         PreferredLyricsProvider.PAXSENIX_MUSIXMATCH,
         PreferredLyricsProvider.PAXSENIX_YOUTUBE,
+        PreferredLyricsProvider.SPOTIFY_DIRECT,
     )
 
 fun deserializeLyricsProviderOrder(orderStr: String?): List<PreferredLyricsProvider> {
@@ -620,6 +620,7 @@ enum class PlayerDesignStyle {
     V7,
     V8,
     V9,
+    AMBER,
 }
 
 enum class PlayerBackgroundStyle {

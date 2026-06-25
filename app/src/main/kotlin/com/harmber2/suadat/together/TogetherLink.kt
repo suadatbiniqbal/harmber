@@ -38,6 +38,11 @@ data class TogetherJoinInfo(
 object TogetherLink {
     fun encode(joinInfo: TogetherJoinInfo): String = joinInfo.toDeepLink()
 
+    fun encodeOnline(code: String): String {
+        val charset = StandardCharsets.UTF_8.name()
+        return "harmber://together?code=${URLEncoder.encode(code, charset)}"
+    }
+
     fun decode(raw: String): TogetherJoinInfo? {
         val trimmed = raw.trim()
         if (trimmed.isBlank()) return null
@@ -50,6 +55,21 @@ object TogetherLink {
 
         decodeCompact(trimmed)?.let { return it }
         return null
+    }
+
+    fun decodeOnlineCode(raw: String): String? {
+        val trimmed = raw.trim()
+        if (trimmed.isBlank()) return null
+        if (trimmed.length in 4..12 && !trimmed.contains("://") && !trimmed.contains("/") && !trimmed.contains("?")) return trimmed
+
+        val asUri = runCatching { URI(trimmed) }.getOrNull() ?: return null
+        val scheme = asUri.scheme?.lowercase() ?: return null
+        if (scheme != "harmber") return null
+        val authority = asUri.host?.lowercase() ?: asUri.authority?.lowercase() ?: return null
+        if (authority != "together") return null
+
+        val params = parseQuery(asUri.rawQuery)
+        return params["code"]?.trim()
     }
 
     private fun decodeDeepLink(uri: URI): TogetherJoinInfo? {

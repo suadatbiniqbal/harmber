@@ -15,7 +15,6 @@ internal fun resolveStreamChunkLength(
     mimeType: String? = null,
 ): Long? {
     if (chunkLength <= 0L || position < 0L) return null
-    if (requestedLength <= 0L && mimeType.isMp4ContainerMimeType()) return null
 
     val remainingLength = knownContentLength?.minus(position)?.takeIf { it > 0L }
     val resolvedLength =

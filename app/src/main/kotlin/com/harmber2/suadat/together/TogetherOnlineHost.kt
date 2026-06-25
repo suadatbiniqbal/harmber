@@ -203,6 +203,27 @@ class TogetherOnlineHost(
 
     suspend fun currentSettings(): TogetherRoomSettings = mutex.withLock { settings }
 
+    fun sendHeartbeat(
+        sessionId: String,
+        pingId: Long,
+        clientElapsedRealtimeMs: Long,
+    ) {
+        scope.launch {
+            runCatching {
+                session?.send(
+                    TogetherJson.json.encodeToString(
+                        TogetherMessage.serializer(),
+                        HeartbeatPing(
+                            sessionId = sessionId,
+                            pingId = pingId,
+                            clientElapsedRealtimeMs = clientElapsedRealtimeMs,
+                        ),
+                    ),
+                )
+            }
+        }
+    }
+
     suspend fun updateSettings(newSettings: TogetherRoomSettings) {
         mutex.withLock {
             settings = newSettings
@@ -407,6 +428,24 @@ class TogetherOnlineHost(
 
                             is AddTrackRequest -> {
                                 if (message.sessionId == sessionId) onEvent?.invoke(TogetherServerEvent.AddTrackRequested(message))
+                            }
+
+                            is HeartbeatPing -> {
+                                if (message.sessionId == sessionId) {
+                                    runCatching {
+                                        session.send(
+                                            TogetherJson.json.encodeToString(
+                                                TogetherMessage.serializer(),
+                                                HeartbeatPong(
+                                                    sessionId = sessionId,
+                                                    pingId = message.pingId,
+                                                    clientElapsedRealtimeMs = message.clientElapsedRealtimeMs,
+                                                    serverElapsedRealtimeMs = android.os.SystemClock.elapsedRealtime(),
+                                                ),
+                                            ),
+                                        )
+                                    }
+                                }
                             }
 
                             is ServerError -> {

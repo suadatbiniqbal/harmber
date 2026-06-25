@@ -101,6 +101,7 @@ InnerTune's Weblate instead. -->
     <string name="see_all">See all</string>
     <string name="your_artists">Your Artists</string>
     <string name="your_albums">Your Albums</string>
+    <string name="suggested_albums">Suggested Albums</string>
     <string name="all_songs">All Songs</string>
     <string name="newest_first">Newest first</string>
     <string name="oldest_first">Oldest first</string>

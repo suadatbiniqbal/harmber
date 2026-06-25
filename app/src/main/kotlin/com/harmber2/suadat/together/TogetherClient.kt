@@ -401,6 +401,24 @@ class TogetherClient(
                                 }
                             }
 
+                            is HeartbeatPing -> {
+                                if (message.sessionId == sessionId) {
+                                    runCatching {
+                                        session.send(
+                                            TogetherJson.json.encodeToString(
+                                                TogetherMessage.serializer(),
+                                                HeartbeatPong(
+                                                    sessionId = sessionId,
+                                                    pingId = message.pingId,
+                                                    clientElapsedRealtimeMs = message.clientElapsedRealtimeMs,
+                                                    serverElapsedRealtimeMs = android.os.SystemClock.elapsedRealtime(),
+                                                ),
+                                            ),
+                                        )
+                                    }
+                                }
+                            }
+
                             is ServerError -> {
                                 _events.tryEmit(TogetherClientEvent.ServerIssue(message = message.message, code = message.code))
                             }

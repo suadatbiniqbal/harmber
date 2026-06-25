@@ -595,6 +595,7 @@ class MusicService :
     private var togetherOnlineConnectJob: Job? = null
     private var togetherClientEventsJob: Job? = null
     private var togetherHeartbeatJob: Job? = null
+    private var togetherHostHeartbeatJob: Job? = null
     private var togetherClock: com.harmber2.suadat.together.TogetherClock? = null
     private var togetherSelfParticipantId: String? = null
     private var togetherLastAppliedQueueHash: String? = null
@@ -952,7 +953,7 @@ class MusicService :
             }
 
         dataStore.data
-            .map { it[PauseOnDeviceMuteKey] ?: false }
+            .map { it[PauseOnDeviceMuteKey] ?: true }
             .distinctUntilChanged()
             .collectLatest(scope) { enabled ->
                 pauseOnDeviceMuteEnabled = enabled
@@ -1056,7 +1057,7 @@ class MusicService :
                 .distinctUntilChanged(),
             currentFormat,
             dataStore.data
-                .map { it[AudioNormalizationKey] ?: true }
+                .map { it[AudioNormalizationKey] ?: false }
                 .distinctUntilChanged(),
         ) { mediaId, format, normalizeAudio ->
             normalizeAudio to resolveAudioNormalizationFactor(mediaId, format, normalizeAudio)
@@ -3348,6 +3349,8 @@ class MusicService :
                     onlineHost.connect(wsUrl)
                 }
 
+            startTogetherHostHeartbeat(created.sessionId, onlineHost)
+
             togetherBroadcastJob =
                 ioScope.launch(SilentHandler) {
                     while (togetherOnlineHost === onlineHost) {
@@ -4121,10 +4124,9 @@ class MusicService :
         val sentAt = state.sentAtElapsedRealtimeMs
         if (sentAt > 0L && lastSentAt > 0L && sentAt <= lastSentAt) return
 
-        val offset = if (togetherIsOnlineSession) 0L else (togetherClock?.snapshot()?.estimatedOffsetMs ?: 0L)
+        val offset = togetherClock?.snapshot()?.estimatedOffsetMs ?: 0L
         val correctedSentAt = sentAt + offset
-        val estimatedOnlineLatency = if (togetherIsOnlineSession) 1200L else 0L
-        val delta = if (togetherIsOnlineSession) estimatedOnlineLatency else (now - correctedSentAt).coerceAtLeast(0L)
+        val delta = (now - correctedSentAt).coerceAtLeast(0L)
         val targetPos =
             if (state.isPlaying) (state.positionMs + delta).coerceAtLeast(0L) else state.positionMs.coerceAtLeast(0L)
 
@@ -4235,6 +4237,22 @@ class MusicService :
             }
     }
 
+    private fun startTogetherHostHeartbeat(
+        sessionId: String,
+        host: com.harmber2.suadat.together.TogetherOnlineHost,
+    ) {
+        togetherHostHeartbeatJob?.cancel()
+        togetherHostHeartbeatJob =
+            ioScope.launch(SilentHandler) {
+                var pingId = 0L
+                while (togetherOnlineHost === host) {
+                    val now = android.os.SystemClock.elapsedRealtime()
+                    host.sendHeartbeat(sessionId = sessionId, pingId = pingId++, clientElapsedRealtimeMs = now)
+                    kotlinx.coroutines.delay(2000)
+                }
+            }
+    }
+
     private suspend fun stopTogetherInternal() {
         togetherBroadcastJob?.cancel()
         togetherBroadcastJob = null
@@ -4247,6 +4265,9 @@ class MusicService :
 
         togetherHeartbeatJob?.cancel()
         togetherHeartbeatJob = null
+
+        togetherHostHeartbeatJob?.cancel()
+        togetherHostHeartbeatJob = null
 
         togetherClock = null
         togetherSelfParticipantId = null

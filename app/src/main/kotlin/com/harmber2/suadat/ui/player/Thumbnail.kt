@@ -27,9 +27,13 @@ import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -42,6 +46,9 @@ import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PageSize
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -78,6 +85,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastForEach
+import androidx.compose.ui.util.lerp
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
@@ -88,18 +96,15 @@ import coil3.request.ImageRequest
 import coil3.request.SuccessResult
 import coil3.request.allowHardware
 import coil3.toBitmap
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.withContext
 import com.harmber2.suadat.LocalPlayerConnection
 import com.harmber2.suadat.R
 import com.harmber2.suadat.canvas.models.CanvasArtwork
-import com.harmber2.suadat.constants.HarmberCanvasKey
 import com.harmber2.suadat.constants.BackdropBlurAmountKey
 import com.harmber2.suadat.constants.BackdropEnabledKey
 import com.harmber2.suadat.constants.CropThumbnailToSquareKey
 import com.harmber2.suadat.constants.DisableBlurKey
 import com.harmber2.suadat.constants.EnableHapticFeedbackKey
+import com.harmber2.suadat.constants.HarmberCanvasKey
 import com.harmber2.suadat.constants.HidePlayerThumbnailKey
 import com.harmber2.suadat.constants.MaxCanvasCacheSizeKey
 import com.harmber2.suadat.constants.PlayerBackgroundStyle
@@ -116,6 +121,9 @@ import com.harmber2.suadat.ui.utils.highRes
 import com.harmber2.suadat.utils.rememberEnumPreference
 import com.harmber2.suadat.utils.rememberLowDataModeActive
 import com.harmber2.suadat.utils.rememberPreference
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import java.util.Locale
 import kotlin.math.abs
 
@@ -151,7 +159,7 @@ fun Thumbnail(
     val lowDataModeActive = rememberLowDataModeActive()
     val playerDesignStyle by rememberEnumPreference(
         key = PlayerDesignStyleKey,
-        defaultValue = PlayerDesignStyle.V7,
+        defaultValue = PlayerDesignStyle.V8,
     )
     val (maxCanvasCacheSize, _) =
         rememberPreference(
@@ -272,394 +280,494 @@ fun Thumbnail(
         }
     val currentMediaIndex = thumbnailPages.indexOfFirst { it.slotKey == "current" }
 
-    // OuterTune Snap behavior
-    val horizontalLazyGridItemWidthFactor = 1f
-    val thumbnailSnapLayoutInfoProvider =
-        remember(thumbnailLazyGridState) {
-            SnapLayoutInfoProvider(
-                lazyGridState = thumbnailLazyGridState,
-                positionInLayout = { layoutSize, itemSize ->
-                    (layoutSize * horizontalLazyGridItemWidthFactor / 2f - itemSize / 2f)
-                },
-                velocityThreshold = 500f,
-            )
+    if (playerDesignStyle == PlayerDesignStyle.AMBER) {
+        val pagerState = rememberPagerState(initialPage = currentMediaIndex.coerceAtLeast(0)) { thumbnailPages.size }
+
+        LaunchedEffect(currentMediaIndex) {
+            if (currentMediaIndex >= 0 && currentMediaIndex != pagerState.currentPage) {
+                pagerState.scrollToPage(currentMediaIndex)
+            }
         }
 
-    // Current item tracking
-    val currentItem by remember { derivedStateOf { thumbnailLazyGridState.firstVisibleItemIndex } }
-    val itemScrollOffset by remember { derivedStateOf { thumbnailLazyGridState.firstVisibleItemScrollOffset } }
+        // Preload next/prev thumbnails
+        LaunchedEffect(thumbnailPages) {
+            thumbnailPages.forEach { page ->
+                val thumbnailUrl = page.mediaItem.metadata?.thumbnailUrl?.highRes()
+                    ?: page.mediaItem.mediaMetadata.artworkUri?.toString()
+                if (thumbnailUrl != null) {
+                    val request = ImageRequest.Builder(context)
+                        .data(thumbnailUrl)
+                        .size(1080, 1080)
+                        .memoryCachePolicy(CachePolicy.ENABLED)
+                        .build()
+                    context.imageLoader.enqueue(request)
+                }
+            }
+        }
 
-    // Handle swipe to change song
-    LaunchedEffect(itemScrollOffset) {
-        if (!thumbnailLazyGridState.isScrollInProgress || !swipeThumbnail || itemScrollOffset != 0 ||
-            currentMediaIndex < 0
+        LaunchedEffect(pagerState.currentPage) {
+            if (pagerState.currentPage != currentMediaIndex && !pagerState.isScrollInProgress) {
+                if (pagerState.currentPage > currentMediaIndex && canSkipNext) {
+                    playerConnection.player.seekToNext()
+                } else if (pagerState.currentPage < currentMediaIndex && canSkipPrevious) {
+                    playerConnection.player.seekToPreviousMediaItem()
+                }
+            }
+        }
+
+        Box(
+            modifier = modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center,
         ) {
-            return@LaunchedEffect
-        }
+            HorizontalPager(
+                state = pagerState,
+                pageSize = PageSize.Fixed(240.dp),
+                contentPadding = PaddingValues(horizontal = 70.dp),
+                pageSpacing = 16.dp,
+                modifier = Modifier.fillMaxWidth().height(280.dp)
+            ) { pageIndex ->
+                val page = thumbnailPages[pageIndex]
+                val item = page.mediaItem
+                
+                val pageOffset = (
+                    (pagerState.currentPage - pageIndex) + pagerState
+                        .currentPageOffsetFraction
+                ).let { abs(it) }
 
-        if (currentItem > currentMediaIndex && canSkipNext) {
-            playerConnection.player.seekToNext()
-            if (com.harmber2.suadat.ui.screens.settings.DiscordPresenceManager
-                    .isRunning()
-            ) {
-                try {
-                    com.harmber2.suadat.ui.screens.settings.DiscordPresenceManager
-                        .restart()
-                } catch (_: Exception) {
+                val scale = lerp(
+                    start = 0.82f,
+                    stop = 1f,
+                    fraction = 1f - pageOffset.coerceIn(0f, 1f)
+                )
+
+                val alpha = lerp(
+                    start = 0.45f,
+                    stop = 1f,
+                    fraction = 1f - pageOffset.coerceIn(0f, 1f)
+                )
+
+                val blurRadius = lerp(
+                    start = 10f,
+                    stop = 0f,
+                    fraction = 1f - pageOffset.coerceIn(0f, 1f)
+                )
+
+                Box(
+                    modifier = Modifier
+                        .graphicsLayer {
+                            scaleX = scale
+                            scaleY = scale
+                            this.alpha = alpha
+                            if (blurRadius > 0.1f && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                renderEffect = BlurEffect(blurRadius, blurRadius)
+                            }
+                        }
+                        .size(240.dp)
+                        .clip(RoundedCornerShape(thumbnailCornerRadius.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                ) {
+                    val thumbnailUrl = item.metadata?.thumbnailUrl?.highRes()
+                        ?: item.mediaMetadata.artworkUri?.toString()
+                    
+                    AsyncImage(
+                        model = rememberOfflineArtworkImageRequest(thumbnailUrl),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
                 }
             }
-        } else if (currentItem < currentMediaIndex && canSkipPrevious) {
-            playerConnection.player.seekToPreviousMediaItem()
-            if (com.harmber2.suadat.ui.screens.settings.DiscordPresenceManager
-                    .isRunning()
+        }
+    } else {
+        // OuterTune Snap behavior
+        val horizontalLazyGridItemWidthFactor = 1f
+        val thumbnailSnapLayoutInfoProvider =
+            remember(thumbnailLazyGridState) {
+                SnapLayoutInfoProvider(
+                    lazyGridState = thumbnailLazyGridState,
+                    positionInLayout = { layoutSize, itemSize ->
+                        (layoutSize * horizontalLazyGridItemWidthFactor / 2f - itemSize / 2f)
+                    },
+                    velocityThreshold = 500f,
+                )
+            }
+
+        // Current item tracking
+        val currentItem by remember { derivedStateOf { thumbnailLazyGridState.firstVisibleItemIndex } }
+        val itemScrollOffset by remember { derivedStateOf { thumbnailLazyGridState.firstVisibleItemScrollOffset } }
+
+        // Handle swipe to change song
+        LaunchedEffect(itemScrollOffset) {
+            if (!thumbnailLazyGridState.isScrollInProgress || !swipeThumbnail || itemScrollOffset != 0 ||
+                currentMediaIndex < 0
             ) {
-                try {
-                    com.harmber2.suadat.ui.screens.settings.DiscordPresenceManager
-                        .restart()
-                } catch (_: Exception) {
+                return@LaunchedEffect
+            }
+
+            if (currentItem > currentMediaIndex && canSkipNext) {
+                playerConnection.player.seekToNext()
+                if (com.harmber2.suadat.ui.screens.settings.DiscordPresenceManager
+                        .isRunning()
+                ) {
+                    try {
+                        com.harmber2.suadat.ui.screens.settings.DiscordPresenceManager
+                            .restart()
+                    } catch (_: Exception) {
+                    }
+                }
+            } else if (currentItem < currentMediaIndex && canSkipPrevious) {
+                playerConnection.player.seekToPreviousMediaItem()
+                if (com.harmber2.suadat.ui.screens.settings.DiscordPresenceManager
+                        .isRunning()
+                ) {
+                    try {
+                        com.harmber2.suadat.ui.screens.settings.DiscordPresenceManager
+                            .restart()
+                    } catch (_: Exception) {
+                    }
                 }
             }
         }
-    }
 
-    // Update position when song changes
-    LaunchedEffect(mediaMetadata, currentMediaItem?.mediaId, canSkipPrevious, canSkipNext) {
-        val index = maxOf(0, currentMediaIndex)
-        if (index >= 0 && index < thumbnailPages.size) {
-            try {
-                thumbnailLazyGridState.animateScrollToItem(index)
-            } catch (e: Exception) {
+        // Update position when song changes
+        LaunchedEffect(mediaMetadata, currentMediaItem?.mediaId, canSkipPrevious, canSkipNext) {
+            val index = maxOf(0, currentMediaIndex)
+            if (index >= 0 && index < thumbnailPages.size) {
+                try {
+                    thumbnailLazyGridState.animateScrollToItem(index)
+                } catch (e: Exception) {
+                    thumbnailLazyGridState.scrollToItem(index)
+                }
+            }
+        }
+
+        LaunchedEffect(playerConnection.player.currentMediaItemIndex, currentMediaItem?.mediaId) {
+            val index = currentMediaIndex
+            if (index >= 0 && index != currentItem) {
                 thumbnailLazyGridState.scrollToItem(index)
             }
         }
-    }
 
-    LaunchedEffect(playerConnection.player.currentMediaItemIndex, currentMediaItem?.mediaId) {
-        val index = currentMediaIndex
-        if (index >= 0 && index != currentItem) {
-            thumbnailLazyGridState.scrollToItem(index)
-        }
-    }
+        // Seek on double tap
+        var showSeekEffect by remember { mutableStateOf(false) }
+        var seekDirection by remember { mutableStateOf("") }
+        val layoutDirection = LocalLayoutDirection.current
 
-    // Seek on double tap
-    var showSeekEffect by remember { mutableStateOf(false) }
-    var seekDirection by remember { mutableStateOf("") }
-    val layoutDirection = LocalLayoutDirection.current
-
-    Box(modifier = modifier) {
-        // Error view
-        AnimatedVisibility(
-            visible = error != null,
-            enter = fadeIn(),
-            exit = fadeOut(),
-            modifier =
-                Modifier
-                    .padding(32.dp)
-                    .align(Alignment.Center),
-        ) {
-            error?.let { playbackError ->
-                PlaybackError(
-                    error = playbackError,
-                    retry = {
-                        playerConnection.player.prepare()
-                        playerConnection.player.play()
-                    },
-                )
-            }
-        }
-
-        // Main thumbnail view
-        AnimatedVisibility(
-            visible = error == null,
-            enter = fadeIn(),
-            exit = fadeOut(),
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .statusBarsPadding(),
-        ) {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
+        Box(modifier = modifier) {
+            // Error view
+            AnimatedVisibility(
+                visible = error != null,
+                enter = fadeIn(),
+                exit = fadeOut(),
+                modifier =
+                    Modifier
+                        .padding(32.dp)
+                        .align(Alignment.Center),
             ) {
-                // Now Playing header
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.padding(horizontal = 32.dp, vertical = 16.dp),
-                ) {
-                    Text(
-                        text = stringResource(R.string.now_playing),
-                        style = MaterialTheme.typography.titleMedium,
-                        color = textBackgroundColor,
+                error?.let { playbackError ->
+                    PlaybackError(
+                        error = playbackError,
+                        retry = {
+                            playerConnection.player.prepare()
+                            playerConnection.player.play()
+                        },
                     )
-                    // Show album title or queue title
-                    val playingFrom = queueTitle ?: mediaMetadata?.album?.title
-                    if (!playingFrom.isNullOrBlank()) {
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = playingFrom,
-                            style = MaterialTheme.typography.titleMedium,
-                            color = textBackgroundColor.copy(alpha = 0.8f),
-                            maxLines = 1,
-                            modifier = Modifier.basicMarquee(),
-                        )
-                    }
                 }
+            }
 
-                // Thumbnail content
-                BoxWithConstraints(
-                    contentAlignment = Alignment.Center,
+            // Main thumbnail view
+            AnimatedVisibility(
+                visible = error == null,
+                enter = fadeIn(),
+                exit = fadeOut(),
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .statusBarsPadding(),
+            ) {
+                Column(
                     modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    val horizontalLazyGridItemWidth = maxWidth * horizontalLazyGridItemWidthFactor
-                    val containerMaxWidth = maxWidth
+                    // Now Playing header
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.padding(horizontal = 32.dp, vertical = 16.dp),
+                    ) {
+                        Text(
+                            text = stringResource(R.string.now_playing),
+                            style = MaterialTheme.typography.titleMedium,
+                            color = textBackgroundColor,
+                        )
+                        // Show album title or queue title
+                        val playingFrom = queueTitle ?: mediaMetadata?.album?.title
+                        if (!playingFrom.isNullOrBlank()) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = playingFrom,
+                                style = MaterialTheme.typography.titleMedium,
+                                color = textBackgroundColor.copy(alpha = 0.8f),
+                                maxLines = 1,
+                                modifier = Modifier.basicMarquee(),
+                            )
+                        }
+                    }
 
-                    LazyHorizontalGrid(
-                        state = thumbnailLazyGridState,
-                        rows = GridCells.Fixed(1),
-                        flingBehavior = rememberSnapFlingBehavior(thumbnailSnapLayoutInfoProvider),
-                        userScrollEnabled = swipeThumbnail && isPlayerExpanded, // Only allow swipe when player is expanded
+                    // Thumbnail content
+                    BoxWithConstraints(
+                        contentAlignment = Alignment.Center,
                         modifier = Modifier.fillMaxSize(),
                     ) {
-                        items(
-                            items = thumbnailPages,
-                            key = { page ->
-                                "${page.slotKey}:${page.windowIndex}:${page.mediaItem.mediaId.ifEmpty { "unknown" }}"
-                            },
-                            contentType = { "thumbnailPage" },
-                        ) { page ->
-                            val item = page.mediaItem
-                            val incrementalSeekSkipEnabled by rememberPreference(SeekExtraSeconds, defaultValue = false)
-                            var skipMultiplier by remember { mutableStateOf(1) }
-                            var lastTapTime by remember { mutableLongStateOf(0L) }
-                            val itemMetadata = remember(item) { item.metadata }
-                            val storefront =
-                                remember {
-                                    val country = Locale.getDefault().country
-                                    if (country.length == 2) country.lowercase(Locale.ROOT) else "us"
-                                }
-                            val shouldAnimateCanvas =
-                                archiveTuneCanvasEnabled &&
-                                    !lowDataModeActive &&
-                                    playerDesignStyle != PlayerDesignStyle.V7 &&
-                                    playerDesignStyle != PlayerDesignStyle.V8 &&
-                                    item.mediaId.isNotBlank() &&
-                                    item.mediaId == currentMediaItem?.mediaId
-                            var canvasArtwork by remember(item.mediaId) { mutableStateOf<CanvasArtwork?>(null) }
-                            var canvasFetchedAtMs by remember(item.mediaId) { mutableLongStateOf(0L) }
-                            var canvasFetchInFlight by remember(item.mediaId) { mutableStateOf(false) }
+                        val horizontalLazyGridItemWidth = maxWidth * horizontalLazyGridItemWidthFactor
+                        val containerMaxWidth = maxWidth
 
-                            LaunchedEffect(shouldAnimateCanvas) {
-                                if (!shouldAnimateCanvas) {
-                                    canvasArtwork = null
-                                    canvasFetchedAtMs = 0L
-                                    canvasFetchInFlight = false
-                                }
-                            }
-
-                            LaunchedEffect(shouldAnimateCanvas, item.mediaId) {
-                                if (!shouldAnimateCanvas) return@LaunchedEffect
-
-                                CanvasArtworkPlaybackCache.get(item.mediaId)?.let { cached ->
-                                    canvasArtwork = cached
-                                    canvasFetchedAtMs = System.currentTimeMillis()
-                                    canvasFetchInFlight = false
-                                    return@LaunchedEffect
-                                }
-
-                                val songTitleRaw =
-                                    itemMetadata
-                                        ?.title
-                                        ?.takeIf { it.isNotBlank() }
-                                        ?: item.mediaMetadata.title?.toString()
-                                        ?: return@LaunchedEffect
-
-                                val artistNameRaw =
-                                    itemMetadata
-                                        ?.artists
-                                        ?.firstOrNull()
-                                        ?.name
-                                        ?.takeIf { it.isNotBlank() }
-                                        ?: item.mediaMetadata.artist?.toString()
-                                        ?: item.mediaMetadata.subtitle?.toString()
-                                        ?: ""
-
-                                val now = System.currentTimeMillis()
-                                if (canvasFetchInFlight) return@LaunchedEffect
-                                canvasFetchInFlight = true
-
-                                val fetched =
-                                    withContext(Dispatchers.IO) {
-                                        fetchCanvasArtworkForPlayback(
-                                            songTitleRaw = songTitleRaw,
-                                            artistNameRaw = artistNameRaw,
-                                            storefront = storefront,
-                                            requireVertical = false,
-                                        )
+                        LazyHorizontalGrid(
+                            state = thumbnailLazyGridState,
+                            rows = GridCells.Fixed(1),
+                            flingBehavior = rememberSnapFlingBehavior(thumbnailSnapLayoutInfoProvider),
+                            userScrollEnabled = swipeThumbnail && isPlayerExpanded, // Only allow swipe when player is expanded
+                            modifier = Modifier.fillMaxSize(),
+                        ) {
+                            items(
+                                items = thumbnailPages,
+                                key = { page ->
+                                    "${page.slotKey}:${page.windowIndex}:${page.mediaItem.mediaId.ifEmpty { "unknown" }}"
+                                },
+                                contentType = { "thumbnailPage" },
+                            ) { page ->
+                                val item = page.mediaItem
+                                val incrementalSeekSkipEnabled by rememberPreference(SeekExtraSeconds, defaultValue = false)
+                                var skipMultiplier by remember { mutableStateOf(1) }
+                                var lastTapTime by remember { mutableLongStateOf(0L) }
+                                val itemMetadata = remember(item) { item.metadata }
+                                val storefront =
+                                    remember {
+                                        val country = Locale.getDefault().country
+                                        if (country.length == 2) country.lowercase(Locale.ROOT) else "us"
                                     }
-                                canvasFetchedAtMs = now
-                                canvasArtwork = fetched
-                                if (fetched != null) {
-                                    canvasArtwork = CanvasArtworkPlaybackCache.put(item.mediaId, fetched)
+                                val shouldAnimateCanvas =
+                                    archiveTuneCanvasEnabled &&
+                                        !lowDataModeActive &&
+                                        playerDesignStyle != PlayerDesignStyle.V7 &&
+                                        playerDesignStyle != PlayerDesignStyle.V8 &&
+                                        item.mediaId.isNotBlank() &&
+                                        item.mediaId == currentMediaItem?.mediaId
+                                var canvasArtwork by remember(item.mediaId) { mutableStateOf<CanvasArtwork?>(null) }
+                                var canvasFetchedAtMs by remember(item.mediaId) { mutableLongStateOf(0L) }
+                                var canvasFetchInFlight by remember(item.mediaId) { mutableStateOf(false) }
+
+                                LaunchedEffect(shouldAnimateCanvas) {
+                                    if (!shouldAnimateCanvas) {
+                                        canvasArtwork = null
+                                        canvasFetchedAtMs = 0L
+                                        canvasFetchInFlight = false
+                                    }
                                 }
-                                canvasFetchInFlight = false
-                            }
 
-                            Box(
-                                modifier =
-                                    Modifier
-                                        .width(horizontalLazyGridItemWidth)
-                                        .fillMaxSize()
-                                        .padding(horizontal = PlayerHorizontalPadding)
-                                        .pointerInput(Unit) {
-                                            detectTapGestures(
-                                                onDoubleTap = { offset ->
-                                                    if (enableHapticFeedback) {
-                                                        view.performHapticFeedback(
-                                                            android.view.HapticFeedbackConstants.CONTEXT_CLICK,
-                                                            android.view.HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING,
-                                                        )
-                                                    }
-                                                    val currentPosition = playerConnection.player.currentPosition
-                                                    val duration = playerConnection.player.duration
+                                LaunchedEffect(shouldAnimateCanvas, item.mediaId) {
+                                    if (!shouldAnimateCanvas) return@LaunchedEffect
 
-                                                    val now = System.currentTimeMillis()
-                                                    if (incrementalSeekSkipEnabled && now - lastTapTime < 1000) {
-                                                        skipMultiplier++
-                                                    } else {
-                                                        skipMultiplier = 1
-                                                    }
-                                                    lastTapTime = now
+                                    CanvasArtworkPlaybackCache.get(item.mediaId)?.let { cached ->
+                                        canvasArtwork = cached
+                                        canvasFetchedAtMs = System.currentTimeMillis()
+                                        canvasFetchInFlight = false
+                                        return@LaunchedEffect
+                                    }
 
-                                                    val skipAmount = 5000 * skipMultiplier
+                                    val songTitleRaw =
+                                        itemMetadata
+                                            ?.title
+                                            ?.takeIf { it.isNotBlank() }
+                                            ?: item.mediaMetadata.title?.toString()
+                                            ?: return@LaunchedEffect
 
-                                                    if ((layoutDirection == LayoutDirection.Ltr && offset.x < size.width / 2) ||
-                                                        (layoutDirection == LayoutDirection.Rtl && offset.x > size.width / 2)
-                                                    ) {
-                                                        playerConnection.player.seekTo(
-                                                            (currentPosition - skipAmount).coerceAtLeast(0),
-                                                        )
-                                                        seekDirection =
-                                                            context.getString(R.string.seek_backward_dynamic, skipAmount / 1000)
-                                                    } else {
-                                                        playerConnection.player.seekTo(
-                                                            (currentPosition + skipAmount).coerceAtMost(duration),
-                                                        )
-                                                        seekDirection = context.getString(R.string.seek_forward_dynamic, skipAmount / 1000)
-                                                    }
-                                                    // If a user double-tap skip lands on a new media item, restart presence manager to pick up artwork quickly
-                                                    if (com.harmber2.suadat.ui.screens.settings.DiscordPresenceManager
-                                                            .isRunning()
-                                                    ) {
-                                                        try {
-                                                            com.harmber2.suadat.ui.screens.settings.DiscordPresenceManager
-                                                                .restart()
-                                                        } catch (
-                                                            _: Exception,
-                                                        ) {
-                                                        }
-                                                    }
+                                    val artistNameRaw =
+                                        itemMetadata
+                                            ?.artists
+                                            ?.firstOrNull()
+                                            ?.name
+                                            ?.takeIf { it.isNotBlank() }
+                                            ?: item.mediaMetadata.artist?.toString()
+                                            ?: item.mediaMetadata.subtitle?.toString()
+                                            ?: ""
 
-                                                    showSeekEffect = true
-                                                },
+                                    val now = System.currentTimeMillis()
+                                    if (canvasFetchInFlight) return@LaunchedEffect
+                                    canvasFetchInFlight = true
+
+                                    val fetched =
+                                        withContext(Dispatchers.IO) {
+                                            fetchCanvasArtworkForPlayback(
+                                                songTitleRaw = songTitleRaw,
+                                                artistNameRaw = artistNameRaw,
+                                                storefront = storefront,
+                                                requireVertical = false,
                                             )
-                                        },
-                                contentAlignment = Alignment.Center,
-                            ) {
+                                        }
+                                    canvasFetchedAtMs = now
+                                    canvasArtwork = fetched
+                                    if (fetched != null) {
+                                        canvasArtwork = CanvasArtworkPlaybackCache.put(item.mediaId, fetched)
+                                    }
+                                    canvasFetchInFlight = false
+                                }
+
                                 Box(
                                     modifier =
                                         Modifier
-                                            .size(containerMaxWidth - (PlayerHorizontalPadding * 2))
-                                            .clip(RoundedCornerShape(thumbnailCornerRadius.dp)),
+                                            .width(horizontalLazyGridItemWidth)
+                                            .fillMaxSize()
+                                            .padding(horizontal = PlayerHorizontalPadding)
+                                            .pointerInput(Unit) {
+                                                detectTapGestures(
+                                                    onDoubleTap = { offset ->
+                                                        if (enableHapticFeedback) {
+                                                            view.performHapticFeedback(
+                                                                android.view.HapticFeedbackConstants.CONTEXT_CLICK,
+                                                                android.view.HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING,
+                                                            )
+                                                        }
+                                                        val currentPosition = playerConnection.player.currentPosition
+                                                        val duration = playerConnection.player.duration
+
+                                                        val now = System.currentTimeMillis()
+                                                        if (incrementalSeekSkipEnabled && now - lastTapTime < 1000) {
+                                                            skipMultiplier++
+                                                        } else {
+                                                            skipMultiplier = 1
+                                                        }
+                                                        lastTapTime = now
+
+                                                        val skipAmount = 5000 * skipMultiplier
+
+                                                        if ((layoutDirection == LayoutDirection.Ltr && offset.x < size.width / 2) ||
+                                                            (layoutDirection == LayoutDirection.Rtl && offset.x > size.width / 2)
+                                                        ) {
+                                                            playerConnection.player.seekTo(
+                                                                (currentPosition - skipAmount).coerceAtLeast(0),
+                                                            )
+                                                            seekDirection =
+                                                                context.getString(R.string.seek_backward_dynamic, skipAmount / 1000)
+                                                        } else {
+                                                            playerConnection.player.seekTo(
+                                                                (currentPosition + skipAmount).coerceAtMost(duration),
+                                                            )
+                                                            seekDirection = context.getString(R.string.seek_forward_dynamic, skipAmount / 1000)
+                                                        }
+                                                        // If a user double-tap skip lands on a new media item, restart presence manager to pick up artwork quickly
+                                                        if (com.harmber2.suadat.ui.screens.settings.DiscordPresenceManager
+                                                                .isRunning()
+                                                        ) {
+                                                            try {
+                                                                com.harmber2.suadat.ui.screens.settings.DiscordPresenceManager
+                                                                    .restart()
+                                                            } catch (
+                                                                _: Exception,
+                                                            ) {
+                                                            }
+                                                        }
+
+                                                        showSeekEffect = true
+                                                    },
+                                                )
+                                            },
+                                    contentAlignment = Alignment.Center,
                                 ) {
-                                    if (hidePlayerThumbnail) {
-                                        // Show app logo when thumbnail is hidden
-                                        Box(
-                                            modifier =
-                                                Modifier
-                                                    .fillMaxSize()
-                                                    .background(MaterialTheme.colorScheme.surfaceVariant),
-                                            contentAlignment = Alignment.Center,
-                                        ) {
-                                            Icon(
-                                                painter = painterResource(R.drawable.harmber_logo_custom),
-                                                contentDescription = stringResource(R.string.hide_player_thumbnail),
-                                                tint = textBackgroundColor.copy(alpha = 0.7f),
-                                                modifier = Modifier.size(120.dp),
-                                            )
-                                        }
-                                    } else {
-                                        val primaryCanvasUrl = canvasArtwork?.animated
-                                        val fallbackCanvasUrl = canvasArtwork?.videoUrl
-
-                                        val shouldCropArtwork =
-                                            cropThumbnailToSquare &&
-                                                playerDesignStyle != PlayerDesignStyle.V7 &&
-                                                playerDesignStyle != PlayerDesignStyle.V8
-
-                                        val thumbnailBgUrl =
-                                            item.metadata?.thumbnailUrl?.highRes()
-                                                ?: item.mediaMetadata.artworkUri?.toString()
-                                        val thumbnailBgRequest = rememberOfflineArtworkImageRequest(thumbnailBgUrl)
-                                        val thumbnailArtworkUrl =
-                                            item.metadata?.thumbnailUrl?.highRes()
-                                                ?: item.mediaMetadata.artworkUri?.toString()
-                                        val thumbnailArtworkRequest = rememberOfflineArtworkImageRequest(thumbnailArtworkUrl)
-                                        val thumbnailBgBlurEnabled = backdropEnabled && !disableBlur && backdropBlurAmount > 0
-
-                                        if (thumbnailBgBlurEnabled && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                            val blurRadiusPx = (backdropBlurAmount * 60 / 100f).coerceAtMost(60f)
-                                            AsyncImage(
-                                                model = thumbnailBgRequest,
-                                                contentDescription = null,
-                                                contentScale = ContentScale.FillBounds,
+                                    Box(
+                                        modifier =
+                                            Modifier
+                                                .size(containerMaxWidth - (PlayerHorizontalPadding * 2))
+                                                .clip(RoundedCornerShape(thumbnailCornerRadius.dp)),
+                                    ) {
+                                        if (hidePlayerThumbnail) {
+                                            // Show app logo when thumbnail is hidden
+                                            Box(
                                                 modifier =
                                                     Modifier
                                                         .fillMaxSize()
-                                                        .let { if (shouldCropArtwork) it.aspectRatio(1f) else it }
-                                                        .graphicsLayer(
-                                                            renderEffect = BlurEffect(radiusX = blurRadiusPx, radiusY = blurRadiusPx),
-                                                            alpha = 0.6f,
-                                                        ),
-                                            )
-                                        } else if (thumbnailBgBlurEnabled) {
-                                            ThumbnailBgBlurApi30(
-                                                imageUrl = thumbnailBgUrl,
-                                                blurAmount = backdropBlurAmount,
-                                                shouldCropArtwork = shouldCropArtwork,
-                                            )
+                                                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                                                contentAlignment = Alignment.Center,
+                                            ) {
+                                                Icon(
+                                                    painter = painterResource(R.drawable.harmber_logo_custom),
+                                                    contentDescription = stringResource(R.string.hide_player_thumbnail),
+                                                    tint = textBackgroundColor.copy(alpha = 0.7f),
+                                                    modifier = Modifier.size(120.dp),
+                                                )
+                                            }
                                         } else {
+                                            val primaryCanvasUrl = canvasArtwork?.animated
+                                            val fallbackCanvasUrl = canvasArtwork?.videoUrl
+
+                                            val shouldCropArtwork =
+                                                cropThumbnailToSquare &&
+                                                    playerDesignStyle != PlayerDesignStyle.V7 &&
+                                                    playerDesignStyle != PlayerDesignStyle.V8
+
+                                            val thumbnailBgUrl =
+                                                item.metadata?.thumbnailUrl?.highRes()
+                                                    ?: item.mediaMetadata.artworkUri?.toString()
+                                            val thumbnailBgRequest = rememberOfflineArtworkImageRequest(thumbnailBgUrl)
+                                            val thumbnailArtworkUrl =
+                                                item.metadata?.thumbnailUrl?.highRes()
+                                                    ?: item.mediaMetadata.artworkUri?.toString()
+                                            val thumbnailArtworkRequest = rememberOfflineArtworkImageRequest(thumbnailArtworkUrl)
+                                            val thumbnailBgBlurEnabled = backdropEnabled && !disableBlur && backdropBlurAmount > 0
+
+                                            if (thumbnailBgBlurEnabled && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                                val blurRadiusPx = (backdropBlurAmount * 60 / 100f).coerceAtMost(60f)
+                                                AsyncImage(
+                                                    model = thumbnailBgRequest,
+                                                    contentDescription = null,
+                                                    contentScale = ContentScale.FillBounds,
+                                                    modifier =
+                                                        Modifier
+                                                            .fillMaxSize()
+                                                            .let { if (shouldCropArtwork) it.aspectRatio(1f) else it }
+                                                            .graphicsLayer(
+                                                                renderEffect = BlurEffect(radiusX = blurRadiusPx, radiusY = blurRadiusPx),
+                                                                alpha = 0.6f,
+                                                            ),
+                                                )
+                                            } else if (thumbnailBgBlurEnabled) {
+                                                ThumbnailBgBlurApi30(
+                                                    imageUrl = thumbnailBgUrl,
+                                                    blurAmount = backdropBlurAmount,
+                                                    shouldCropArtwork = shouldCropArtwork,
+                                                )
+                                            } else {
+                                                AsyncImage(
+                                                    model = thumbnailBgRequest,
+                                                    contentDescription = null,
+                                                    contentScale = ContentScale.FillBounds,
+                                                    modifier =
+                                                        Modifier
+                                                            .fillMaxSize()
+                                                            .let { if (shouldCropArtwork) it.aspectRatio(1f) else it }
+                                                            .graphicsLayer(alpha = 0.6f),
+                                                )
+                                            }
+
                                             AsyncImage(
-                                                model = thumbnailBgRequest,
+                                                model = thumbnailArtworkRequest,
                                                 contentDescription = null,
-                                                contentScale = ContentScale.FillBounds,
+                                                contentScale = if (shouldCropArtwork) ContentScale.Crop else ContentScale.Fit,
                                                 modifier =
                                                     Modifier
                                                         .fillMaxSize()
-                                                        .let { if (shouldCropArtwork) it.aspectRatio(1f) else it }
-                                                        .graphicsLayer(alpha = 0.6f),
+                                                        .let { if (shouldCropArtwork) it.aspectRatio(1f) else it },
                                             )
-                                        }
 
-                                        AsyncImage(
-                                            model = thumbnailArtworkRequest,
-                                            contentDescription = null,
-                                            contentScale = if (shouldCropArtwork) ContentScale.Crop else ContentScale.Fit,
-                                            modifier =
-                                                Modifier
-                                                    .fillMaxSize()
-                                                    .let { if (shouldCropArtwork) it.aspectRatio(1f) else it },
-                                        )
-
-                                        if (shouldAnimateCanvas &&
-                                            (!primaryCanvasUrl.isNullOrBlank() || !fallbackCanvasUrl.isNullOrBlank())
-                                        ) {
-                                            CanvasArtworkPlayer(
-                                                primaryUrl = primaryCanvasUrl,
-                                                fallbackUrl = fallbackCanvasUrl,
-                                                isPlaying = isPlaying,
-                                                modifier = Modifier.fillMaxSize(),
-                                            )
+                                            if (shouldAnimateCanvas &&
+                                                (!primaryCanvasUrl.isNullOrBlank() || !fallbackCanvasUrl.isNullOrBlank())
+                                            ) {
+                                                CanvasArtworkPlayer(
+                                                    primaryUrl = primaryCanvasUrl,
+                                                    fallbackUrl = fallbackCanvasUrl,
+                                                    isPlaying = isPlaying,
+                                                    modifier = Modifier.fillMaxSize(),
+                                                )
+                                            }
                                         }
                                     }
                                 }
@@ -668,33 +776,33 @@ fun Thumbnail(
                     }
                 }
             }
-        }
 
-        // Seek effect
-        LaunchedEffect(showSeekEffect) {
-            if (showSeekEffect) {
-                delay(1000)
-                showSeekEffect = false
+            // Seek effect
+            LaunchedEffect(showSeekEffect) {
+                if (showSeekEffect) {
+                    delay(1000)
+                    showSeekEffect = false
+                }
             }
-        }
 
-        AnimatedVisibility(
-            visible = showSeekEffect,
-            enter = fadeIn(),
-            exit = fadeOut(),
-            modifier = Modifier.align(Alignment.Center),
-        ) {
-            Text(
-                text = seekDirection,
-                color = Color.White,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                modifier =
-                    Modifier
-                        .background(Color.Black.copy(alpha = 0.7f), RoundedCornerShape(8.dp))
-                        .padding(8.dp),
-            )
+            AnimatedVisibility(
+                visible = showSeekEffect,
+                enter = fadeIn(),
+                exit = fadeOut(),
+                modifier = Modifier.align(Alignment.Center),
+            ) {
+                Text(
+                    text = seekDirection,
+                    color = Color.White,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    modifier =
+                        Modifier
+                            .background(Color.Black.copy(alpha = 0.7f), RoundedCornerShape(8.dp))
+                            .padding(8.dp),
+                )
+            }
         }
     }
 }

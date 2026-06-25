@@ -172,7 +172,7 @@ fun LyricsSettings(
     val (enablePaxsenixSpotifyLyrics, onEnablePaxsenixSpotifyLyricsChange) =
         rememberPreference(
             key = EnablePaxsenixSpotifyLyricsKey,
-            defaultValue = true,
+            defaultValue = false,
         )
     val (enablePaxsenixMusixmatchLyrics, onEnablePaxsenixMusixmatchLyricsChange) =
         rememberPreference(

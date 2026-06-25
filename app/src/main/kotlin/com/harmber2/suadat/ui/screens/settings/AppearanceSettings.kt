@@ -155,7 +155,7 @@ fun AppearanceSettings(
     val (playerDesignStyle, onPlayerDesignStyleChange) =
         rememberEnumPreference(
             PlayerDesignStyleKey,
-            defaultValue = PlayerDesignStyle.V7,
+            defaultValue = PlayerDesignStyle.V8,
         )
     val (hidePlayerThumbnail, onHidePlayerThumbnailChange) =
         rememberPreference(
@@ -330,7 +330,7 @@ fun AppearanceSettings(
             it != PlayerBackgroundStyle.BLUR || Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
         }
     val isPlayerBackgroundStyleEnabled =
-        playerDesignStyle != PlayerDesignStyle.V7 && playerDesignStyle != PlayerDesignStyle.V8 && playerDesignStyle != PlayerDesignStyle.V9
+        playerDesignStyle != PlayerDesignStyle.V7 && playerDesignStyle != PlayerDesignStyle.V8 && playerDesignStyle != PlayerDesignStyle.V9 && playerDesignStyle != PlayerDesignStyle.AMBER
     val isSystemInDarkTheme = isSystemInDarkTheme()
     val useDarkTheme =
         remember(darkMode, isSystemInDarkTheme) {
@@ -593,6 +593,7 @@ fun AppearanceSettings(
                             PlayerDesignStyle.V7 -> stringResource(R.string.player_design_v7)
                             PlayerDesignStyle.V8 -> stringResource(R.string.player_design_v8)
                             PlayerDesignStyle.V9 -> stringResource(R.string.player_design_v9)
+                            PlayerDesignStyle.AMBER -> stringResource(R.string.player_design_amber)
                         }
                     },
                 )

@@ -94,7 +94,7 @@ fun PlayerSettings(
     val (lowDataMode, onLowDataModeChange) =
         rememberPreference(
             LowDataModeKey,
-            defaultValue = true,
+            defaultValue = false,
         )
     val (persistentQueue, onPersistentQueueChange) =
         rememberPreference(
@@ -114,7 +114,7 @@ fun PlayerSettings(
     val (audioNormalization, onAudioNormalizationChange) =
         rememberPreference(
             AudioNormalizationKey,
-            defaultValue = true,
+            defaultValue = false,
         )
     val (audioOffload, onAudioOffloadChange) =
         rememberPreference(
@@ -141,7 +141,7 @@ fun PlayerSettings(
     val (pauseOnDeviceMute, onPauseOnDeviceMuteChange) =
         rememberPreference(
             PauseOnDeviceMuteKey,
-            defaultValue = false,
+            defaultValue = true,
         )
     val (
         deviceMutePlaybackRecoveryVolume,

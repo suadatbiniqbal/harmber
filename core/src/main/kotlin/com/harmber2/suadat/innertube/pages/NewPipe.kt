@@ -43,10 +43,10 @@ private class NewPipeDownloaderImpl(
             .Builder()
             .proxy(proxy ?: Proxy.NO_PROXY)
             .retryOnConnectionFailure(true)
-            .connectTimeout(15, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
-            .writeTimeout(30, TimeUnit.SECONDS)
-            .callTimeout(45, TimeUnit.SECONDS)
+            .connectTimeout(5, TimeUnit.SECONDS)
+            .readTimeout(10, TimeUnit.SECONDS)
+            .writeTimeout(10, TimeUnit.SECONDS)
+            .callTimeout(15, TimeUnit.SECONDS)
             .build()
 
     @Throws(IOException::class, ReCaptchaException::class)
@@ -102,9 +102,9 @@ object NewPipeUtils {
             .Builder()
             .proxy(YouTube.streamOkHttpProxy)
             .retryOnConnectionFailure(true)
-            .connectTimeout(10, TimeUnit.SECONDS)
-            .readTimeout(10, TimeUnit.SECONDS)
-            .callTimeout(15, TimeUnit.SECONDS)
+            .connectTimeout(3, TimeUnit.SECONDS)
+            .readTimeout(3, TimeUnit.SECONDS)
+            .callTimeout(5, TimeUnit.SECONDS)
             .followRedirects(true)
             .followSslRedirects(true)
             .build()
@@ -141,20 +141,22 @@ object NewPipeUtils {
         runCatching {
             val normalizedQuery = query.normalized()
             val errors = mutableListOf<Throwable>()
-            val services =
-                listOf(
-                    ServiceList.Bandcamp to ExternalAudioService.BANDCAMP,
-                    ServiceList.SoundCloud to ExternalAudioService.SOUNDCLOUD,
-                )
+            
+            // Try Bandcamp first as it's more likely to have higher quality
+            resolveExternalAudioStream(
+                service = ServiceList.Bandcamp,
+                source = ExternalAudioService.BANDCAMP,
+                query = normalizedQuery,
+            ).onSuccess { return@runCatching it }
+                .onFailure { errors += it }
 
-            for ((service, source) in services) {
-                resolveExternalAudioStream(
-                    service = service,
-                    source = source,
-                    query = normalizedQuery,
-                ).onSuccess { return@runCatching it }
-                    .onFailure { errors += it }
-            }
+            // Fallback to SoundCloud
+            resolveExternalAudioStream(
+                service = ServiceList.SoundCloud,
+                source = ExternalAudioService.SOUNDCLOUD,
+                query = normalizedQuery,
+            ).onSuccess { return@runCatching it }
+                .onFailure { errors += it }
 
             throw IllegalStateException(
                 "No Bandcamp or SoundCloud stream found for ${normalizedQuery.title}",

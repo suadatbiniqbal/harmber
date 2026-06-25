@@ -54,6 +54,7 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
@@ -100,6 +101,8 @@ import androidx.media3.common.Player.STATE_ENDED
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import coil3.request.crossfade
 import me.saket.squiggles.SquigglySlider
 import com.harmber2.suadat.LocalPlayerConnection
 import com.harmber2.suadat.R
@@ -640,7 +643,7 @@ fun PlayerTopActions(
             }
         }
 
-        PlayerDesignStyle.V7, PlayerDesignStyle.V8, PlayerDesignStyle.V9 -> {
+        PlayerDesignStyle.V7, PlayerDesignStyle.V8, PlayerDesignStyle.V9, PlayerDesignStyle.AMBER -> {
             Unit
         }
     }
@@ -1699,7 +1702,7 @@ fun PlayerPlaybackControls(
             }
         }
 
-        PlayerDesignStyle.V7, PlayerDesignStyle.V8, PlayerDesignStyle.V9 -> {
+        PlayerDesignStyle.V7, PlayerDesignStyle.V8, PlayerDesignStyle.V9, PlayerDesignStyle.AMBER -> {
             Unit
         }
     }
@@ -3658,6 +3661,191 @@ private fun V9TransportButton(
 }
 
 @Composable
+fun AmberPlayerContent(
+    mediaMetadata: MediaMetadata,
+    queueTitle: String?,
+    playbackState: Int,
+    isPlaying: Boolean,
+    isLoading: Boolean,
+    canSkipPrevious: Boolean,
+    canSkipNext: Boolean,
+    currentSongLiked: Boolean,
+    sliderPosition: Long?,
+    position: Long,
+    duration: Long,
+    volume: Float,
+    playerConnection: PlayerConnection,
+    navController: NavController,
+    state: BottomSheetState,
+    menuState: MenuState,
+    bottomSheetPageState: BottomSheetPageState,
+    currentFormat: FormatEntity?,
+    onSliderValueChange: (Long) -> Unit,
+    onSliderValueChangeFinished: () -> Unit,
+    onVolumeChange: (Float) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val foreground = Color.White
+    val secondaryForeground = foreground.copy(alpha = 0.72f)
+    
+    val titleActions = rememberPlayerTitleActions(mediaMetadata, navController, state)
+    
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(horizontal = 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Thumbnail(
+            sliderPositionProvider = { sliderPosition },
+            isPlayerExpanded = state.isExpanded,
+            modifier = Modifier.weight(1f)
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = mediaMetadata.title,
+                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+                color = foreground,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.clickable { titleActions.onTitleClick() }
+            )
+            
+            Spacer(modifier = Modifier.height(4.dp))
+            
+            Text(
+                text = mediaMetadata.artists.joinToString { it.name },
+                style = MaterialTheme.typography.titleMedium,
+                color = secondaryForeground,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.clickable { 
+                    mediaMetadata.artists.firstOrNull()?.id?.let { titleActions.onArtistClick(it) }
+                }
+            )
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        PlayerSlider(
+            sliderStyle = SliderStyle.Wavy,
+            sliderPosition = sliderPosition,
+            position = position,
+            duration = duration,
+            isPlaying = isPlaying,
+            textButtonColor = foreground,
+            onValueChange = onSliderValueChange,
+            onValueChangeFinished = onSliderValueChangeFinished,
+        )
+
+        PlayerTimeLabel(
+            sliderPosition = sliderPosition,
+            position = position,
+            duration = duration,
+            textBackgroundColor = secondaryForeground,
+            showRemainingTime = true
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(
+                onClick = { playerConnection.player.shuffleModeEnabled = !playerConnection.player.shuffleModeEnabled }
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.shuffle),
+                    contentDescription = null,
+                    tint = if (playerConnection.player.shuffleModeEnabled) MaterialTheme.colorScheme.primary else foreground
+                )
+            }
+
+            IconButton(
+                onClick = { playerConnection.seekToPrevious() },
+                enabled = canSkipPrevious
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.skip_previous),
+                    contentDescription = null,
+                    tint = foreground,
+                    modifier = Modifier.size(32.dp)
+                )
+            }
+
+            Surface(
+                onClick = {
+                    if (playbackState == STATE_ENDED) {
+                        playerConnection.player.seekTo(0, 0)
+                        playerConnection.player.playWhenReady = true
+                    } else {
+                        playerConnection.player.togglePlayPause()
+                    }
+                },
+                shape = CircleShape,
+                color = foreground,
+                modifier = Modifier.size(72.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    if (isLoading) {
+                        CircularWavyProgressIndicator(
+                            modifier = Modifier.size(40.dp),
+                            color = Color.Black
+                        )
+                    } else {
+                        Icon(
+                            painter = painterResource(
+                                if (isPlaying) R.drawable.pause else R.drawable.play
+                            ),
+                            contentDescription = null,
+                            tint = Color.Black,
+                            modifier = Modifier.size(40.dp)
+                        )
+                    }
+                }
+            }
+
+            IconButton(
+                onClick = { playerConnection.seekToNext() },
+                enabled = canSkipNext
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.skip_next),
+                    contentDescription = null,
+                    tint = foreground,
+                    modifier = Modifier.size(32.dp)
+                )
+            }
+
+            IconButton(
+                onClick = { playerConnection.player.toggleRepeatMode() }
+            ) {
+                Icon(
+                    painter = painterResource(
+                        when (playerConnection.player.repeatMode) {
+                            Player.REPEAT_MODE_ONE -> R.drawable.repeat_one
+                            else -> R.drawable.repeat
+                        }
+                    ),
+                    contentDescription = null,
+                    tint = if (playerConnection.player.repeatMode != Player.REPEAT_MODE_OFF) MaterialTheme.colorScheme.primary else foreground
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
+    }
+}
+
+@Composable
 fun PlayerBackground(
     playerBackground: PlayerBackgroundStyle,
     mediaMetadata: MediaMetadata?,
@@ -3674,17 +3862,23 @@ fun PlayerBackground(
     Box(modifier = Modifier.fillMaxSize()) {
         when (playerBackground) {
             PlayerBackgroundStyle.BLUR -> {
+                val backgroundArtwork = remember(mediaMetadata?.thumbnailUrl) {
+                    mediaMetadata?.thumbnailUrl?.highRes()
+                }
                 AnimatedContent(
-                    targetState = mediaMetadata?.thumbnailUrl,
+                    targetState = backgroundArtwork,
                     transitionSpec = {
                         fadeIn(tween(1000)) togetherWith fadeOut(tween(1000))
                     },
-                    label = "",
+                    label = "PlayerBackgroundBlur",
                 ) { thumbnailUrl ->
                     if (thumbnailUrl != null) {
                         Box(modifier = Modifier.fillMaxSize()) {
                             AsyncImage(
-                                model = thumbnailUrl.highRes(),
+                                model = ImageRequest.Builder(LocalContext.current)
+                                    .data(thumbnailUrl)
+                                    .crossfade(true)
+                                    .build(),
                                 contentDescription = "Blurred background",
                                 contentScale = ContentScale.Crop,
                                 modifier =

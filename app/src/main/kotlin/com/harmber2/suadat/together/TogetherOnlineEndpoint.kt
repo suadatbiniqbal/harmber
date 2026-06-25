@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit
 
 object TogetherOnlineEndpoint {
     private const val EndpointSourceUrl =
-        "https://raw.githubusercontent.com/suadatbiniqbal/harmber/refs/heads/dev/serverharmber.txt"
+        "https://raw.githubusercontent.com/ArchiveTuneApp/ArchiveTune/refs/heads/main/ArchiveTuneKoiverseServer.txt"
 
     private const val CacheTtlMs: Long = 6 * 60 * 60 * 1000L
 
@@ -62,10 +62,10 @@ object TogetherOnlineEndpoint {
         }
 
         dataStore.edit { prefs ->
-            prefs[TogetherOnlineEndpointCacheKey] = "https://harmber-api.koiiverse.cloud"
+            prefs[TogetherOnlineEndpointCacheKey] = "https://archivetune-api.koiiverse.cloud"
             prefs[TogetherOnlineEndpointLastCheckedAtKey] = now
         }
-        return "https://harmber-api.koiiverse.cloud"
+        return "https://archivetune-api.koiiverse.cloud"
     }
 
     private suspend fun fetchEndpointFromSourceOrNull(): String? {

@@ -9,7 +9,6 @@
 
 package com.harmber2.suadat
 
-import com.harmber2.suadat.utils.AdManager
 import com.harmber2.suadat.utils.isTvDevice
 
 import android.Manifest
@@ -26,6 +25,7 @@ import android.provider.OpenableColumns
 import android.view.View
 import android.view.WindowManager
 import android.webkit.MimeTypeMap
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -202,6 +202,7 @@ import com.harmber2.suadat.constants.MiniPlayerBottomSpacing
 import com.harmber2.suadat.constants.MiniPlayerHeight
 import com.harmber2.suadat.constants.MiniPlayerLastAnchorKey
 import com.harmber2.suadat.constants.NavigationBarAnimationSpec
+import com.harmber2.suadat.constants.NavigationGlassmorphismKey
 import com.harmber2.suadat.constants.PauseSearchHistoryKey
 import com.harmber2.suadat.constants.PlayerBackgroundStyle
 import com.harmber2.suadat.constants.PlayerBackgroundStyleKey
@@ -255,7 +256,6 @@ import com.harmber2.suadat.ui.component.LocalBottomSheetPageState
 import com.harmber2.suadat.ui.component.LocalMenuState
 import com.harmber2.suadat.ui.component.MarkdownText
 import com.harmber2.suadat.ui.component.NetworkStatusBanner
-import com.harmber2.suadat.ui.component.SupportHarmberDialog
 import com.harmber2.suadat.ui.component.StarDialog
 import com.harmber2.suadat.ui.component.SpotifyConnectDialog
 import com.harmber2.suadat.ui.component.TopSearch
@@ -469,7 +469,6 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        AdManager.initialize(this)
         window.decorView.layoutDirection = View.LAYOUT_DIRECTION_LTR
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
@@ -711,7 +710,7 @@ class MainActivity : ComponentActivity() {
                 remember(darkTheme, isSystemInDarkTheme) {
                     if (darkTheme == DarkMode.AUTO) isSystemInDarkTheme else darkTheme == DarkMode.ON
                 }
-            val pureBlackEnabled by rememberPreference(PureBlackKey, defaultValue = false)
+            val pureBlackEnabled by rememberPreference(PureBlackKey, defaultValue = true)
             val pureBlack = pureBlackEnabled && useDarkTheme
 
             val customThemeSeedPalette =
@@ -872,6 +871,8 @@ class MainActivity : ComponentActivity() {
                             intent?.action == ACTION_MUSIC_RECOGNITION
                         }
 
+                    val (navigationGlassmorphism) = rememberPreference(NavigationGlassmorphismKey, defaultValue = false)
+
                     val topLevelScreens =
                         remember(navigationItems) {
                             navigationItems.map(Screens::route) + "settings"
@@ -977,7 +978,7 @@ class MainActivity : ComponentActivity() {
                     )
                     val playerDesignStyle by rememberEnumPreference(
                         key = PlayerDesignStyleKey,
-                        defaultValue = PlayerDesignStyle.V7,
+                        defaultValue = PlayerDesignStyle.V8,
                     )
 
                     val aodModeEnabled by remember(playerConnection) {
@@ -1339,7 +1340,6 @@ class MainActivity : ComponentActivity() {
 
                     var showStarDialog by remember { mutableStateOf(false) }
                     var showSpotifyConnectDialog by remember { mutableStateOf(false) }
-                    var showSupportDialog by remember { mutableStateOf(false) }
 
                     LaunchedEffect(Unit) {
                         delay(2000)
@@ -1362,32 +1362,22 @@ class MainActivity : ComponentActivity() {
                         // For now, if Spotify is shown, we wait for it to be handled before showing Star.
                         
                         if (!showSpotifyConnectDialog) {
-                            val currentTime = System.currentTimeMillis()
-                            val lastShown = withContext(Dispatchers.IO) {
-                                dataStore[LastSupportAdShownTimeKey] ?: 0L
-                            }
-                            
-                            // 6 hours = 21600000 ms
-                            if (currentTime - lastShown > 21600000L) {
-                                showSupportDialog = true
-                            } else {
-                                val shouldShowStar =
-                                    withContext(Dispatchers.IO) {
-                                        val hasPressed = dataStore[HasPressedStarKey] ?: false
-                                        val remindAfter = dataStore[RemindAfterKey] ?: 3
-                                        !hasPressed && (dataStore[LaunchCountKey] ?: 0) >= remindAfter
-                                    }
-
-                                if (shouldShowStar) {
-                                    var waited = 0L
-                                    val waitStep = 500L
-                                    val maxWait = 10_000L
-                                    while (bottomSheetPageState.isVisible && waited < maxWait) {
-                                        delay(waitStep)
-                                        waited += waitStep
-                                    }
-                                    showStarDialog = true
+                            val shouldShowStar =
+                                withContext(Dispatchers.IO) {
+                                    val hasPressed = dataStore[HasPressedStarKey] ?: false
+                                    val remindAfter = dataStore[RemindAfterKey] ?: 3
+                                    !hasPressed && (dataStore[LaunchCountKey] ?: 0) >= remindAfter
                                 }
+
+                            if (shouldShowStar) {
+                                var waited = 0L
+                                val waitStep = 500L
+                                val maxWait = 10_000L
+                                while (bottomSheetPageState.isVisible && waited < maxWait) {
+                                    delay(waitStep)
+                                    waited += waitStep
+                                }
+                                showStarDialog = true
                             }
                         }
 
@@ -1400,9 +1390,9 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                     
-                    // Re-check for star dialog after spotify or support dialog is closed
-                    LaunchedEffect(showSpotifyConnectDialog, showSupportDialog) {
-                        if (!showSpotifyConnectDialog && !showSupportDialog) {
+                    // Re-check for star dialog after spotify dialog is closed
+                    LaunchedEffect(showSpotifyConnectDialog) {
+                        if (!showSpotifyConnectDialog) {
                              val hasPressed = withContext(Dispatchers.IO) { dataStore[HasPressedStarKey] ?: false }
                              val remindAfter = withContext(Dispatchers.IO) { dataStore[RemindAfterKey] ?: 3 }
                              val launchCount = withContext(Dispatchers.IO) { dataStore[LaunchCountKey] ?: 0 }
@@ -1412,25 +1402,6 @@ class MainActivity : ComponentActivity() {
                                  showStarDialog = true
                              }
                         }
-                    }
-
-                    if (showSupportDialog) {
-                        SupportHarmberDialog(
-                            onDismissRequest = {
-                                coroutineScope.launch {
-                                    dataStore.edit { it[LastSupportAdShownTimeKey] = System.currentTimeMillis() }
-                                    showSupportDialog = false
-                                }
-                            },
-                            onWatchAdClick = {
-                                AdManager.showRewardedAd(this@MainActivity) {
-                                    coroutineScope.launch {
-                                        dataStore.edit { it[LastSupportAdShownTimeKey] = System.currentTimeMillis() }
-                                        showSupportDialog = false
-                                    }
-                                }
-                            }
-                        )
                     }
 
                     if (showSpotifyConnectDialog) {
@@ -2006,6 +1977,7 @@ class MainActivity : ComponentActivity() {
                                                             end = FloatingToolbarHorizontalPadding,
                                                             bottom = bottomInset + floatingBarsBottomPadding,
                                                         ).height(navVisibleHeight),
+                                                glassmorphism = navigationGlassmorphism,
                                                 onFabClick =
                                                     if (shouldShowLibraryCreatePlaylistButton) {
                                                         { showCreatePlaylistDialog = true }

@@ -339,79 +339,6 @@ fun BottomSheetPlayer(
 
     val playerConnection = LocalPlayerConnection.current ?: return
 
-    val playerDesignStyle by rememberEnumPreference(
-        key = PlayerDesignStyleKey,
-        defaultValue = PlayerDesignStyle.V7,
-    )
-
-    val storedPlayerBackground by rememberEnumPreference(
-        key = PlayerBackgroundStyleKey,
-        defaultValue = PlayerBackgroundStyle.DEFAULT,
-    )
-    val playerUsesFixedBackground =
-        playerDesignStyle == PlayerDesignStyle.V8 || playerDesignStyle == PlayerDesignStyle.V9
-    val playerBackground =
-        if (playerUsesFixedBackground) PlayerBackgroundStyle.DEFAULT else storedPlayerBackground
-
-    // Custom background preferences (image + effects)
-    val (playerCustomImageUri) = rememberPreference(PlayerCustomImageUriKey, "")
-    val (playerCustomBlur) = rememberPreference(PlayerCustomBlurKey, 0f)
-    val (playerCustomContrast) = rememberPreference(PlayerCustomContrastKey, 1f)
-    val (playerCustomBrightness) = rememberPreference(PlayerCustomBrightnessKey, 1f)
-
-    val (disableBlur) = rememberPreference(DisableBlurKey, true)
-    val (blurRadius) = rememberPreference(BlurRadiusKey, 48f)
-    val (backdropEnabled) = rememberPreference(BackdropEnabledKey, defaultValue = true)
-    val (backdropBlurAmount) = rememberPreference(BackdropBlurAmountKey, defaultValue = 60)
-    val (showCodecOnPlayer) = rememberPreference(booleanPreferencesKey("show_codec_on_player"), false)
-    val (incrementalSeekSkipEnabled) = rememberPreference(com.harmber2.suadat.constants.SeekExtraSeconds, defaultValue = false)
-    var keyboardSkipMultiplier by remember { mutableStateOf(1) }
-    var lastKeyboardTapTime by remember { mutableLongStateOf(0L) }
-
-    val playerButtonsStyle by rememberEnumPreference(
-        key = PlayerButtonsStyleKey,
-        defaultValue = PlayerButtonsStyle.DEFAULT,
-    )
-
-    val isSystemInDarkTheme = isSystemInDarkTheme()
-    val darkTheme by rememberEnumPreference(DarkModeKey, defaultValue = DarkMode.AUTO)
-    val useDarkTheme =
-        remember(darkTheme, isSystemInDarkTheme) {
-            if (darkTheme == DarkMode.AUTO) isSystemInDarkTheme else darkTheme == DarkMode.ON
-        }
-    val onBackgroundColor =
-        when (playerBackground) {
-            PlayerBackgroundStyle.DEFAULT -> {
-                MaterialTheme.colorScheme.secondary
-            }
-
-            else -> {
-                if (useDarkTheme) {
-                    MaterialTheme.colorScheme.onSurface
-                } else {
-                    MaterialTheme.colorScheme.onPrimary
-                }
-            }
-        }
-    val useBlackBackground =
-        remember(isSystemInDarkTheme, darkTheme, pureBlack) {
-            val useDarkTheme =
-                if (darkTheme == DarkMode.AUTO) isSystemInDarkTheme else darkTheme == DarkMode.ON
-            useDarkTheme && pureBlack
-        }
-    val backgroundColor =
-        if (useBlackBackground && state.value > state.collapsedBound) {
-            val progress =
-                ((state.value - state.collapsedBound) / (state.expandedBound - state.collapsedBound))
-                    .coerceIn(0f, 1f)
-            Color.Black.copy(alpha = progress)
-        } else {
-            val progress =
-                ((state.value - state.collapsedBound) / (state.expandedBound - state.collapsedBound))
-                    .coerceIn(0f, 1f)
-            MaterialTheme.colorScheme.surfaceContainer.copy(alpha = progress)
-        }
-
     val playbackState by playerConnection.playbackState.collectAsState()
     val isPlaying by playerConnection.isPlaying.collectAsState()
     val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
@@ -435,20 +362,6 @@ fun BottomSheetPlayer(
     val canSkipNext by playerConnection.canSkipNext.collectAsState()
 
     val aodModeEnabled by playerConnection.aodModeEnabled.collectAsStateWithLifecycle()
-    val (thumbnailCornerRadius) = rememberPreference(ThumbnailCornerRadiusKey, defaultValue = 8f)
-    val archiveTuneCanvasEnabled by rememberPreference(HarmberCanvasKey, true)
-    val lowDataModeActive = rememberLowDataModeActive()
-    val (maxCanvasCacheSize, _) =
-        rememberPreference(
-            key = MaxCanvasCacheSizeKey,
-            defaultValue = 256,
-        )
-
-    val sliderStyle by rememberEnumPreference(SliderStyleKey, SliderStyle.Simple)
-
-    LaunchedEffect(maxCanvasCacheSize) {
-        CanvasArtworkPlaybackCache.setMaxSize(maxCanvasCacheSize)
-    }
 
     var position by rememberSaveable(mediaMetadata?.id) {
         mutableLongStateOf(playerConnection.player.currentPosition)
@@ -468,6 +381,147 @@ fun BottomSheetPlayer(
 
     // Track loading state: when buffering or when user is seeking
     val isLoading = playbackState == STATE_BUFFERING || sliderPosition != null
+
+    val enrichedMetadata =
+        remember(mediaMetadata, currentSong) {
+            val meta = mediaMetadata ?: return@remember null
+            if (meta.album != null) return@remember meta
+            val dbAlbum = currentSong?.album
+            val dbAlbumId = currentSong?.song?.albumId
+            when {
+                dbAlbum != null -> {
+                    meta.copy(
+                        album = MediaMetadata.Album(id = dbAlbum.id, title = dbAlbum.title),
+                    )
+                }
+
+                dbAlbumId != null -> {
+                    meta.copy(
+                        album =
+                            MediaMetadata.Album(
+                                id = dbAlbumId,
+                                title = currentSong?.song?.albumName.orEmpty(),
+                            ),
+                    )
+                }
+
+                else -> {
+                    meta
+                }
+            }
+        }
+
+    val onSliderValueChange: (Long) -> Unit = {
+        isUserSeeking = true
+        sliderPosition = it
+    }
+    val onSliderValueChangeFinished: () -> Unit = {
+        sliderPosition?.let {
+            val isTransitioning = playerConnection.player.currentMediaItem?.mediaId != mediaMetadata?.id
+            if (isTransitioning) {
+                // During crossfade, we want to seek in the NEXT song (the one UI is showing)
+                // The easiest way is to skip to it and then seek
+                playerConnection.player.seekToNext()
+                playerConnection.player.seekTo(it)
+            } else {
+                playerConnection.player.seekTo(it)
+            }
+            position = it
+        }
+        isUserSeeking = false
+    }
+
+    val playerDesignStyle by rememberEnumPreference(
+        key = PlayerDesignStyleKey,
+        defaultValue = PlayerDesignStyle.V8,
+    )
+
+    val (showCodecOnPlayer) = rememberPreference(booleanPreferencesKey("show_codec_on_player"), false)
+
+    val sleepTimerEnabled =
+        remember(
+            playerConnection.service.sleepTimer.triggerTime,
+            playerConnection.service.sleepTimer.pauseWhenSongEnd,
+        ) {
+            playerConnection.service.sleepTimer.isActive
+        }
+
+    val dynamicQueuePeekHeight =
+        if (playerDesignStyle == PlayerDesignStyle.V5) {
+            0.dp
+        } else if (playerDesignStyle == PlayerDesignStyle.V9) {
+            88.dp +
+                (if (showCodecOnPlayer) 24.dp else 0.dp) +
+                (if (sleepTimerEnabled) 42.dp else 0.dp)
+        } else if (showCodecOnPlayer) {
+            88.dp
+        } else {
+            QueuePeekHeight
+        }
+
+    val dismissedBound = dynamicQueuePeekHeight + WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()
+
+    val queueSheetState =
+        rememberBottomSheetState(
+            dismissedBound = dismissedBound,
+            expandedBound = state.expandedBound,
+            collapsedBound = dismissedBound,
+            initialAnchor = 0,
+        )
+
+    val storedPlayerBackground by rememberEnumPreference(
+        key = PlayerBackgroundStyleKey,
+        defaultValue = PlayerBackgroundStyle.DEFAULT,
+    )
+    val playerUsesFixedBackground =
+        playerDesignStyle == PlayerDesignStyle.V8 || playerDesignStyle == PlayerDesignStyle.V9 || playerDesignStyle == PlayerDesignStyle.AMBER
+    val playerBackground =
+        if (playerUsesFixedBackground) PlayerBackgroundStyle.DEFAULT else storedPlayerBackground
+
+    // Custom background preferences (image + effects)
+    val (playerCustomImageUri) = rememberPreference(PlayerCustomImageUriKey, "")
+    val (playerCustomBlur) = rememberPreference(PlayerCustomBlurKey, 0f)
+    val (playerCustomContrast) = rememberPreference(PlayerCustomContrastKey, 1f)
+    val (playerCustomBrightness) = rememberPreference(PlayerCustomBrightnessKey, 1f)
+
+    val (disableBlur) = rememberPreference(DisableBlurKey, true)
+    val (blurRadius) = rememberPreference(BlurRadiusKey, 48f)
+    val (backdropEnabled) = rememberPreference(BackdropEnabledKey, defaultValue = true)
+    val (backdropBlurAmount) = rememberPreference(BackdropBlurAmountKey, defaultValue = 60)
+
+    val (incrementalSeekSkipEnabled) = rememberPreference(com.harmber2.suadat.constants.SeekExtraSeconds, defaultValue = false)
+    var keyboardSkipMultiplier by remember { mutableIntStateOf(1) }
+    var lastKeyboardTapTime by remember { mutableLongStateOf(0L) }
+
+    val playerButtonsStyle by rememberEnumPreference(
+        key = PlayerButtonsStyleKey,
+        defaultValue = PlayerButtonsStyle.DEFAULT,
+    )
+
+    val isSystemInDarkTheme = isSystemInDarkTheme()
+    val darkTheme by rememberEnumPreference(DarkModeKey, defaultValue = DarkMode.AUTO)
+
+    val (thumbnailCornerRadius) = rememberPreference(ThumbnailCornerRadiusKey, defaultValue = 8f)
+    val archiveTuneCanvasEnabled by rememberPreference(HarmberCanvasKey, true)
+    val lowDataModeActive = rememberLowDataModeActive()
+    val (maxCanvasCacheSize, _) =
+        rememberPreference(
+            key = MaxCanvasCacheSizeKey,
+            defaultValue = 256,
+        )
+    val sliderStyle by rememberEnumPreference(SliderStyleKey, SliderStyle.Simple)
+
+
+    val useBlackBackground =
+        remember(isSystemInDarkTheme, darkTheme, pureBlack) {
+            val useDarkTheme =
+                if (darkTheme == DarkMode.AUTO) isSystemInDarkTheme else darkTheme == DarkMode.ON
+            useDarkTheme && pureBlack
+        }
+
+    LaunchedEffect(maxCanvasCacheSize) {
+        CanvasArtworkPlaybackCache.setMaxSize(maxCanvasCacheSize)
+    }
 
     var gradientColors by remember {
         mutableStateOf<List<Color>>(emptyList())
@@ -619,13 +673,6 @@ fun BottomSheetPlayer(
         .getDownload(mediaMetadata?.id ?: "")
         .collectAsState(initial = null)
 
-    val sleepTimerEnabled =
-        remember(
-            playerConnection.service.sleepTimer.triggerTime,
-            playerConnection.service.sleepTimer.pauseWhenSongEnd,
-        ) {
-            playerConnection.service.sleepTimer.isActive
-        }
 
     var sleepTimerTimeLeft by remember {
         mutableLongStateOf(0L)
@@ -768,28 +815,6 @@ fun BottomSheetPlayer(
         }
     }
 
-    val dynamicQueuePeekHeight =
-        if (playerDesignStyle == PlayerDesignStyle.V5) {
-            0.dp
-        } else if (playerDesignStyle == PlayerDesignStyle.V9) {
-            88.dp +
-                (if (showCodecOnPlayer) 24.dp else 0.dp) +
-                (if (sleepTimerEnabled) 42.dp else 0.dp)
-        } else if (showCodecOnPlayer) {
-            88.dp
-        } else {
-            QueuePeekHeight
-        }
-
-    val dismissedBound = dynamicQueuePeekHeight + WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()
-
-    val queueSheetState =
-        rememberBottomSheetState(
-            dismissedBound = dismissedBound,
-            expandedBound = state.expandedBound,
-            collapsedBound = dismissedBound,
-            initialAnchor = 0,
-        )
 
     var isLyricsScreenVisible by rememberSaveable {
         mutableStateOf(false)
@@ -970,25 +995,6 @@ fun BottomSheetPlayer(
             )
         },
     ) {
-        val onSliderValueChange: (Long) -> Unit = {
-            isUserSeeking = true
-            sliderPosition = it
-        }
-        val onSliderValueChangeFinished: () -> Unit = {
-            sliderPosition?.let {
-                val isTransitioning = playerConnection.player.currentMediaItem?.mediaId != mediaMetadata?.id
-                if (isTransitioning) {
-                    // During crossfade, we want to seek in the NEXT song (the one UI is showing)
-                    // The easiest way is to skip to it and then seek
-                    playerConnection.player.seekToNext()
-                    playerConnection.player.seekTo(it)
-                } else {
-                    playerConnection.player.seekTo(it)
-                }
-                position = it
-            }
-            isUserSeeking = false
-        }
         val seekEnabled = duration > 0L && duration != C.TIME_UNSET
         val updatedOnSliderValueChange by rememberUpdatedState(onSliderValueChange)
         val updatedOnSliderValueChangeFinished by rememberUpdatedState(onSliderValueChangeFinished)
@@ -998,34 +1004,6 @@ fun BottomSheetPlayer(
                 queueWindows.getOrNull(currentWindowIndex + 1)?.mediaItem?.metadata
             }
 
-        val enrichedMetadata =
-            remember(mediaMetadata, currentSong) {
-                val meta = mediaMetadata ?: return@remember null
-                if (meta.album != null) return@remember meta
-                val dbAlbum = currentSong?.album
-                val dbAlbumId = currentSong?.song?.albumId
-                when {
-                    dbAlbum != null -> {
-                        meta.copy(
-                            album = MediaMetadata.Album(id = dbAlbum.id, title = dbAlbum.title),
-                        )
-                    }
-
-                    dbAlbumId != null -> {
-                        meta.copy(
-                            album =
-                                MediaMetadata.Album(
-                                    id = dbAlbumId,
-                                    title = currentSong?.song?.albumName.orEmpty(),
-                                ),
-                        )
-                    }
-
-                    else -> {
-                        meta
-                    }
-                }
-            }
 
         val storefront =
             remember {
@@ -1196,7 +1174,8 @@ fun BottomSheetPlayer(
             playerDesignStyle != PlayerDesignStyle.V5 &&
             playerDesignStyle != PlayerDesignStyle.V7 &&
             playerDesignStyle != PlayerDesignStyle.V8 &&
-            playerDesignStyle != PlayerDesignStyle.V9
+            playerDesignStyle != PlayerDesignStyle.V9 &&
+            playerDesignStyle != PlayerDesignStyle.AMBER
         ) {
             PlayerBackground(
                 playerBackground = playerBackground,
@@ -1220,12 +1199,10 @@ fun BottomSheetPlayer(
                     val littleTextColor = MaterialTheme.colorScheme.onPrimaryContainer
                     val displayPositionMs = sliderPosition ?: position
                     val progressFraction =
-                        remember(displayPositionMs, duration) {
-                            if (duration <= 0L || duration == C.TIME_UNSET) {
-                                0f
-                            } else {
-                                (displayPositionMs.toFloat() / duration.toFloat()).coerceIn(0f, 1f)
-                            }
+                        if (duration <= 0L || duration == C.TIME_UNSET) {
+                            0f
+                        } else {
+                            (displayPositionMs.toFloat() / duration.toFloat()).coerceIn(0f, 1f)
                         }
                     val progressOverlayColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.28f)
 
@@ -1434,6 +1411,41 @@ fun BottomSheetPlayer(
                                     ).nestedScroll(state.preUpPostDownNestedScrollConnection),
                         )
                     }
+                } else if (playerDesignStyle == PlayerDesignStyle.AMBER) {
+                    enrichedMetadata?.let { metadata ->
+                        AmberPlayerContent(
+                            mediaMetadata = metadata,
+                            queueTitle = queueTitle,
+                            playbackState = playbackState,
+                            isPlaying = isPlaying,
+                            isLoading = isLoading,
+                            canSkipPrevious = canSkipPrevious,
+                            canSkipNext = canSkipNext,
+                            currentSongLiked = currentSongLiked,
+                            sliderPosition = sliderPosition,
+                            position = position,
+                            duration = duration,
+                            volume = deviceMusicVolumeController.volumeFraction,
+                            playerConnection = playerConnection,
+                            navController = navController,
+                            state = state,
+                            menuState = menuState,
+                            bottomSheetPageState = bottomSheetPageState,
+                            currentFormat = currentFormat,
+                            onSliderValueChange = onSliderValueChange,
+                            onSliderValueChangeFinished = onSliderValueChangeFinished,
+                            onVolumeChange = onPlayerVolumeChange,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(bottom = queueSheetState.collapsedBound)
+                                .windowInsetsPadding(
+                                    WindowInsets.systemBars.only(
+                                        WindowInsetsSides.Top + WindowInsetsSides.Horizontal,
+                                    ),
+                                )
+                                .nestedScroll(state.preUpPostDownNestedScrollConnection),
+                        )
+                    }
                 } else {
                     Row(
                         modifier =
@@ -1478,12 +1490,10 @@ fun BottomSheetPlayer(
                     val littleTextColor = MaterialTheme.colorScheme.onPrimaryContainer
                     val displayPositionMs = sliderPosition ?: position
                     val progressFraction =
-                        remember(displayPositionMs, duration) {
-                            if (duration <= 0L || duration == C.TIME_UNSET) {
-                                0f
-                            } else {
-                                (displayPositionMs.toFloat() / duration.toFloat()).coerceIn(0f, 1f)
-                            }
+                        if (duration <= 0L || duration == C.TIME_UNSET) {
+                            0f
+                        } else {
+                            (displayPositionMs.toFloat() / duration.toFloat()).coerceIn(0f, 1f)
                         }
                     val progressOverlayColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.28f)
                     val seekEnabled = duration > 0L && duration != C.TIME_UNSET
@@ -1689,6 +1699,41 @@ fun BottomSheetPlayer(
                                             WindowInsetsSides.Top + WindowInsetsSides.Horizontal,
                                         ),
                                     ).nestedScroll(state.preUpPostDownNestedScrollConnection),
+                        )
+                    }
+                } else if (playerDesignStyle == PlayerDesignStyle.AMBER) {
+                    enrichedMetadata?.let { metadata ->
+                        AmberPlayerContent(
+                            mediaMetadata = metadata,
+                            queueTitle = queueTitle,
+                            playbackState = playbackState,
+                            isPlaying = isPlaying,
+                            isLoading = isLoading,
+                            canSkipPrevious = canSkipPrevious,
+                            canSkipNext = canSkipNext,
+                            currentSongLiked = currentSongLiked,
+                            sliderPosition = sliderPosition,
+                            position = position,
+                            duration = duration,
+                            volume = deviceMusicVolumeController.volumeFraction,
+                            playerConnection = playerConnection,
+                            navController = navController,
+                            state = state,
+                            menuState = menuState,
+                            bottomSheetPageState = bottomSheetPageState,
+                            currentFormat = currentFormat,
+                            onSliderValueChange = onSliderValueChange,
+                            onSliderValueChangeFinished = onSliderValueChangeFinished,
+                            onVolumeChange = onPlayerVolumeChange,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(bottom = queueSheetState.collapsedBound)
+                                .windowInsetsPadding(
+                                    WindowInsets.systemBars.only(
+                                        WindowInsetsSides.Top + WindowInsetsSides.Horizontal,
+                                    ),
+                                )
+                                .nestedScroll(state.preUpPostDownNestedScrollConnection),
                         )
                     }
                 } else {
@@ -2109,8 +2154,8 @@ private fun V7PlayerBackdrop(
                                 val cropHeight = (fullBitmap.height - startY).coerceAtLeast(1)
                                 android.graphics.Bitmap.createBitmap(fullBitmap, 0, startY, fullBitmap.width, cropHeight)
                             } else {
-                                fullBitmap
-                            }
+                        fullBitmap
+                    }
                         val palette =
                             Palette
                                 .from(bitmapForPalette)

@@ -186,7 +186,7 @@ fun Queue(
 
     val playerDesignStyle by rememberEnumPreference(
         key = PlayerDesignStyleKey,
-        defaultValue = PlayerDesignStyle.V7,
+        defaultValue = PlayerDesignStyle.V8,
     )
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -562,7 +562,7 @@ fun Queue(
                     )
                 }
 
-                PlayerDesignStyle.V7, PlayerDesignStyle.V8 -> {
+                PlayerDesignStyle.V7, PlayerDesignStyle.V8, PlayerDesignStyle.AMBER -> {
                     val audioManager = remember { context.getSystemService(Context.AUDIO_SERVICE) as android.media.AudioManager }
                     val activeDevice =
                         remember(audioManager) {

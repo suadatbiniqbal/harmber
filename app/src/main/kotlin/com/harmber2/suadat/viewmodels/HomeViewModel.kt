@@ -38,6 +38,7 @@ import com.harmber2.suadat.db.entities.*
 import com.harmber2.suadat.extensions.toEnum
 import com.harmber2.suadat.innertube.YouTube
 import com.harmber2.suadat.innertube.models.AccountChannel
+import com.harmber2.suadat.innertube.models.ArtistItem
 import com.harmber2.suadat.innertube.models.PlaylistItem
 import com.harmber2.suadat.innertube.models.WatchEndpoint
 import com.harmber2.suadat.innertube.models.YTItem
@@ -57,6 +58,7 @@ import com.harmber2.suadat.utils.dataStore
 import com.harmber2.suadat.utils.get
 import com.harmber2.suadat.utils.parseSpeedDialPins
 import com.harmber2.suadat.utils.reportException
+import com.harmber2.suadat.ui.utils.resize
 import com.harmber2.suadat.spotify.SpotifyCanvasManager
 import com.harmber2.suadat.spotify.models.SpotifyTrack
 import com.harmber2.suadat.utils.toPlaybackAuthState
@@ -115,6 +117,10 @@ class HomeViewModel
         val speedDialItems = MutableStateFlow<List<LocalItem>>(emptyList())
         val forgottenFavorites = MutableStateFlow<List<Song>?>(null)
         val keepListening = MutableStateFlow<List<LocalItem>?>(null)
+        val mostPlayedArtists = MutableStateFlow<List<Artist>>(emptyList())
+        val mostPlayedAlbums = MutableStateFlow<List<Album>>(emptyList())
+        val albumRecommendations = MutableStateFlow<List<Album>>(emptyList())
+        val randomAlbums = MutableStateFlow<List<Album>>(emptyList())
         val similarRecommendations = MutableStateFlow<List<SimilarRecommendation>?>(null)
         val spotifyRecommendations = MutableStateFlow<List<SpotifyTrack>>(emptyList())
         val accountPlaylists = MutableStateFlow<List<PlaylistItem>?>(null)
@@ -298,6 +304,68 @@ class HomeViewModel
                                 .first()
                                 .shuffled()
                                 .take(20)
+                    }
+
+                    launch {
+                        database
+                            .mostPlayedArtists(fromTimeStamp, limit = 15)
+                            .collect { artists ->
+                                mostPlayedArtists.value = artists
+                                // Fetch missing artist thumbnails
+                                artists.forEach { artist ->
+                                    val currentThumbnailUrl = artist.artist.thumbnailUrl
+                                    if (currentThumbnailUrl == null || currentThumbnailUrl.contains("yt3.ggpht.com")) {
+                                        viewModelScope.launch(Dispatchers.IO) {
+                                            YouTube.artist(artist.id).onSuccess { page ->
+                                                database.query {
+                                                    update(
+                                                        artist.artist.copy(
+                                                            thumbnailUrl = page.artist.thumbnail?.resize(1080, 1080)
+                                                        )
+                                                    )
+                                                }
+                                            }.onFailure {
+                                                // Fallback to search if artist page fails
+                                                YouTube.search(artist.artist.name, YouTube.SearchFilter.FILTER_ARTIST).onSuccess { searchResult ->
+                                                    searchResult.items.filterIsInstance<ArtistItem>().firstOrNull()?.let { searchArtist ->
+                                                        database.query {
+                                                            update(
+                                                                artist.artist.copy(
+                                                                    thumbnailUrl = searchArtist.thumbnail?.resize(1080, 1080)
+                                                                )
+                                                            )
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                    }
+
+                    launch {
+                        database
+                            .mostPlayedAlbums(fromTimeStamp, limit = 20)
+                            .collect { mostPlayedAlbums.value = it }
+                    }
+
+                    launch {
+                        database
+                            .mostPlayedAlbums(0, limit = 50)
+                            .first()
+                            .shuffled()
+                            .take(15)
+                            .let { albumRecommendations.value = it }
+                    }
+
+                    launch {
+                        database
+                            .albumsByCreateDateAsc()
+                            .first()
+                            .shuffled()
+                            .take(50)
+                            .let { randomAlbums.value = it }
                     }
 
                     launch {

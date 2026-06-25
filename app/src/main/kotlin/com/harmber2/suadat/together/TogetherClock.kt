@@ -27,7 +27,7 @@ class TogetherClock {
     ): TogetherClockSnapshot {
         val rtt = (receivedAtElapsedMs - sentAtElapsedMs).coerceAtLeast(0L)
         val mid = sentAtElapsedMs + rtt / 2L
-        val newOffset = (serverElapsedMs - mid).toDouble()
+        val newOffset = (mid - serverElapsedMs).toDouble()
 
         val rttAlpha = 0.15
         val offsetAlpha = if (newOffset.absoluteValue > 1500.0) 0.6 else 0.2
