@@ -111,6 +111,8 @@ import com.harmber2.suadat.ui.component.LocalMenuState
 import com.harmber2.suadat.ui.menu.PlaylistMenu
 import com.harmber2.suadat.ui.menu.YouTubePlaylistMenu
 import com.harmber2.suadat.ui.theme.PlayerColorExtractor
+import com.harmber2.suadat.ui.utils.rememberArtworkCardColor
+import com.harmber2.suadat.ui.utils.rememberArtworkGradient
 import com.harmber2.suadat.utils.rememberEnumPreference
 import com.harmber2.suadat.utils.rememberPreference
 import com.harmber2.suadat.viewmodels.LibraryPlaylistsViewModel
@@ -466,91 +468,6 @@ private fun triggerPlaylistMenu(
                 coroutineScope = coroutineScope,
                 onDismiss = menuState::dismiss,
             )
-        }
-    }
-}
-
-@Composable
-fun rememberArtworkGradient(
-    thumbnailUrl: String?,
-    fallbackColor: Color = MaterialTheme.colorScheme.surfaceVariant,
-): List<Color> {
-    val context = LocalContext.current
-    var colors by remember(thumbnailUrl) { mutableStateOf(listOf(fallbackColor, fallbackColor.copy(alpha = 0.5f))) }
-
-    LaunchedEffect(thumbnailUrl) {
-        if (thumbnailUrl == null) return@LaunchedEffect
-        val request =
-            ImageRequest
-                .Builder(context)
-                .data(thumbnailUrl)
-                .size(PlayerColorExtractor.Config.IMAGE_SIZE, PlayerColorExtractor.Config.IMAGE_SIZE)
-                .allowHardware(false)
-                .build()
-
-        val result =
-            runCatching {
-                context.imageLoader.execute(request)
-            }.getOrNull()
-
-        if (result != null) {
-            val bitmap = result.image?.toBitmap()
-            if (bitmap != null) {
-                val palette =
-                    withContext(Dispatchers.Default) {
-                        Palette
-                            .from(bitmap)
-                            .maximumColorCount(PlayerColorExtractor.Config.MAX_COLOR_COUNT)
-                            .resizeBitmapArea(PlayerColorExtractor.Config.BITMAP_AREA)
-                            .generate()
-                    }
-
-                val extractedColors =
-                    PlayerColorExtractor.extractGradientColors(
-                        palette = palette,
-                        fallbackColor = fallbackColor.toArgb(),
-                    )
-                if (extractedColors.size >= 2) {
-                    colors = extractedColors
-                } else if (extractedColors.isNotEmpty()) {
-                    colors = listOf(extractedColors[0], extractedColors[0].copy(alpha = 0.5f))
-                }
-            }
-        }
-    }
-    return colors
-}
-
-@Composable
-fun rememberArtworkCardColor(
-    thumbnailUrl: String?,
-    fallbackColor: Color = MaterialTheme.colorScheme.surfaceVariant,
-): Color {
-    val gradientColors =
-        rememberArtworkGradient(
-            thumbnailUrl = thumbnailUrl,
-            fallbackColor = fallbackColor,
-        )
-    val surfaceColor = MaterialTheme.colorScheme.surface
-    val useDarkTheme = remember(surfaceColor) { ColorUtils.calculateLuminance(surfaceColor.toArgb()) < 0.5 }
-    val pureBlack by rememberPreference(PureBlackKey, defaultValue = false)
-
-    return remember(gradientColors, useDarkTheme, pureBlack) {
-        val baseColor = gradientColors.firstOrNull() ?: fallbackColor
-        val baseArgb = baseColor.toArgb()
-        val hsv = FloatArray(3)
-        android.graphics.Color.colorToHSV(baseArgb, hsv)
-        val hue = hsv[0]
-
-        if (useDarkTheme) {
-            // Issue 6/3 fix: increased brightness for visibility in pure black mode
-            val s = (hsv[1] * 0.45f).coerceIn(0.06f, 0.20f)
-            val v = if (pureBlack) 0.18f else 0.12f
-            Color(android.graphics.Color.HSVToColor(floatArrayOf(hue, s, v)))
-        } else {
-            val s = (hsv[1] * 0.30f).coerceIn(0.03f, 0.12f)
-            val v = 0.95f
-            Color(android.graphics.Color.HSVToColor(floatArrayOf(hue, s, v)))
         }
     }
 }

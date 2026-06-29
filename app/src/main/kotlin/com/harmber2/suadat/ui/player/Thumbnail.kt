@@ -769,6 +769,15 @@ fun Thumbnail(
                                                 )
                                             }
                                         }
+
+                                        // Overlay Ad
+                                        val ads by com.harmber2.suadat.models.AdManager.ads.collectAsState()
+                                        if (item.mediaId == currentMediaItem?.mediaId) {
+                                            com.harmber2.suadat.ui.screens.BannerAdOverlay(
+                                                ads = ads,
+                                                modifier = Modifier.fillMaxSize()
+                                            )
+                                        }
                                     }
                                 }
                             }

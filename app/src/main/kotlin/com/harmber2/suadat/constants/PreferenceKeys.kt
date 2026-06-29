@@ -183,6 +183,7 @@ val TogetherDefaultPortKey = intPreferencesKey("together_default_port")
 val TogetherAllowGuestsToAddTracksKey = booleanPreferencesKey("together_allow_guests_add_tracks")
 val TogetherAllowGuestsToControlPlaybackKey = booleanPreferencesKey("together_allow_guests_control_playback")
 val TogetherRequireHostApprovalToJoinKey = booleanPreferencesKey("together_require_host_approval_to_join")
+val TogetherBearerTokenKey = stringPreferencesKey("together_bearer_token")
 val TogetherLastJoinLinkKey = stringPreferencesKey("together_last_join_link")
 val TogetherWelcomeShownKey = booleanPreferencesKey("together_welcome_shown")
 
@@ -857,6 +858,9 @@ val DailyNightlyReleasesFingerprintKey = stringPreferencesKey("daily_nightly_rel
 
 val TogetherOnlineEndpointCacheKey = stringPreferencesKey("together_online_endpoint_cache")
 val TogetherOnlineEndpointLastCheckedAtKey = longPreferencesKey("together_online_endpoint_last_checked_at")
+
+val LastAdShownDateKey = stringPreferencesKey("last_ad_shown_date")
+val OverlayAdShowCountKey = intPreferencesKey("overlay_ad_show_count")
 
 enum class UpdateChannel {
     STABLE,

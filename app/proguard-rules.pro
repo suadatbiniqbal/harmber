@@ -154,3 +154,11 @@
 -dontwarn com.google.type.Date
 -dontwarn com.google.type.TimeOfDay$Builder
 -dontwarn com.google.type.TimeOfDay
+
+## Firebase Realtime Database
+# Keep classes and members used for serialization
+-keep class com.harmber2.suadat.models.BannerAd { *; }
+-keepclassmembers class com.harmber2.suadat.models.** {
+    *** get*();
+    void set*(***);
+}

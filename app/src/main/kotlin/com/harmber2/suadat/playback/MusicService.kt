@@ -120,6 +120,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import com.harmber2.suadat.MainActivity
 import com.harmber2.suadat.R
 import com.harmber2.suadat.constants.AudioNormalizationKey
@@ -177,6 +178,7 @@ import com.harmber2.suadat.constants.ShowLyricsKey
 import com.harmber2.suadat.constants.SkipSilenceKey
 import com.harmber2.suadat.constants.SmartTrimmerKey
 import com.harmber2.suadat.constants.StopMusicOnTaskClearKey
+import com.harmber2.suadat.constants.TogetherBearerTokenKey
 import com.harmber2.suadat.constants.TogetherClientIdKey
 import com.harmber2.suadat.constants.WakelockKey
 import com.harmber2.suadat.constants.YtmSyncKey
@@ -3269,9 +3271,21 @@ class MusicService :
             }
 
             val togetherToken =
-                com.harmber2.suadat.BuildConfig.TOGETHER_BEARER_TOKEN
-                    .trim()
-                    .takeIf { it.isNotBlank() }
+                dataStore.getAsync(TogetherBearerTokenKey, "")?.trim()?.takeIf { it.isNotBlank() }
+                    ?: com.harmber2.suadat.BuildConfig.TOGETHER_BEARER_TOKEN
+                        .trim()
+                        .takeIf { it.isNotBlank() }
+
+            if (togetherToken == null) {
+                scope.launch(SilentHandler) {
+                    togetherSessionState.value =
+                        com.harmber2.suadat.together.TogetherSessionState.Error(
+                            message = "Bearer token not set. Online rooms require a valid server token. Check Music Together settings for details.",
+                            recoverable = true,
+                        )
+                }
+                return@launch
+            }
 
             val api =
                 com.harmber2.suadat.together
@@ -3611,9 +3625,21 @@ class MusicService :
             }
 
             val togetherToken =
-                com.harmber2.suadat.BuildConfig.TOGETHER_BEARER_TOKEN
-                    .trim()
-                    .takeIf { it.isNotBlank() }
+                dataStore.getAsync(TogetherBearerTokenKey, "")?.trim()?.takeIf { it.isNotBlank() }
+                    ?: com.harmber2.suadat.BuildConfig.TOGETHER_BEARER_TOKEN
+                        .trim()
+                        .takeIf { it.isNotBlank() }
+
+            if (togetherToken == null) {
+                scope.launch(SilentHandler) {
+                    togetherSessionState.value =
+                        com.harmber2.suadat.together.TogetherSessionState.Error(
+                            message = "Bearer token not set. Online rooms require a valid server token. Check Music Together settings for details.",
+                            recoverable = true,
+                        )
+                }
+                return@launch
+            }
 
             val api =
                 com.harmber2.suadat.together
@@ -5803,10 +5829,12 @@ class MusicService :
             return dataSpec
         }
         val mediaId = dataSpec.key ?: return dataSpec
-        val storedFormat =
+        
+        val storedFormat: FormatEntity? =
             runBlocking(Dispatchers.IO) {
                 database.format(mediaId).first()
             }
+
         storedFormat?.let { format ->
             audioNormalizationFactorCache[mediaId] = calculateAudioNormalizationFactor(format, normalizeAudio = true)
         }
@@ -5898,114 +5926,123 @@ class MusicService :
                 } ?: resolvedDataSpec
             }
 
-        val playbackData =
+        val playbackDataResult =
             runBlocking(Dispatchers.IO) {
-                if (hiResLosslessSelected) {
-                    resolveHiResLosslessPlayback(mediaId).recoverCatching { externalFailure ->
-                        Timber.tag("MusicService").w(
-                            externalFailure,
-                            "Hi-Res external stream failed for %s; falling back to Web Remix",
-                            mediaId,
-                        )
+                withTimeoutOrNull(25000L) {
+                    if (hiResLosslessSelected) {
+                        resolveHiResLosslessPlayback(mediaId).recoverCatching { externalFailure ->
+                            Timber.tag("MusicService").w(
+                                externalFailure,
+                                "Hi-Res external stream failed for %s; falling back to Web Remix",
+                                mediaId,
+                            )
+                            retryWithoutPlaybackLoginContext {
+                                YTPlayerUtils.playerResponseForPlayback(
+                                    mediaId,
+                                    audioQuality = if (lowDataModeActive) AudioQuality.LOW else AudioQuality.HIGHEST,
+                                    connectivityManager = connectivityManager,
+                                    preferredStreamClient = PlayerStreamClient.WEB_REMIX,
+                                    networkMetered = lowDataModeActive,
+                                )
+                            }.getOrThrow()
+                        }
+                    } else {
+                        val fallbackQuality = if (failedExternalMediaIds.contains(mediaId) && audioQuality == AudioQuality.LOSSLESS) AudioQuality.HIGHEST else audioQuality
                         retryWithoutPlaybackLoginContext {
                             YTPlayerUtils.playerResponseForPlayback(
                                 mediaId,
-                                audioQuality = if (lowDataModeActive) AudioQuality.LOW else AudioQuality.HIGHEST,
+                                audioQuality = if (lowDataModeActive) AudioQuality.LOW else fallbackQuality,
                                 connectivityManager = connectivityManager,
-                                preferredStreamClient = PlayerStreamClient.WEB_REMIX,
+                                preferredStreamClient = preferredStreamClient,
                                 networkMetered = lowDataModeActive,
                             )
-                        }.getOrThrow()
-                    }
-                } else {
-                    val fallbackQuality = if (failedExternalMediaIds.contains(mediaId) && audioQuality == AudioQuality.LOSSLESS) AudioQuality.HIGHEST else audioQuality
-                    retryWithoutPlaybackLoginContext {
-                        YTPlayerUtils.playerResponseForPlayback(
-                            mediaId,
-                            audioQuality = if (lowDataModeActive) AudioQuality.LOW else fallbackQuality,
-                            connectivityManager = connectivityManager,
-                            preferredStreamClient = preferredStreamClient,
-                            networkMetered = lowDataModeActive,
-                        )
-                    }.recoverCatching { youtubeFailure ->
-                        if (youtubeFailure !is YTPlayerUtils.BotDetectionPlaybackException) throw youtubeFailure
+                        }.recoverCatching { youtubeFailure ->
+                            if (youtubeFailure !is YTPlayerUtils.BotDetectionPlaybackException) throw youtubeFailure
 
-                        Timber.tag("MusicService").w(
-                            youtubeFailure,
-                            "YouTube stream clients hit bot detection for %s; trying external audio fallback",
-                            mediaId,
-                        )
-                        resolveHiResLosslessPlayback(mediaId).getOrElse { externalFailure ->
                             Timber.tag("MusicService").w(
-                                externalFailure,
-                                "External audio fallback failed after YouTube bot detection for %s",
+                                youtubeFailure,
+                                "YouTube stream clients hit bot detection for %s; trying external audio fallback",
                                 mediaId,
                             )
-                            throw youtubeFailure
+                            resolveHiResLosslessPlayback(mediaId).getOrElse { externalFailure ->
+                                Timber.tag("MusicService").w(
+                                    externalFailure,
+                                    "External audio fallback failed after YouTube bot detection for %s",
+                                    mediaId,
+                                )
+                                throw youtubeFailure
+                            }
                         }
-                    }
-                }
-            }.getOrElse { throwable ->
-                when {
-                    throwable is YTPlayerUtils.InvalidPlaybackLoginContextException -> {
-                        promptLoginRecovery(mediaId, throwable.targetUrl)
-                        throw PlaybackException(
-                            getString(R.string.playback_requires_youtube_music_login_refresh),
-                            throwable,
-                            PlaybackException.ERROR_CODE_REMOTE_ERROR,
-                        )
-                    }
-
-                    throwable is YTPlayerUtils.LoginRequiredForPlaybackException -> {
-                        throw PlaybackException(
-                            getString(R.string.playback_requires_youtube_music_confirmation),
-                            throwable,
-                            PlaybackException.ERROR_CODE_REMOTE_ERROR,
-                        )
-                    }
-
-                    throwable is YTPlayerUtils.BotDetectionPlaybackException -> {
-                        throw PlaybackException(
-                            getString(R.string.error_no_stream),
-                            throwable,
-                            PlaybackException.ERROR_CODE_REMOTE_ERROR,
-                        )
-                    }
-
-                    throwable is PlaybackException -> {
-                        throw throwable
-                    }
-
-                    throwable is java.net.ConnectException || throwable is java.net.UnknownHostException -> {
-                        throw PlaybackException(
-                            getString(R.string.error_no_internet),
-                            throwable,
-                            PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED,
-                        )
-                    }
-
-                    throwable.isRequestTimeout() -> {
-                        throw PlaybackException(
-                            getString(R.string.error_timeout),
-                            throwable,
-                            PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_TIMEOUT,
-                        )
-                    }
-
-                    else -> {
-                        throw PlaybackException(
-                            getString(R.string.error_unknown),
-                            throwable,
-                            PlaybackException.ERROR_CODE_REMOTE_ERROR,
-                        )
                     }
                 }
             }
 
         val nonNullPlayback =
-            requireNotNull(playbackData) {
-                getString(R.string.error_unknown)
+            if (playbackDataResult == null) {
+                throw PlaybackException(
+                    getString(R.string.error_timeout),
+                    null,
+                    PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_TIMEOUT,
+                )
+            } else {
+                playbackDataResult.getOrElse { throwable ->
+                    when {
+                        throwable is YTPlayerUtils.InvalidPlaybackLoginContextException -> {
+                            promptLoginRecovery(mediaId, throwable.targetUrl)
+                            throw PlaybackException(
+                                getString(R.string.playback_requires_youtube_music_login_refresh),
+                                throwable,
+                                PlaybackException.ERROR_CODE_REMOTE_ERROR,
+                            )
+                        }
+
+                        throwable is YTPlayerUtils.LoginRequiredForPlaybackException -> {
+                            throw PlaybackException(
+                                getString(R.string.playback_requires_youtube_music_confirmation),
+                                throwable,
+                                PlaybackException.ERROR_CODE_REMOTE_ERROR,
+                            )
+                        }
+
+                        throwable is YTPlayerUtils.BotDetectionPlaybackException -> {
+                            throw PlaybackException(
+                                getString(R.string.error_no_stream),
+                                throwable,
+                                PlaybackException.ERROR_CODE_REMOTE_ERROR,
+                            )
+                        }
+
+                        throwable is PlaybackException -> {
+                            throw throwable
+                        }
+
+                        throwable is java.net.ConnectException || throwable is java.net.UnknownHostException -> {
+                            throw PlaybackException(
+                                getString(R.string.error_no_internet),
+                                throwable,
+                                PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED,
+                            )
+                        }
+
+                        throwable.isRequestTimeout() -> {
+                            throw PlaybackException(
+                                getString(R.string.error_timeout),
+                                throwable,
+                                PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_TIMEOUT,
+                            )
+                        }
+
+                        else -> {
+                            throw PlaybackException(
+                                getString(R.string.error_unknown),
+                                throwable,
+                                PlaybackException.ERROR_CODE_REMOTE_ERROR,
+                            )
+                        }
+                    }
+                }
             }
+
         nonNullPlayback.playbackTracking
             ?.remotePlaybackTrackingUrl()
             ?.let { remotePlaybackTrackingUrlCache[mediaId] = it }
@@ -6071,17 +6108,7 @@ class MusicService :
                 )
         }
         val resolvedDataSpec = dataSpec.withUri(streamUrl.toUri())
-        val length =
-            resolveStreamChunkLength(
-                requestedLength = dataSpec.length,
-                position = dataSpec.position,
-                knownContentLength = knownContentLength ?: format.contentLength,
-                chunkLength = CHUNK_LENGTH,
-                mimeType = format.mimeType,
-            )
-        return length?.let { nonNullLength ->
-            resolvedDataSpec.subrange(0L, nonNullLength)
-        } ?: resolvedDataSpec
+        return resolvedDataSpec
     }
 
     private suspend fun resolveHiResLosslessPlayback(mediaId: String): Result<YTPlayerUtils.PlaybackData> =

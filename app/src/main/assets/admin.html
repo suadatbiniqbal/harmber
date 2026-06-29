@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Harmber Admin - Banner Ads</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding: 20px; background: #f5f5f5; color: #333; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h1 { margin-top: 0; color: #1a1a1a; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input[type="text"], input[type="number"], select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        .checkbox-group { display: flex; align-items: center; gap: 10px; margin: 15px 0; }
+        button { background: #1DB954; color: white; border: none; padding: 12px 20px; border-radius: 30px; font-weight: bold; cursor: pointer; transition: opacity 0.2s; }
+        button:hover { opacity: 0.9; }
+        .ad-list { margin-top: 40px; border-top: 2px solid #eee; padding-top: 20px; }
+        .ad-item { background: #fafafa; border: 1px solid #eee; padding: 15px; border-radius: 8px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .ad-info { flex: 1; }
+        .ad-actions { display: flex; gap: 10px; }
+        .delete-btn { background: #ff4444; }
+        .toggle-btn { background: #007bff; }
+        .preview-img { max-width: 150px; border-radius: 4px; display: block; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Harmber Ad Manager</h1>
+
+        <div id="setup-view">
+            <p>Please enter your Firebase config to continue:</p>
+            <textarea id="fb-config" rows="10" style="width:100%; font-family: monospace;">{
+  "apiKey": "AIzaSyApubO067JYW1ih6AUii86Nu0jC6WpFcVI",
+  "authDomain": "harmber.firebaseapp.com",
+  "databaseURL": "https://harmber-default-rtdb.firebaseio.com",
+  "projectId": "harmber",
+  "storageBucket": "harmber.firebasestorage.app",
+  "messagingSenderId": "227933260927",
+  "appId": "1:227933260927:android:0c101c91d898b86738034a"
+}</textarea>
+            <button onclick="initFirebase()" style="margin-top:10px">Connect to Firebase</button>
+        </div>
+
+        <div id="admin-view" style="display:none">
+            <div id="global-settings" style="background: #e8f5e9; padding: 20px; border-radius: 10px; margin-bottom: 30px;">
+                <h3>Global Carousel Settings</h3>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="autoSwipeEnabled">
+                    <label for="autoSwipeEnabled">Enable Auto-Swipe for Home Banners</label>
+                </div>
+                <div class="form-group">
+                    <label>Auto-Swipe Interval (milliseconds, default 5000)</label>
+                    <input type="number" id="swipeIntervalMs" value="5000">
+                </div>
+                <button onclick="saveGlobalConfig()" style="background: #2e7d32;">Save Global Settings</button>
+            </div>
+
+            <hr>
+            <h3>Add New Ad</h3>
+            <p style="font-size: 0.8em; color: #666;">
+                <b>Banner:</b> 16:9 ratio (e.g. 1280x720). Shown on Home screen.<br>
+                <b>Overlay:</b> 1:1 ratio (e.g. 1024x1024). Shown over Player artwork.
+            </p>
+            <div class="form-group">
+                <label>Media URL (Image/Gif/Video)</label>
+                <input type="text" id="mediaUrl" placeholder="https://...">
+            </div>
+            <div class="form-group">
+                <label>Ad Format</label>
+                <select id="adFormat">
+                    <option value="banner">Home Banner (16:9)</option>
+                    <option value="overlay">Player Art Overlay (1:1)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Media Type</label>
+                <select id="mediaType">
+                    <option value="image">Image</option>
+                    <option value="gif">Gif</option>
+                    <option value="video">Video</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Title</label>
+                <input type="text" id="title" placeholder="Hit Songs English">
+            </div>
+            <div class="form-group">
+                <label>Subtitle</label>
+                <input type="text" id="subtitle" placeholder="Jennifer Lopez, Pitbull">
+            </div>
+            <div class="form-group">
+                <label>Button Text</label>
+                <input type="text" id="buttonText" value="Listen now">
+            </div>
+            <div class="form-group">
+                <label>Action URL (Link to open)</label>
+                <input type="text" id="actionUrl" placeholder="https://...">
+            </div>
+            <div class="form-group">
+                <label>Priority (Higher shows first)</label>
+                <input type="number" id="priority" value="0">
+            </div>
+            <hr>
+            <h4>Overlay Specific Settings</h4>
+            <div class="form-group">
+                <label>Daily Limit (Max times shown per user per day)</label>
+                <input type="number" id="dailyLimit" value="3">
+            </div>
+            <div class="form-group">
+                <label>Start Hour (0-23)</label>
+                <input type="number" id="startHour" value="0">
+            </div>
+            <div class="form-group">
+                <label>End Hour (0-23)</label>
+                <input type="number" id="endHour" value="23">
+            </div>
+            <div class="checkbox-group">
+                <input type="checkbox" id="active" checked>
+                <label for="active">Active (Visible in app)</label>
+            </div>
+            <button onclick="addAd()">Publish Ad</button>
+
+            <div class="ad-list" id="ad-list">
+                <h3>Current Ads</h3>
+                <!-- Ads will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let database;
+
+        function initFirebase() {
+            try {
+                const config = JSON.parse(document.getElementById('fb-config').value);
+                firebase.initializeApp(config);
+                database = firebase.database();
+                document.getElementById('setup-view').style.display = 'none';
+                document.getElementById('admin-view').style.display = 'block';
+                loadAds();
+                loadGlobalConfig();
+            } catch(e) {
+                alert('Invalid config: ' + e.message);
+            }
+        }
+
+        function loadGlobalConfig() {
+            database.ref('ad_config').on('value', (snapshot) => {
+                const config = snapshot.val();
+                if (config) {
+                    document.getElementById('autoSwipeEnabled').checked = config.autoSwipeEnabled !== false;
+                    document.getElementById('swipeIntervalMs').value = config.swipeIntervalMs || 5000;
+                }
+            });
+        }
+
+        function saveGlobalConfig() {
+            const config = {
+                autoSwipeEnabled: document.getElementById('autoSwipeEnabled').checked,
+                swipeIntervalMs: parseInt(document.getElementById('swipeIntervalMs').value) || 5000
+            };
+            database.ref('ad_config').set(config)
+                .then(() => alert('Global settings saved!'));
+        }
+
+        function addAd() {
+            const ad = {
+                id: Date.now().toString(),
+                mediaUrl: document.getElementById('mediaUrl').value,
+                mediaType: document.getElementById('mediaType').value,
+                adFormat: document.getElementById('adFormat').value,
+                title: document.getElementById('title').value,
+                subtitle: document.getElementById('subtitle').value,
+                buttonText: document.getElementById('buttonText').value,
+                actionUrl: document.getElementById('actionUrl').value,
+                priority: parseInt(document.getElementById('priority').value),
+                active: document.getElementById('active').checked,
+                dailyLimit: parseInt(document.getElementById('dailyLimit').value),
+                startHour: parseInt(document.getElementById('startHour').value),
+                endHour: parseInt(document.getElementById('endHour').value)
+            };
+
+            if (!ad.mediaUrl) return alert('Media URL is required');
+
+            database.ref('banner_ads/' + ad.id).set(ad)
+                .then(() => {
+                    alert('Ad Published!');
+                    document.getElementById('mediaUrl').value = '';
+                    document.getElementById('title').value = '';
+                    document.getElementById('subtitle').value = '';
+                });
+        }
+
+        function loadAds() {
+            database.ref('banner_ads').on('value', (snapshot) => {
+                const list = document.getElementById('ad-list');
+                list.innerHTML = '<h3>Current Ads</h3>';
+                const ads = snapshot.val();
+                if (!ads) return list.innerHTML += '<p>No ads found.</p>';
+
+                Object.values(ads).sort((a,b) => b.priority - a.priority).forEach(ad => {
+                    const item = document.createElement('div');
+                    item.className = 'ad-item';
+                    item.innerHTML = `
+                        <div class="ad-info">
+                            <strong>${ad.title || 'Untitled'}</strong> (${ad.active ? 'Active' : 'Hidden'})<br>
+                            <small>${ad.subtitle || ''}</small>
+                            <img src="${ad.mediaUrl}" class="preview-img">
+                        </div>
+                        <div class="ad-actions">
+                            <button class="toggle-btn" onclick="toggleAd('${ad.id}', ${!ad.active})">${ad.active ? 'Hide' : 'Show'}</button>
+                            <button class="delete-btn" onclick="deleteAd('${ad.id}')">Delete</button>
+                        </div>
+                    `;
+                    list.appendChild(item);
+                });
+            });
+        }
+
+        function toggleAd(id, state) {
+            database.ref('banner_ads/' + id).update({ active: state });
+        }
+
+        function deleteAd(id) {
+            if (confirm('Delete this ad?')) {
+                database.ref('banner_ads/' + id).remove();
+            }
+        }
+    </script>
+</body>
+</html>

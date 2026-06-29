@@ -871,7 +871,7 @@ class MainActivity : ComponentActivity() {
                             intent?.action == ACTION_MUSIC_RECOGNITION
                         }
 
-                    val (navigationGlassmorphism) = rememberPreference(NavigationGlassmorphismKey, defaultValue = false)
+                    val (navigationGlassmorphism) = rememberPreference(NavigationGlassmorphismKey, defaultValue = true)
 
                     val topLevelScreens =
                         remember(navigationItems) {

@@ -77,6 +77,7 @@ fun HomeScreen(
     val speedDialItems by viewModel.speedDialItems.collectAsStateWithLifecycle()
     val forgottenFavorites by viewModel.forgottenFavorites.collectAsStateWithLifecycle()
     val keepListening by viewModel.keepListening.collectAsStateWithLifecycle()
+    val bannerAds by viewModel.bannerAds.collectAsStateWithLifecycle()
     val albumRecommendations by viewModel.albumRecommendations.collectAsStateWithLifecycle()
     val mostPlayedArtists by viewModel.mostPlayedArtists.collectAsStateWithLifecycle()
     val mostPlayedAlbums by viewModel.mostPlayedAlbums.collectAsStateWithLifecycle()
@@ -325,7 +326,20 @@ fun HomeScreen(
                     state = lazylistState,
                     contentPadding = LocalPlayerAwareWindowInsets.current.asPaddingValues(),
                 ) {
-                    // 1. Top: Most Played Artists (Circular)
+                    if (showHomeCategoryChips) {
+                        item {
+                            ChipsRow(
+                                chips = homePage?.chips.orEmpty().map { it to it.title },
+                                currentValue = selectedChip,
+                                onValueUpdate = {
+                                    viewModel.toggleChip(it)
+                                },
+                                modifier = Modifier.animateItem()
+                            )
+                        }
+                    }
+
+                    // 1. Most Played Artists
                     if (mostPlayedArtists.isNotEmpty()) {
                         item {
                             NavigationTitle(
@@ -343,61 +357,17 @@ fun HomeScreen(
                         }
                     }
 
-                    // Album Recommendations (Wide Cards)
-                    if (albumRecommendations.isNotEmpty()) {
-                        item {
-                            NavigationTitle(
-                                title = stringResource(R.string.albums),
-                                modifier = Modifier.animateItem(),
-                            )
-                        }
-
-                        item {
-                            AlbumRecommendationsSection(
-                                albums = albumRecommendations,
-                                navController = navController,
-                                modifier = Modifier.animateItem(),
+                    // Advertisement / Banner Ads Section
+                    if (bannerAds.isNotEmpty()) {
+                        item(key = "banner_ads", contentType = "advertisement") {
+                            BannerAdSection(
+                                ads = bannerAds,
+                                modifier = Modifier.animateItem()
                             )
                         }
                     }
 
-                    // 2. Random Album Recommendations
-                    if (randomAlbums.isNotEmpty()) {
-                        item {
-                            NavigationTitle(
-                                title = stringResource(R.string.suggested_albums),
-                                modifier = Modifier.animateItem(),
-                            )
-                        }
-
-                        item {
-                            RandomAlbumsSection(
-                                albums = randomAlbums,
-                                navController = navController,
-                                modifier = Modifier.animateItem(),
-                            )
-                        }
-                    }
-
-                    // 3. Below Artists: Album Recommendations (Cards)
-                    if (mostPlayedAlbums.isNotEmpty()) {
-                        item {
-                            NavigationTitle(
-                                title = stringResource(R.string.your_albums),
-                                modifier = Modifier.animateItem(),
-                            )
-                        }
-
-                        item {
-                            MostPlayedAlbumsSection(
-                                albums = mostPlayedAlbums,
-                                navController = navController,
-                                modifier = Modifier.animateItem(),
-                            )
-                        }
-                    }
-
-                    // 3. Below Albums: Music Recommendations (Small cards for Quick Picks)
+                    // 2. Quick Picks
                     quickPicks?.takeIf { it.isNotEmpty() }?.let { picks ->
                         item {
                             NavigationTitle(
@@ -418,19 +388,80 @@ fun HomeScreen(
                         }
                     }
 
-                    if (showHomeCategoryChips) {
+                    // 3. Spotify
+                    spotifyPlaylistsContainer(
+                        viewModel = viewModel,
+                        navController = navController,
+                        haptic = haptic,
+                        scope = scope,
+                    )
+
+                    SpotifyRecommendationsContainer(
+                        viewModel = viewModel,
+                        mediaMetadata = mediaMetadata,
+                        isPlaying = isPlaying,
+                        navController = navController,
+                        playerConnection = playerConnection,
+                        menuState = menuState,
+                        haptic = haptic,
+                        scope = scope,
+                    )
+
+                    // 4. Wide Albums
+                    if (albumRecommendations.isNotEmpty()) {
                         item {
-                            ChipsRow(
-                                chips = homePage?.chips.orEmpty().map { it to it.title },
-                                currentValue = selectedChip,
-                                onValueUpdate = {
-                                    viewModel.toggleChip(it)
-                                },
+                            NavigationTitle(
+                                title = stringResource(R.string.albums),
+                                modifier = Modifier.animateItem(),
+                            )
+                        }
+
+                        item {
+                            AlbumRecommendationsSection(
+                                albums = albumRecommendations,
+                                navController = navController,
+                                modifier = Modifier.animateItem(),
                             )
                         }
                     }
 
-                    // 3. Below Music: Recents (Keep Listening)
+                    // 5. Random Albums
+                    if (randomAlbums.isNotEmpty()) {
+                        item {
+                            NavigationTitle(
+                                title = stringResource(R.string.suggested_albums),
+                                modifier = Modifier.animateItem(),
+                            )
+                        }
+
+                        item {
+                            RandomAlbumsSection(
+                                albums = randomAlbums,
+                                navController = navController,
+                                modifier = Modifier.animateItem(),
+                            )
+                        }
+                    }
+
+                    // 6. Your Albums
+                    if (mostPlayedAlbums.isNotEmpty()) {
+                        item {
+                            NavigationTitle(
+                                title = stringResource(R.string.your_albums),
+                                modifier = Modifier.animateItem(),
+                            )
+                        }
+
+                        item {
+                            MostPlayedAlbumsSection(
+                                albums = mostPlayedAlbums,
+                                navController = navController,
+                                modifier = Modifier.animateItem(),
+                            )
+                        }
+                    }
+
+                    // 7. Keep Listening
                     keepListening?.takeIf { it.isNotEmpty() }?.let { items ->
                         item {
                             NavigationTitle(
@@ -452,17 +483,6 @@ fun HomeScreen(
                             )
                         }
                     }
-
-                    SpotifyRecommendationsContainer(
-                        viewModel = viewModel,
-                        mediaMetadata = mediaMetadata,
-                        isPlaying = isPlaying,
-                        navController = navController,
-                        playerConnection = playerConnection,
-                        menuState = menuState,
-                        haptic = haptic,
-                        scope = scope,
-                    )
 
                     SimilarRecommendationsContainer(
                         viewModel = viewModel,
@@ -500,19 +520,12 @@ fun HomeScreen(
                     AccountPlaylistsContainer(
                         viewModel = viewModel,
                         accountName = accountName,
-                        accountImageUrl = url,
+                        accountImageUrl = accountImageUrl,
                         mediaMetadata = mediaMetadata,
                         isPlaying = isPlaying,
                         navController = navController,
                         playerConnection = playerConnection,
                         menuState = menuState,
-                        haptic = haptic,
-                        scope = scope,
-                    )
-
-                    spotifyPlaylistsContainer(
-                        viewModel = viewModel,
-                        navController = navController,
                         haptic = haptic,
                         scope = scope,
                     )

@@ -27,6 +27,10 @@ import com.harmber2.suadat.constants.HideExplicitKey
 import com.harmber2.suadat.constants.HideVideoKey
 import com.harmber2.suadat.constants.InnerTubeCookieKey
 import com.harmber2.suadat.constants.QuickPicks
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.harmber2.suadat.constants.QuickPicksKey
 import com.harmber2.suadat.constants.SelectedYtmPlaylistsKey
 import com.harmber2.suadat.constants.SpeedDialSongIdsKey
@@ -48,6 +52,7 @@ import com.harmber2.suadat.innertube.pages.ExplorePage
 import com.harmber2.suadat.innertube.pages.HomePage
 import com.harmber2.suadat.innertube.utils.completed
 import com.harmber2.suadat.innertube.utils.hasYouTubeLoginCookie
+import com.harmber2.suadat.models.BannerAd
 import com.harmber2.suadat.models.SimilarRecommendation
 import com.harmber2.suadat.spotify.Spotify
 import com.harmber2.suadat.spotify.SpotifyLibraryRepository
@@ -126,6 +131,7 @@ class HomeViewModel
         val accountPlaylists = MutableStateFlow<List<PlaylistItem>?>(null)
         val spotifyPlaylists = spotifyRepository.playlists.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
         val homePage = MutableStateFlow<HomePage?>(null)
+        val bannerAds = com.harmber2.suadat.models.AdManager.ads
         val explorePage = MutableStateFlow<ExplorePage?>(null)
         val selectedChip = MutableStateFlow<HomePage.Chip?>(null)
         private val previousHomePage = MutableStateFlow<HomePage?>(null)
@@ -841,6 +847,7 @@ class HomeViewModel
 
         init {
             observeQuickPicks()
+            com.harmber2.suadat.models.AdManager.observeAds()
 
             viewModelScope.launch(Dispatchers.IO) {
                 load()

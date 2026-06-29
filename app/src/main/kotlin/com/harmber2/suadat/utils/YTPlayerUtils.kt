@@ -1257,9 +1257,8 @@ object YTPlayerUtils {
         Timber.tag(logTag).v("Validating stream URL status")
         try {
             val requestProfile = StreamClientUtils.resolveRequestProfile(url)
-            val probeRanges = buildPlaybackProbeRanges()
+            val probeRanges = listOf("bytes=0-1023") 
 
-            var sawReadableProbe = false
             for (range in probeRanges) {
                 val rangeRequest =
                     StreamClientUtils
@@ -1277,7 +1276,7 @@ object YTPlayerUtils {
                         val code = response.code
                         if (code == 403) return@use false
                         if (code !in 200..399 && code != 416) return@use false
-                        if (code == 416) return@use sawReadableProbe
+                        if (code == 416) return@use true
 
                         val contentType = response.header("Content-Type").orEmpty().lowercase(Locale.US)
                         if (
@@ -1287,26 +1286,18 @@ object YTPlayerUtils {
                             contentType.startsWith("application/xml") ||
                             contentType.startsWith("text/xml")
                         ) {
-                            Timber.tag(logTag).w(
-                                "Rejecting stream probe because it returned non-media content-type: %s",
-                                contentType,
-                            )
                             return@use false
                         }
 
-                        val readable = response.body?.source()?.request(1) == true
-                        if (readable) {
-                            sawReadableProbe = true
-                        }
-                        readable
+                        // Ensure we can actually read some bytes
+                        response.body?.source()?.request(1) == true
                     }
                 if (!probeValid) return false
             }
 
             return true
         } catch (e: Exception) {
-            Timber.tag(logTag).e(e, "Stream URL validation failed with exception")
-            reportException(e)
+            Timber.tag(logTag).w("Stream URL validation failed: ${e.message}")
         }
         return false
     }
@@ -1450,7 +1441,7 @@ object YTPlayerUtils {
 
     private fun describeClient(client: YouTubeClient): String = "${client.clientName}@${client.clientVersion}"
 
-    private const val STREAM_PROBE_CONNECT_TIMEOUT_SECONDS = 4L
-    private const val STREAM_PROBE_READ_TIMEOUT_SECONDS = 4L
-    private const val STREAM_PROBE_CALL_TIMEOUT_SECONDS = 6L
+    private const val STREAM_PROBE_CONNECT_TIMEOUT_SECONDS = 8L
+    private const val STREAM_PROBE_READ_TIMEOUT_SECONDS = 8L
+    private const val STREAM_PROBE_CALL_TIMEOUT_SECONDS = 12L
 }

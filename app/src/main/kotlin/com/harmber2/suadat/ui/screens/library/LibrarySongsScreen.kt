@@ -87,8 +87,9 @@ import com.harmber2.suadat.playback.queues.ListQueue
 import com.harmber2.suadat.ui.component.ExpressivePullToRefreshBox
 import com.harmber2.suadat.ui.component.LocalMenuState
 import com.harmber2.suadat.ui.menu.SongMenu
-import com.harmber2.suadat.ui.screens.library.rememberArtworkGradient
 import com.harmber2.suadat.ui.utils.ItemWrapper
+import com.harmber2.suadat.ui.utils.rememberArtworkCardColor
+import com.harmber2.suadat.ui.utils.rememberArtworkGradient
 import com.harmber2.suadat.utils.makeTimeString
 import com.harmber2.suadat.utils.rememberEnumPreference
 import com.harmber2.suadat.utils.rememberPreference

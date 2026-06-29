@@ -527,12 +527,8 @@ object NewPipeUtils {
 
     private fun ExternalAudioQuery.searchQueries(): List<String> {
         val primaryArtist = artists.firstOrNull().orEmpty()
-        return buildList {
-            if (primaryArtist.isNotBlank()) add("$primaryArtist $title")
-            add(title)
-        }.map { it.trim() }
+        return listOf("$primaryArtist $title").map { it.trim() }
             .filter { it.isNotBlank() }
-            .distinct()
     }
 
     private fun ExternalAudioQuery.acceptsCandidate(

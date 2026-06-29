@@ -356,7 +356,7 @@ fun AppearanceSettings(
     val (navigationGlassmorphism, onNavigationGlassmorphismChange) =
         rememberPreference(
             NavigationGlassmorphismKey,
-            defaultValue = false,
+            defaultValue = true,
         )
 
     if (showSliderOptionDialog) {

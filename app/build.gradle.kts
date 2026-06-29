@@ -213,6 +213,7 @@ dependencies {
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.messaging)
     implementation(libs.firebase.inappmessaging)
+    implementation("com.google.firebase:firebase-database-ktx")
 
     implementation(libs.guava)
 
@@ -318,8 +319,6 @@ dependencies {
     implementation("androidx.compose.material3.adaptive:adaptive:1.3.0-beta02")
     implementation(libs.accompanist.lyrics.ui)
     implementation(libs.accompanist.lyrics.core)
-
-    implementation("org.json:json:20240303")
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
