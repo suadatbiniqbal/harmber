@@ -186,7 +186,7 @@ fun BannerAdSection(
     if (bannerAds.size == 1) {
         BannerAdCard(
             ad = bannerAds[0],
-            modifier = modifier.padding(horizontal = 24.dp)
+            modifier = modifier.padding(horizontal = 24.dp).padding(top = 16.dp, bottom = 8.dp)
         )
     } else {
         val pagerState = rememberPagerState(pageCount = { bannerAds.size })
@@ -203,14 +203,14 @@ fun BannerAdSection(
             }
         }
         
-        Column(modifier = modifier.fillMaxWidth()) {
+        Column(modifier = modifier.fillMaxWidth().padding(top = 16.dp)) {
             HorizontalPager(
                 state = pagerState,
                 contentPadding = PaddingValues(horizontal = 24.dp),
                 pageSpacing = 16.dp,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 8.dp)
+                    .padding(vertical = 4.dp)
             ) { page ->
                 val ad = bannerAds[page]
                 BannerAdCard(
@@ -282,8 +282,8 @@ private fun BannerAdCard(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .padding(bottom = 12.dp)
-            .clip(RoundedCornerShape(28.dp)),
+            .padding(bottom = 8.dp)
+            .clip(RoundedCornerShape(24.dp)),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainer
         ),
@@ -294,7 +294,7 @@ private fun BannerAdCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(16f / 9f)
-                    .clip(RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
+                    .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
                     .background(Color.Black)
             ) {
                 if (ad.mediaType == "video") {
@@ -312,15 +312,15 @@ private fun BannerAdCard(
                             painter = painterResource(id = R.drawable.play),
                             contentDescription = null,
                             tint = Color.White,
-                            modifier = Modifier.size(48.dp)
+                            modifier = Modifier.size(40.dp)
                         )
                         
                         // Sound Toggle
                         Box(
                             modifier = Modifier
                                 .align(Alignment.BottomEnd)
-                                .padding(12.dp)
-                                .size(32.dp)
+                                .padding(8.dp)
+                                .size(28.dp)
                                 .clip(CircleShape)
                                 .background(Color.Black.copy(alpha = 0.5f))
                                 .clickable { isMuted = !isMuted },
@@ -330,7 +330,7 @@ private fun BannerAdCard(
                                 painter = painterResource(id = if (isMuted) R.drawable.volume_off else R.drawable.volume_up),
                                 contentDescription = null,
                                 tint = Color.White,
-                                modifier = Modifier.size(16.dp)
+                                modifier = Modifier.size(14.dp)
                             )
                         }
                     }
@@ -347,28 +347,30 @@ private fun BannerAdCard(
                 }
 
                 // Advertisement Tag
-                Surface(
-                    color = Color.Black.copy(alpha = 0.5f),
-                    shape = RoundedCornerShape(8.dp),
-                    modifier = Modifier
-                        .padding(12.dp)
-                        .align(Alignment.TopStart)
-                ) {
-                    Text(
-                        text = "Advertisement",
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 10.sp
-                        ),
-                        color = Color.White.copy(alpha = 0.9f),
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                    )
+                if (ad.showAdTag) {
+                    Surface(
+                        color = Color.Black.copy(alpha = 0.5f),
+                        shape = RoundedCornerShape(6.dp),
+                        modifier = Modifier
+                            .padding(10.dp)
+                            .align(Alignment.TopStart)
+                    ) {
+                        Text(
+                            text = "Advertisement",
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 9.sp
+                            ),
+                            color = Color.White.copy(alpha = 0.9f),
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp)
+                        )
+                    }
                 }
             }
             
             Row(
                 modifier = Modifier
-                    .padding(14.dp)
+                    .padding(horizontal = 12.dp, vertical = 10.dp)
                     .fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
@@ -377,7 +379,7 @@ private fun BannerAdCard(
                     if (ad.title.isNotEmpty()) {
                         Text(
                             text = ad.title,
-                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                             color = MaterialTheme.colorScheme.onSurface,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
@@ -386,23 +388,15 @@ private fun BannerAdCard(
                     if (ad.subtitle.isNotEmpty()) {
                         Text(
                             text = ad.subtitle,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
-                        )
-                    } else {
-                        Text(
-                            text = "Sponsored Content",
-                            style = MaterialTheme.typography.labelSmall.copy(
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                            )
                         )
                     }
                 }
                 
-                Spacer(Modifier.width(12.dp))
+                Spacer(Modifier.width(8.dp))
                 
                 Button(
                     onClick = {
@@ -413,16 +407,17 @@ private fun BannerAdCard(
                             } catch (_: Exception) {}
                         }
                     },
-                    shape = RoundedCornerShape(20.dp),
+                    shape = RoundedCornerShape(18.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primary,
                         contentColor = MaterialTheme.colorScheme.onPrimary
                     ),
-                    contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 6.dp),
+                    modifier = Modifier.height(34.dp)
                 ) {
                     Text(
-                        text = ad.buttonText.ifEmpty { "Listen now" },
-                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
+                        text = ad.buttonText.ifEmpty { "Listen" },
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
                     )
                 }
             }

@@ -7,12 +7,14 @@
 
 package com.harmber2.suadat.discord
 
+import android.os.Build
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import okhttp3.*
 import org.json.JSONArray
 import org.json.JSONObject
 import timber.log.Timber
+import java.util.Locale
 import kotlin.random.Random
 
 private sealed class GatewayFrame {
@@ -309,14 +311,14 @@ class GatewayClient {
         val d = JSONObject()
         d.put("token", token)
         val properties = JSONObject()
-        properties.put("os", "linux")
-        properties.put("browser", "Discord Client")
+        properties.put("os", "android")
+        properties.put("browser", "Discord Android")
         properties.put("release_channel", "stable")
-        properties.put("client_version", "0.0.309")
-        properties.put("os_version", "10.0.0")
-        properties.put("os_arch", "x64")
-        properties.put("system_locale", "en-US")
-        properties.put("client_build_number", 66528)
+        properties.put("client_version", "126.21 - stable")
+        properties.put("os_version", Build.VERSION.RELEASE)
+        properties.put("os_arch", Build.SUPPORTED_ABIS.firstOrNull() ?: "arm64-v8a")
+        properties.put("system_locale", Locale.getDefault().toLanguageTag())
+        properties.put("client_build_number", 126210)
         d.put("properties", properties)
         d.put("compress", false)
         d.put("large_threshold", 250)

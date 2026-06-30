@@ -122,8 +122,8 @@ class DiscordRPC(
                 pref = statePref,
                 song = song,
                 translatedMap = translatedMap,
-                default = song.artists.joinToString { it.name }.ifBlank { appName },
-            ).toDiscordText(maxLength = 128, fallback = appName)
+                default = song.artists.joinToString { it.name }.ifBlank { "Harmber Music" },
+            ).toDiscordText(maxLength = 128, fallback = "Harmber Music")
 
         val baseSongUrl = song.youtubeMusicUrl()
         val resolvedImages = DiscordImageResolver.resolveImagesForSong(context, song)

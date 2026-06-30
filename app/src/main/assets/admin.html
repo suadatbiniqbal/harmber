@@ -119,6 +119,10 @@
                 <input type="checkbox" id="active" checked>
                 <label for="active">Active (Visible in app)</label>
             </div>
+            <div class="checkbox-group">
+                <input type="checkbox" id="showAdTag" checked>
+                <label for="showAdTag">Show "Advertisement" Tag on Banner</label>
+            </div>
             <button onclick="addAd()">Publish Ad</button>
 
             <div class="ad-list" id="ad-list">
@@ -176,6 +180,7 @@
                 actionUrl: document.getElementById('actionUrl').value,
                 priority: parseInt(document.getElementById('priority').value),
                 active: document.getElementById('active').checked,
+                showAdTag: document.getElementById('showAdTag').checked,
                 dailyLimit: parseInt(document.getElementById('dailyLimit').value),
                 startHour: parseInt(document.getElementById('startHour').value),
                 endHour: parseInt(document.getElementById('endHour').value)

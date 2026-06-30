@@ -454,10 +454,14 @@ class HomeViewModel
                 updateAllLocalItems()
 
                 viewModelScope.launch(Dispatchers.IO) {
-                    spotifyRepository.restoreSession()
-                    spotifyRepository.restoreCachedPlaylists()
-                    kotlinx.coroutines.delay(5000)
-                    loadSimilarRecommendations()
+                    supervisorScope {
+                        launch { spotifyRepository.restoreSession() }
+                        launch { spotifyRepository.restoreCachedPlaylists() }
+                        launch {
+                            kotlinx.coroutines.delay(1000)
+                            loadSimilarRecommendations()
+                        }
+                    }
                 }
 
                 allYtItems.value = similarRecommendations.value?.flatMap { it.items }.orEmpty() +

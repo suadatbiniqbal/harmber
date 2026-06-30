@@ -50,6 +50,7 @@ import com.harmber2.suadat.innertube.models.WatchEndpoint
 import com.harmber2.suadat.innertube.models.WatchEndpoint.WatchEndpointMusicSupportedConfigs.WatchEndpointMusicConfig.Companion.MUSIC_VIDEO_TYPE_ATV
 import com.harmber2.suadat.innertube.models.YTItem
 import com.harmber2.suadat.innertube.models.YouTubeClient
+import com.harmber2.suadat.innertube.models.YouTubeClient.Companion.ANDROID_MUSIC
 import com.harmber2.suadat.innertube.models.YouTubeClient.Companion.WEB
 import com.harmber2.suadat.innertube.models.YouTubeClient.Companion.WEB_REMIX
 import com.harmber2.suadat.innertube.models.YouTubeLocale
@@ -360,7 +361,7 @@ object YouTube {
             val response =
                 innerTube
                     .search(
-                        client = WEB_REMIX,
+                        client = ANDROID_MUSIC,
                         query = query,
                         params = filter.value,
                         useAccountContext = useAccountContext,

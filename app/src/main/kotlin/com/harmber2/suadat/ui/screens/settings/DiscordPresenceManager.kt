@@ -153,13 +153,23 @@ object DiscordPresenceManager {
                     }
 
                     val rpc = getOrCreateRpc(appContext, activeToken)
-                    val result =
-                        rpc.updateSong(
+                    var updateResult = Result.failure<Unit>(Exception("Initial failure"))
+                    
+                    // Add retry mechanism for more stability
+                    for (attempt in 1..2) {
+                        updateResult = rpc.updateSong(
                             song = song,
                             currentPlaybackTimeMillis = positionMs,
                             isPaused = isPaused,
                         )
-                    if (result.isSuccess) {
+                        if (updateResult.isSuccess) break
+                        if (attempt < 2) {
+                            Timber.tag(LOG_TAG).w("Presence update attempt $attempt failed, retrying...")
+                            kotlinx.coroutines.delay(1000)
+                        }
+                    }
+
+                    if (updateResult.isSuccess) {
                         consecutiveFailures = 0
                         updateLastTimestamps(song = song, positionMs = positionMs, isPaused = isPaused)
                         Timber.tag(LOG_TAG).d("updated presence song=%s paused=%s", song.song.title, isPaused)
@@ -167,8 +177,9 @@ object DiscordPresenceManager {
                     } else {
                         consecutiveFailures++
                         Timber.tag(LOG_TAG).w(
-                            "updatePresence returned failure consecutive=%d",
+                            "updatePresence returned failure consecutive=%d error=%s",
                             consecutiveFailures,
+                            updateResult.exceptionOrNull()?.message
                         )
                         false
                     }

@@ -26,5 +26,6 @@ data class BannerAd(
     // Overlay Specific
     var dailyLimit: Int = 3,
     var startHour: Int = 0,
-    var endHour: Int = 23
+    var endHour: Int = 23,
+    var showAdTag: Boolean = true
 )

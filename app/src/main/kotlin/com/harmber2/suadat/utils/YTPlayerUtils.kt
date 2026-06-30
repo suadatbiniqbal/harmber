@@ -1257,47 +1257,31 @@ object YTPlayerUtils {
         Timber.tag(logTag).v("Validating stream URL status")
         try {
             val requestProfile = StreamClientUtils.resolveRequestProfile(url)
-            val probeRanges = listOf("bytes=0-1023") 
+            val rangeRequest =
+                StreamClientUtils
+                    .applyRequestProfile(
+                        okhttp3.Request
+                            .Builder()
+                            .get()
+                            .header("Range", "bytes=0-0")
+                            .url(url),
+                        requestProfile,
+                    ).build()
 
-            for (range in probeRanges) {
-                val rangeRequest =
-                    StreamClientUtils
-                        .applyRequestProfile(
-                            okhttp3.Request
-                                .Builder()
-                                .get()
-                                .header("Range", range)
-                                .url(url),
-                            requestProfile,
-                        ).build()
+            return currentStreamClient().newCall(rangeRequest).execute().use { response ->
+                val code = response.code
+                if (code == 403) return@use false
+                if (code !in 200..399 && code != 416) return@use false
 
-                val probeValid =
-                    currentStreamClient().newCall(rangeRequest).execute().use { response ->
-                        val code = response.code
-                        if (code == 403) return@use false
-                        if (code !in 200..399 && code != 416) return@use false
-                        if (code == 416) return@use true
+                val contentType = response.header("Content-Type").orEmpty().lowercase(Locale.US)
+                if (contentType.contains("text/html") || contentType.contains("application/json")) {
+                    return@use false
+                }
 
-                        val contentType = response.header("Content-Type").orEmpty().lowercase(Locale.US)
-                        if (
-                            contentType.startsWith("text/html") ||
-                            contentType.startsWith("text/plain") ||
-                            contentType.startsWith("application/json") ||
-                            contentType.startsWith("application/xml") ||
-                            contentType.startsWith("text/xml")
-                        ) {
-                            return@use false
-                        }
-
-                        // Ensure we can actually read some bytes
-                        response.body?.source()?.request(1) == true
-                    }
-                if (!probeValid) return false
+                response.body?.source()?.request(1) == true
             }
-
-            return true
         } catch (e: Exception) {
-            Timber.tag(logTag).w("Stream URL validation failed: ${e.message}")
+            Timber.tag(logTag).w("Fast validation failed: %s", e.message)
         }
         return false
     }
@@ -1441,7 +1425,7 @@ object YTPlayerUtils {
 
     private fun describeClient(client: YouTubeClient): String = "${client.clientName}@${client.clientVersion}"
 
-    private const val STREAM_PROBE_CONNECT_TIMEOUT_SECONDS = 8L
-    private const val STREAM_PROBE_READ_TIMEOUT_SECONDS = 8L
-    private const val STREAM_PROBE_CALL_TIMEOUT_SECONDS = 12L
+    private const val STREAM_PROBE_CONNECT_TIMEOUT_SECONDS = 3L
+    private const val STREAM_PROBE_READ_TIMEOUT_SECONDS = 3L
+    private const val STREAM_PROBE_CALL_TIMEOUT_SECONDS = 5L
 }

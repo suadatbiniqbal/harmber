@@ -12,9 +12,11 @@ import androidx.compose.animation.core.*
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -354,6 +356,7 @@ fun HomeScreen(
                                 navController = navController,
                                 modifier = Modifier.animateItem(),
                             )
+                            Spacer(Modifier.height(16.dp))
                         }
                     }
 
@@ -364,6 +367,7 @@ fun HomeScreen(
                                 ads = bannerAds,
                                 modifier = Modifier.animateItem()
                             )
+                            Spacer(Modifier.height(8.dp))
                         }
                     }
 

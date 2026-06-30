@@ -153,9 +153,9 @@ class InnerTube {
             }
 
             install(HttpTimeout) {
-                requestTimeoutMillis = 15000
-                connectTimeoutMillis = 10000
-                socketTimeoutMillis = 15000
+                requestTimeoutMillis = 8000
+                connectTimeoutMillis = 5000
+                socketTimeoutMillis = 8000
             }
 
             engine {

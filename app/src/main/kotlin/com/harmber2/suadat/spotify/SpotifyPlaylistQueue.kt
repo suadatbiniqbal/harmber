@@ -49,11 +49,33 @@ class SpotifyPlaylistQueue(
                 return@withContext Queue.Status(title = title, items = emptyList(), mediaItemIndex = 0)
             }
 
-            val targetIndex = startIndex.coerceIn(allTracks.indices)
-            val resolvedEntries = resolveTrackEntries(allTracks)
-            val resolvedItems = resolvedEntries.map { it.second }
+            // Optimize: Resolve tracks until we find at least one playable, with a window
+            val maxInitialToResolve = 15
+            val resolvedEntries = mutableListOf<Pair<Int, MediaItem>>()
+            var currentTargetIndex = startIndex.coerceIn(allTracks.indices)
+            
+            var checkOffset = currentTargetIndex
+            while (resolvedEntries.isEmpty() && checkOffset < (currentTargetIndex + maxInitialToResolve).coerceAtMost(allTracks.size)) {
+                val windowTracks = allTracks.subList(checkOffset, (checkOffset + 5).coerceAtMost(allTracks.size))
+                resolvedEntries += resolveTrackEntries(windowTracks, startOffset = checkOffset)
+                checkOffset += windowTracks.size
+            }
+            
+            // If still empty, try backwards from target
+            if (resolvedEntries.isEmpty()) {
+                checkOffset = (currentTargetIndex - 1).coerceAtLeast(0)
+                while (resolvedEntries.isEmpty() && checkOffset >= (currentTargetIndex - 5).coerceAtLeast(0)) {
+                    val track = allTracks[checkOffset]
+                    SpotifyPlaybackResolver.resolveToMediaItem(track)?.let {
+                        resolvedEntries.add(checkOffset to it)
+                    }
+                    checkOffset--
+                }
+            }
 
-            resolveOffset = allTracks.size
+            val resolvedItems = resolvedEntries.map { it.second }
+            resolveOffset = (currentTargetIndex + maxInitialToResolve).coerceAtMost(allTracks.size)
+
             if (resolvedItems.isEmpty()) {
                 return@withContext Queue.Status(title = title, items = emptyList(), mediaItemIndex = 0)
             }
@@ -63,9 +85,9 @@ class SpotifyPlaylistQueue(
                 items = resolvedItems,
                 mediaItemIndex =
                     resolvedEntries
-                        .indexOfFirst { it.first >= targetIndex }
+                        .indexOfFirst { it.first >= currentTargetIndex }
                         .takeIf { it >= 0 }
-                        ?: resolvedItems.lastIndex,
+                        ?: 0,
             )
         }
 
@@ -80,30 +102,23 @@ class SpotifyPlaylistQueue(
 
             val end = (resolveOffset + RESOLVE_BATCH_SIZE).coerceAtMost(allTracks.size)
             val batch = allTracks.subList(resolveOffset, end)
+            val resolved = resolveTrackEntries(batch, startOffset = resolveOffset).map { it.second }
             resolveOffset = end
-            resolveTracks(batch)
+            resolved
         }
 
-    private suspend fun resolveTracks(tracks: List<SpotifyTrack>): List<MediaItem> = resolveTrackEntries(tracks).map { it.second }
-
-    private suspend fun resolveTrackEntries(tracks: List<SpotifyTrack>): List<Pair<Int, MediaItem>> =
-        buildList {
-            tracks.chunked(RESOLVE_BATCH_SIZE).forEachIndexed { chunkIndex, chunk ->
-                val chunkOffset = chunkIndex * RESOLVE_BATCH_SIZE
-                val resolvedChunk =
-                    coroutineScope {
-                        chunk
-                            .mapIndexed { index, track ->
-                                async {
-                                    SpotifyPlaybackResolver
-                                        .resolveToMediaItem(track)
-                                        ?.let { mediaItem -> chunkOffset + index to mediaItem }
-                                }
-                            }.awaitAll()
-                            .filterNotNull()
-                    }
-                addAll(resolvedChunk)
-            }
+    private suspend fun resolveTrackEntries(
+        tracks: List<SpotifyTrack>,
+        startOffset: Int
+    ): List<Pair<Int, MediaItem>> =
+        coroutineScope {
+            tracks.mapIndexed { index, track ->
+                async {
+                    SpotifyPlaybackResolver
+                        .resolveToMediaItem(track)
+                        ?.let { mediaItem -> (startOffset + index) to mediaItem }
+                }
+            }.awaitAll().filterNotNull()
         }
 
     private suspend fun fetchNextApiPage() {

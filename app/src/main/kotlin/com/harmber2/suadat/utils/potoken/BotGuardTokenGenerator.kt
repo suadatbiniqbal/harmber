@@ -65,10 +65,10 @@ object BotGuardTokenGenerator {
     private const val JS_BRIDGE = "BotGuardBridge"
 
     /** Timeout for first call (cold start: WebView boot + BotGuard bootstrap). */
-    private const val COLD_START_TIMEOUT_MS = 8_000L
+    private const val COLD_START_TIMEOUT_MS = 6_000L
 
     /** Timeout for subsequent calls (warm: just mint a token). */
-    private const val WARM_TIMEOUT_MS = 3_000L
+    private const val WARM_TIMEOUT_MS = 2_000L
 
     /** Maximum number of cached player tokens. */
     private const val PLAYER_TOKEN_CACHE_SIZE = 200

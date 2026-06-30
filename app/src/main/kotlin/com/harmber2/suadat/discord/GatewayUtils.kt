@@ -25,7 +25,7 @@ val NON_RESUMABLE_CLOSE_CODES: Set<Int> = setOf(4004, 4010, 4011, 4012, 4013, 40
 object GatewayDefaults {
     const val API_BASE = "https://discord.com/api"
     const val GATEWAY_URL = "wss://gateway.discord.gg"
-    const val GATEWAY_VERSION = 9
+    const val GATEWAY_VERSION = 10
     const val USER_AGENT = "Discord Embedded/1.9.15780"
     const val HELLO_TIMEOUT_MS = 20_000L
 }
