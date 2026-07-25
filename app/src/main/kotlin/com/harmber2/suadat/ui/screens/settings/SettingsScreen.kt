@@ -215,7 +215,7 @@ fun SettingsScreen(
                     item = settingsItem,
                     index = index,
                     count = settingsItems.size,
-                    modifier = Modifier.padding(horizontal = 26.dp),
+                    modifier = Modifier.padding(horizontal = 18.dp),
                 )
             }
 

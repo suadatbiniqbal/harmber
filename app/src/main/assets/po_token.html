@@ -211,4 +211,10 @@
 
       return result;
     }
+
+    // Expose functions to global window object explicitly to avoid ReferenceError in evaluateJavascript
+    window.runBotGuard = runBotGuard;
+    window.createPoTokenMinter = createPoTokenMinter;
+    window.obtainPoToken = obtainPoToken;
+
 </script></head><body></body></html>

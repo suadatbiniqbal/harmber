@@ -65,10 +65,10 @@ object BotGuardTokenGenerator {
     private const val JS_BRIDGE = "BotGuardBridge"
 
     /** Timeout for first call (cold start: WebView boot + BotGuard bootstrap). */
-    private const val COLD_START_TIMEOUT_MS = 6_000L
+    private const val COLD_START_TIMEOUT_MS = 15_000L
 
     /** Timeout for subsequent calls (warm: just mint a token). */
-    private const val WARM_TIMEOUT_MS = 2_000L
+    private const val WARM_TIMEOUT_MS = 10_000L
 
     /** Maximum number of cached player tokens. */
     private const val PLAYER_TOKEN_CACHE_SIZE = 200
@@ -298,14 +298,17 @@ object BotGuardTokenGenerator {
                             .bufferedReader()
                             .use { it.readText() }
                     }
-                val patched = html.replaceFirst("</script>", "\n$JS_BRIDGE.onPageLoaded()</script>")
+                // Use a proper document with baseURL and immediate script execution trigger
                 webView.loadDataWithBaseURL(
                     "https://www.youtube.com",
-                    patched,
+                    html,
                     "text/html",
                     "utf-8",
                     null,
                 )
+                // Trigger onPageLoaded after a small delay to ensure script parsing
+                kotlinx.coroutines.delay(100)
+                webView.evaluateJavascript("if (typeof window.BotGuardBridge !== 'undefined') { window.BotGuardBridge.onPageLoaded(); }", null)
             }
         }
 
@@ -318,8 +321,8 @@ object BotGuardTokenGenerator {
                     """
                     try {
                         var data = $challengeJson;
-                        runBotGuard(data).then(function(r) {
-                            this.webPoSignalOutput = r.webPoSignalOutput;
+                        window.runBotGuard(data).then(function(r) {
+                            window.webPoSignalOutput = r.webPoSignalOutput;
                             $JS_BRIDGE.onBotGuardReady(r.botguardResponse);
                         }, function(e) {
                             $JS_BRIDGE.onFatalError(e + "\n" + e.stack);
@@ -342,8 +345,8 @@ object BotGuardTokenGenerator {
                     webView.evaluateJavascript(
                         """
                         try {
-                            this.integrityToken = $tokenU8;
-                            createPoTokenMinter(webPoSignalOutput, integrityToken).then(function() {
+                            window.integrityToken = $tokenU8;
+                            window.createPoTokenMinter(window.webPoSignalOutput, window.integrityToken).then(function() {
                                 $JS_BRIDGE.onMinterReady();
                             }).catch(function(e) {
                                 $JS_BRIDGE.onFatalError(e + "\n" + (e.stack || ''));
@@ -379,7 +382,7 @@ object BotGuardTokenGenerator {
                     webView.evaluateJavascript(
                         """
                         try {
-                            obtainPoToken($u8Arg).then(function(u8) {
+                            window.obtainPoToken($u8Arg).then(function(u8) {
                                 $JS_BRIDGE.onMintOk("$identifier", u8.join(","));
                             }).catch(function(e) {
                                 $JS_BRIDGE.onMintErr("$identifier", e + "\n" + (e.stack || ''));

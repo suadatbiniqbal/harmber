@@ -104,10 +104,10 @@ val LocalPreferenceGroupPosition = compositionLocalOf<PreferenceGroupPosition?> 
 
 private val PreferenceGroupLargeCorner = 28.dp
 private val PreferenceGroupSmallCorner = 6.dp
-private val PreferenceGroupHorizontalPadding = 26.dp
-private val PreferenceEntryMinHeight = 88.dp
-private val PreferenceEntryHorizontalPadding = 22.dp
-private val PreferenceEntryVerticalPadding = 18.dp
+private val PreferenceGroupHorizontalPadding = 18.dp
+private val PreferenceEntryMinHeight = 72.dp
+private val PreferenceEntryHorizontalPadding = 20.dp
+private val PreferenceEntryVerticalPadding = 12.dp
 
 @Composable
 private fun rememberPreferenceIconShape(): Shape = MaterialShapes.Ghostish.toShape()
@@ -469,7 +469,7 @@ private fun <T> PreferenceSelectionBottomSheet(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 26.dp)
+                    .padding(horizontal = 18.dp)
                     .padding(bottom = 12.dp),
         ) {
             ProvideTextStyle(
@@ -1145,6 +1145,6 @@ fun PreferenceGroupTitle(
         style = MaterialTheme.typography.titleSmall,
         fontWeight = FontWeight.SemiBold,
         color = MaterialTheme.colorScheme.primary,
-        modifier = modifier.padding(horizontal = 20.dp, vertical = 10.dp),
+        modifier = modifier.padding(horizontal = 20.dp, vertical = 6.dp),
     )
 }

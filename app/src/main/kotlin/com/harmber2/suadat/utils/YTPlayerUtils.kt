@@ -949,19 +949,10 @@ object YTPlayerUtils {
             Timber.tag(logTag).i("Format found: ${format.mimeType}, bitrate: ${format.bitrate}")
             Timber.tag(logTag).v("Stream expires in: $streamExpiresInSeconds seconds")
 
-            val valid = validateStatus(streamUrl)
-            if (valid) {
-                Timber.tag(logTag).i("Stream validated successfully with client: ${describeClient(client)}")
-                lastSuccessfulClientKey = StreamClientUtils.buildClientKey(client)
-                break
-            }
-
-            Timber.tag(logTag).w("Stream validation failed with client: ${describeClient(client)}, trying next fallback")
-            format = null
-            streamUrl = null
-            streamClientUsed = null
-            streamExpiresInSeconds = null
-            streamPlayerResponse = null
+            // Optimization: Skip expensive network validation. 
+            // MusicService has built-in retry logic that handles invalid stream URLs more efficiently.
+            lastSuccessfulClientKey = StreamClientUtils.buildClientKey(client)
+            break
         }
 
         if (streamPlayerResponse == null) {

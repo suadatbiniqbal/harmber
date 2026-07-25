@@ -64,6 +64,7 @@ class SyncUtils
         private val syncMutex = Mutex()
         private val playlistSyncMutex = Mutex()
         private val dbWriteSemaphore = Semaphore(2)
+        private val networkSemaphore = Semaphore(3)
 
         init {
             syncScope.launch {
@@ -100,16 +101,30 @@ class SyncUtils
                     }
 
                     supervisorScope {
-                        syncLikedSongs(authoritative = authoritative)
-                        syncLibrarySongs(authoritative = authoritative)
+                        val syncs = listOf(
+                            suspend { syncLikedSongs(authoritative = authoritative) },
+                            suspend { syncLibrarySongs(authoritative = authoritative) },
+                            suspend { syncLikedAlbums(authoritative = authoritative) },
+                            suspend { syncArtistsSubscriptions(authoritative = authoritative) },
+                            suspend { syncSavedPlaylists(authoritative = authoritative) }
+                        )
 
-                        listOf(
-                            async { syncLikedAlbums(authoritative = authoritative) },
-                            async { syncArtistsSubscriptions(authoritative = authoritative) },
-                        ).awaitAll()
+                        for (syncTask in syncs) {
+                            if (!isSyncStillEnabled(syncGeneration.get())) break
+                            try {
+                                syncTask()
+                                // Add a small delay between major sync tasks to avoid hitting rate limits
+                                kotlinx.coroutines.delay(1000)
+                            } catch (e: Exception) {
+                                if (e is io.ktor.client.plugins.ClientRequestException && e.response.status.value == 429) {
+                                    Timber.e("Hit 429 Rate Limit during full sync, aborting remaining tasks")
+                                    break
+                                }
+                                Timber.e(e, "Error during sync task")
+                            }
+                        }
 
-                        syncSavedPlaylists(authoritative = authoritative)
-                        if (!authoritative) {
+                        if (!authoritative && isSyncStillEnabled(syncGeneration.get())) {
                             syncAutoSyncPlaylists()
                         }
                     }
@@ -119,6 +134,7 @@ class SyncUtils
                     syncMutex.unlock()
                 }
             }
+
 
         suspend fun cleanupDuplicatePlaylists() =
             withContext(Dispatchers.IO) {
@@ -307,24 +323,30 @@ class SyncUtils
                         }
                         val baseTimestamp = LocalDateTime.now()
 
-                        remoteSongs.forEachIndexed { index, song ->
-                            val timestamp = likedSongTimestamp(baseTimestamp, index)
-                            launch {
-                                if (!isSyncStillEnabled(gen)) return@launch
-                                dbWriteSemaphore.withPermit {
-                                    if (!isSyncStillEnabled(gen)) return@withPermit
-                                    val dbSong = database.song(song.id).firstOrNull()
-                                    database.withTransaction {
-                                        if (!isSyncStillEnabled(gen)) return@withTransaction
-                                        if (dbSong == null) {
-                                            insert(song.toMediaMetadata()) { it.copy(liked = true, likedDate = timestamp) }
-                                        } else if (!dbSong.song.liked || dbSong.song.likedDate != timestamp) {
-                                            update(dbSong.song.copy(liked = true, likedDate = timestamp))
+                        remoteSongs.chunked(50).forEach { chunk ->
+                            if (!isSyncStillEnabled(gen)) return@forEach
+                            coroutineScope {
+                                chunk.forEachIndexed { index, song ->
+                                    val timestamp = likedSongTimestamp(baseTimestamp, index)
+                                    launch {
+                                        if (!isSyncStillEnabled(gen)) return@launch
+                                        dbWriteSemaphore.withPermit {
+                                            if (!isSyncStillEnabled(gen)) return@withPermit
+                                            val dbSong = database.song(song.id).firstOrNull()
+                                            database.withTransaction {
+                                                if (!isSyncStillEnabled(gen)) return@withTransaction
+                                                if (dbSong == null) {
+                                                    insert(song.toMediaMetadata()) { it.copy(liked = true, likedDate = timestamp) }
+                                                } else if (!dbSong.song.liked || dbSong.song.likedDate != timestamp) {
+                                                    update(dbSong.song.copy(liked = true, likedDate = timestamp))
+                                                }
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
+
                     }.onFailure { e ->
                         Timber.e(e, "syncLikedSongs: Failed to sync liked songs")
                     }
@@ -368,23 +390,29 @@ class SyncUtils
                             }
                         }
 
-                        remoteSongs.forEach { song ->
-                            launch {
-                                if (!isSyncStillEnabled(gen)) return@launch
-                                dbWriteSemaphore.withPermit {
-                                    if (!isSyncStillEnabled(gen)) return@withPermit
-                                    val dbSong = database.song(song.id).firstOrNull()
-                                    database.withTransaction {
-                                        if (!isSyncStillEnabled(gen)) return@withTransaction
-                                        if (dbSong == null) {
-                                            insert(song.toMediaMetadata()) { it.toggleLibrary() }
-                                        } else if (dbSong.song.inLibrary == null) {
-                                            update(dbSong.song.toggleLibrary())
+                        remoteSongs.chunked(50).forEach { chunk ->
+                            if (!isSyncStillEnabled(gen)) return@forEach
+                            coroutineScope {
+                                chunk.forEach { song ->
+                                    launch {
+                                        if (!isSyncStillEnabled(gen)) return@launch
+                                        dbWriteSemaphore.withPermit {
+                                            if (!isSyncStillEnabled(gen)) return@withPermit
+                                            val dbSong = database.song(song.id).firstOrNull()
+                                            database.withTransaction {
+                                                if (!isSyncStillEnabled(gen)) return@withTransaction
+                                                if (dbSong == null) {
+                                                    insert(song.toMediaMetadata()) { it.toggleLibrary() }
+                                                } else if (dbSong.song.inLibrary == null) {
+                                                    update(dbSong.song.toggleLibrary())
+                                                }
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
+
                     }.onFailure { e ->
                         Timber.e(e, "syncLibrarySongs: Failed to sync library songs")
                     }
@@ -431,28 +459,33 @@ class SyncUtils
                         remoteAlbums.forEach { album ->
                             launch {
                                 if (!isSyncStillEnabled(gen)) return@launch
-                                dbWriteSemaphore.withPermit {
+                                networkSemaphore.withPermit {
                                     if (!isSyncStillEnabled(gen)) return@withPermit
-                                    val dbAlbum = database.album(album.id).firstOrNull()
-                                    YouTube
-                                        .album(album.browseId)
-                                        .onSuccess { albumPage ->
-                                            if (!isSyncStillEnabled(gen)) return@onSuccess
-                                            if (dbAlbum == null) {
-                                                try {
-                                                    database.insert(albumPage)
-                                                    database.album(album.id).firstOrNull()?.let { newDbAlbum ->
-                                                        database.update(newDbAlbum.album.localToggleLike())
+                                    dbWriteSemaphore.withPermit {
+                                        if (!isSyncStillEnabled(gen)) return@withPermit
+                                        val dbAlbum = database.album(album.id).firstOrNull()
+                                        if (dbAlbum != null && dbAlbum.album.bookmarkedAt != null) return@withPermit
+
+                                        YouTube
+                                            .album(album.browseId)
+                                            .onSuccess { albumPage ->
+                                                if (!isSyncStillEnabled(gen)) return@onSuccess
+                                                if (dbAlbum == null) {
+                                                    try {
+                                                        database.insert(albumPage)
+                                                        database.album(album.id).firstOrNull()?.let { newDbAlbum ->
+                                                            database.update(newDbAlbum.album.localToggleLike())
+                                                        }
+                                                    } catch (e: Exception) {
+                                                        Timber.w("syncLikedAlbums: Failed to insert album ${album.id}", e)
                                                     }
-                                                } catch (e: Exception) {
-                                                    Timber.w("syncLikedAlbums: Failed to insert album ${album.id}", e)
+                                                } else if (dbAlbum.album.bookmarkedAt == null) {
+                                                    database.update(dbAlbum.album.localToggleLike())
                                                 }
-                                            } else if (dbAlbum.album.bookmarkedAt == null) {
-                                                database.update(dbAlbum.album.localToggleLike())
+                                            }.onFailure { e ->
+                                                Timber.w("syncLikedAlbums: Failed to fetch album ${album.id}", e)
                                             }
-                                        }.onFailure { e ->
-                                            Timber.w("syncLikedAlbums: Failed to fetch album ${album.id}", e)
-                                        }
+                                    }
                                 }
                             }
                         }

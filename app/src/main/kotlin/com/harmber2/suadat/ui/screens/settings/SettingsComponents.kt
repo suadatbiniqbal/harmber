@@ -595,14 +595,14 @@ fun SettingsSegmentedItem(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .heightIn(min = 88.dp)
-                    .padding(horizontal = 22.dp, vertical = 14.dp),
+                    .heightIn(min = 72.dp)
+                    .padding(horizontal = 20.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Box(
                 modifier =
                     Modifier
-                        .size(52.dp)
+                        .size(44.dp)
                         .clip(CircleShape)
                         .background(effectiveAccent),
                 contentAlignment = Alignment.Center,
@@ -612,7 +612,7 @@ fun SettingsSegmentedItem(
                         badge = {
                             Badge(
                                 containerColor = MaterialTheme.colorScheme.error,
-                                modifier = Modifier.size(9.dp),
+                                modifier = Modifier.size(8.dp),
                             )
                         },
                     ) {
@@ -620,7 +620,7 @@ fun SettingsSegmentedItem(
                             painter = item.icon,
                             contentDescription = null,
                             tint = iconContentColor,
-                            modifier = Modifier.size(26.dp),
+                            modifier = Modifier.size(22.dp),
                         )
                     }
                 } else {
@@ -628,12 +628,12 @@ fun SettingsSegmentedItem(
                         painter = item.icon,
                         contentDescription = null,
                         tint = iconContentColor,
-                        modifier = Modifier.size(26.dp),
+                        modifier = Modifier.size(22.dp),
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.width(18.dp))
+            Spacer(modifier = Modifier.width(16.dp))
 
             Column(
                 modifier = Modifier.weight(1f),

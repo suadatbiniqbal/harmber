@@ -21,8 +21,8 @@ object SettingsDimensions {
 
     val ScreenHorizontalPadding = 16.dp
     val SectionSpacing = 14.dp
-    val RowVerticalPadding = 14.dp
-    val RowHorizontalPadding = 16.dp
+    val RowVerticalPadding = 10.dp
+    val RowHorizontalPadding = 14.dp
 
     val RowIconSize = 36.dp
     val RowIconInnerSize = 20.dp
@@ -37,7 +37,7 @@ object SettingsDimensions {
     val DividerStartIndent = 60.dp
 
     val SectionHeaderBottomPadding = 6.dp
-    val SectionHeaderHorizontalPadding = 20.dp
+    val SectionHeaderHorizontalPadding = 18.dp
 }
 
 object SettingsAnimations {

@@ -120,7 +120,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeoutOrNull
 import com.harmber2.suadat.MainActivity
 import com.harmber2.suadat.R
 import com.harmber2.suadat.constants.AudioNormalizationKey
@@ -178,7 +177,6 @@ import com.harmber2.suadat.constants.ShowLyricsKey
 import com.harmber2.suadat.constants.SkipSilenceKey
 import com.harmber2.suadat.constants.SmartTrimmerKey
 import com.harmber2.suadat.constants.StopMusicOnTaskClearKey
-import com.harmber2.suadat.constants.TogetherBearerTokenKey
 import com.harmber2.suadat.constants.TogetherClientIdKey
 import com.harmber2.suadat.constants.WakelockKey
 import com.harmber2.suadat.constants.YtmSyncKey
@@ -352,9 +350,9 @@ class MusicService :
         OkHttpClient
             .Builder()
             .proxy(YouTube.streamOkHttpProxy)
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
-            .writeTimeout(30, TimeUnit.SECONDS)
+            .connectTimeout(10, TimeUnit.SECONDS)
+            .readTimeout(15, TimeUnit.SECONDS)
+            .writeTimeout(15, TimeUnit.SECONDS)
             .retryOnConnectionFailure(true)
             .followRedirects(true)
             .followSslRedirects(true)
@@ -887,13 +885,6 @@ class MusicService :
         connectivityManager = getSystemService()!!
         connectivityObserver = NetworkConnectivityObserver(this)
 
-        scope.launch(Dispatchers.IO) {
-            val lastSongId = database.lastEventSongId().first()
-            if (!lastSongId.isNullOrBlank()) {
-                com.harmber2.suadat.utils.potoken.BotGuardTokenGenerator.preWarm(lastSongId)
-            }
-        }
-
         scope.launch {
             connectivityObserver.networkStatus.collect { isConnected ->
                 isNetworkConnected.value = isConnected
@@ -962,7 +953,7 @@ class MusicService :
             }
 
         dataStore.data
-            .map { it[PauseOnDeviceMuteKey] ?: true }
+            .map { it[PauseOnDeviceMuteKey] ?: false }
             .distinctUntilChanged()
             .collectLatest(scope) { enabled ->
                 pauseOnDeviceMuteEnabled = enabled
@@ -3278,21 +3269,9 @@ class MusicService :
             }
 
             val togetherToken =
-                dataStore.getAsync(TogetherBearerTokenKey, "")?.trim()?.takeIf { it.isNotBlank() }
-                    ?: com.harmber2.suadat.BuildConfig.TOGETHER_BEARER_TOKEN
-                        .trim()
-                        .takeIf { it.isNotBlank() }
-
-            if (togetherToken == null) {
-                scope.launch(SilentHandler) {
-                    togetherSessionState.value =
-                        com.harmber2.suadat.together.TogetherSessionState.Error(
-                            message = "Bearer token not set. Online rooms require a valid server token. Check Music Together settings for details.",
-                            recoverable = true,
-                        )
-                }
-                return@launch
-            }
+                com.harmber2.suadat.BuildConfig.TOGETHER_BEARER_TOKEN
+                    .trim()
+                    .takeIf { it.isNotBlank() }
 
             val api =
                 com.harmber2.suadat.together
@@ -3632,21 +3611,9 @@ class MusicService :
             }
 
             val togetherToken =
-                dataStore.getAsync(TogetherBearerTokenKey, "")?.trim()?.takeIf { it.isNotBlank() }
-                    ?: com.harmber2.suadat.BuildConfig.TOGETHER_BEARER_TOKEN
-                        .trim()
-                        .takeIf { it.isNotBlank() }
-
-            if (togetherToken == null) {
-                scope.launch(SilentHandler) {
-                    togetherSessionState.value =
-                        com.harmber2.suadat.together.TogetherSessionState.Error(
-                            message = "Bearer token not set. Online rooms require a valid server token. Check Music Together settings for details.",
-                            recoverable = true,
-                        )
-                }
-                return@launch
-            }
+                com.harmber2.suadat.BuildConfig.TOGETHER_BEARER_TOKEN
+                    .trim()
+                    .takeIf { it.isNotBlank() }
 
             val api =
                 com.harmber2.suadat.together
@@ -5771,44 +5738,42 @@ class MusicService :
         }
     }
 
-    private fun createPlayerCacheDataSourceFactory(cacheWriteEnabled: Boolean): CacheDataSource.Factory =
+    private fun createPlayerCacheDataSourceFactory(upstreamFactory: DataSource.Factory): CacheDataSource.Factory =
         CacheDataSource
             .Factory()
             .setCache(playerCache)
-            .setUpstreamDataSourceFactory(createResolvedUpstreamDataSourceFactory())
+            .setUpstreamDataSourceFactory(upstreamFactory)
             .apply {
-                if (!cacheWriteEnabled) {
+                if (isLowDataModeActive()) {
                     setCacheWriteDataSinkFactory(null)
                 }
             }.setFlags(FLAG_IGNORE_CACHE_ON_ERROR)
 
-    private fun createCacheDataSource(): CacheDataSource.Factory =
+    private fun createCacheDataSource(upstreamFactory: DataSource.Factory): CacheDataSource.Factory =
         CacheDataSource
             .Factory()
             .setCache(downloadCache)
-            .setUpstreamDataSourceFactory(
-                DataSource.Factory {
-                    createPlayerCacheDataSourceFactory(
-                        cacheWriteEnabled = !isLowDataModeActive(),
-                    ).createDataSource()
-                },
-            ).setCacheWriteDataSinkFactory(null)
+            .setUpstreamDataSourceFactory(upstreamFactory)
+            .setCacheWriteDataSinkFactory(null)
             .setFlags(FLAG_IGNORE_CACHE_ON_ERROR)
 
     private fun createDataSourceFactory(): DataSource.Factory {
+        val baseFactory = createResolvedUpstreamDataSourceFactory()
+        val playerCacheFactory = createPlayerCacheDataSourceFactory(baseFactory)
+        val downloadCacheFactory = createCacheDataSource(playerCacheFactory)
+
         val cachedFactory =
-            ResolvingDataSource.Factory(createCacheDataSource()) { dataSpec ->
+            ResolvingDataSource.Factory(downloadCacheFactory) { dataSpec ->
                 resolvePlaybackDataSpec(
                     dataSpec = dataSpec,
                     allowCacheShortCircuit = true,
                 )
             }
-        val directFactory = createResolvedUpstreamDataSourceFactory()
 
         return DataSource.Factory {
             SchemeRoutingDataSource(
                 cachedFactory = cachedFactory,
-                directFactory = directFactory,
+                directFactory = baseFactory,
             )
         }
     }
@@ -5836,12 +5801,10 @@ class MusicService :
             return dataSpec
         }
         val mediaId = dataSpec.key ?: return dataSpec
-        
-        val storedFormat: FormatEntity? =
+        val storedFormat =
             runBlocking(Dispatchers.IO) {
-                database.format(mediaId).first()
+                database.getFormatById(mediaId)
             }
-
         storedFormat?.let { format ->
             audioNormalizationFactorCache[mediaId] = calculateAudioNormalizationFactor(format, normalizeAudio = true)
         }
@@ -5920,8 +5883,18 @@ class MusicService :
             }?.let {
                 scope.launch(Dispatchers.IO) { recoverSong(mediaId) }
                 val resolvedDataSpec = dataSpec.withUri(it.url.toUri())
-        return resolvedDataSpec
-    }
+                val length =
+                    resolveStreamChunkLength(
+                        requestedLength = dataSpec.length,
+                        position = dataSpec.position,
+                        knownContentLength = knownContentLength,
+                        chunkLength = CHUNK_LENGTH,
+                        mimeType = storedFormat?.mimeType,
+                    )
+                return length?.let { nonNullLength ->
+                    resolvedDataSpec.subrange(0L, nonNullLength)
+                } ?: resolvedDataSpec
+            }
 
         val playbackData =
             runBlocking(Dispatchers.IO) {
@@ -6031,7 +6004,6 @@ class MusicService :
             requireNotNull(playbackData) {
                 getString(R.string.error_unknown)
             }
-
         nonNullPlayback.playbackTracking
             ?.remotePlaybackTrackingUrl()
             ?.let { remotePlaybackTrackingUrlCache[mediaId] = it }
@@ -6097,7 +6069,17 @@ class MusicService :
                 )
         }
         val resolvedDataSpec = dataSpec.withUri(streamUrl.toUri())
-        return resolvedDataSpec
+        val length =
+            resolveStreamChunkLength(
+                requestedLength = dataSpec.length,
+                position = dataSpec.position,
+                knownContentLength = knownContentLength ?: format.contentLength,
+                chunkLength = CHUNK_LENGTH,
+                mimeType = format.mimeType,
+            )
+        return length?.let { nonNullLength ->
+            resolvedDataSpec.subrange(0L, nonNullLength)
+        } ?: resolvedDataSpec
     }
 
     private suspend fun resolveHiResLosslessPlayback(mediaId: String): Result<YTPlayerUtils.PlaybackData> =
@@ -6532,6 +6514,10 @@ class MusicService :
                 }
             }.onFailure {
                 Timber.tag(TAG).w(it, "Failed to read persistent file: $fileName")
+                if (it is java.io.InvalidClassException || it is ClassNotFoundException) {
+                    Timber.tag(TAG).i("Removing incompatible persistent file: $fileName")
+                    runCatching { persistentFile.delete() }
+                }
             }.getOrNull()
         }
     }
@@ -6911,7 +6897,7 @@ class MusicService :
         const val CHANNEL_ID = "music_channel_01"
         const val NOTIFICATION_ID = 888
         const val ERROR_CODE_NO_STREAM = 1000001
-        const val CHUNK_LENGTH = 8 * 1024 * 1024L
+        const val CHUNK_LENGTH = 2 * 1024 * 1024L
         val RETRYABLE_STREAM_RESPONSE_CODES = setOf(403, 404, 410, 416)
         const val PERSISTENT_QUEUE_FILE = "persistent_queue.data"
         const val PERSISTENT_AUTOMIX_FILE = "persistent_automix.data"
