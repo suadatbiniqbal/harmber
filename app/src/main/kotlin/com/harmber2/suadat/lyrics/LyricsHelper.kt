@@ -184,13 +184,20 @@ class LyricsHelper
                     providers
                         .map { provider ->
                             async(Dispatchers.IO) {
-                                fetchProviderLyrics(provider, mediaMetadata, artist)
+                                val lyrics = fetchProviderLyrics(provider, mediaMetadata, artist)
+                                if (lyrics != null && (LyricsUtils.isLineSyncedLrc(lyrics) || LyricsUtils.isTtml(lyrics))) {
+                                    lyrics
+                                } else {
+                                    lyrics
+                                }
                             }
                         }
 
                 if (requests.isEmpty()) return@supervisorScope LYRICS_NOT_FOUND
 
                 val pending = requests.toMutableSet()
+                var fallbackLyrics: String? = null
+                
                 while (pending.isNotEmpty()) {
                     val (request, lyrics) =
                         select<Pair<Deferred<String?>, String?>> {
@@ -199,13 +206,18 @@ class LyricsHelper
                             }
                         }
                     pending.remove(request)
+                    
                     if (lyrics != null) {
-                        pending.forEach { it.cancel() }
-                        return@supervisorScope lyrics
+                        if (LyricsUtils.isLineSyncedLrc(lyrics) || LyricsUtils.isTtml(lyrics)) {
+                            pending.forEach { it.cancel() }
+                            return@supervisorScope lyrics
+                        } else if (fallbackLyrics == null) {
+                            fallbackLyrics = lyrics
+                        }
                     }
                 }
 
-                LYRICS_NOT_FOUND
+                fallbackLyrics ?: LYRICS_NOT_FOUND
             }
 
         private suspend fun fetchProviderLyrics(

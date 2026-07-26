@@ -2411,6 +2411,8 @@ class MainActivity : ComponentActivity() {
             return
         }
 
+        val isHarmberUrl = authority == "harmber.xyz" || authority == "www.harmber.xyz"
+
         when (val path = uri.pathSegments.firstOrNull()) {
             "playlist" -> {
                 uri.getQueryParameter("list")?.let { playlistId ->

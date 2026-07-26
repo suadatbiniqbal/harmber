@@ -860,7 +860,17 @@ fun SpotifyPlaylistScreen(
                     isPlaying = isPlaying && !trackIsResolving,
                     trailingContent = {
                         if (trackIsResolving) {
-                            CircularWavyProgressIndicator(modifier = Modifier.size(24.dp))
+                            Box(
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .padding(8.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularWavyProgressIndicator(
+                                    modifier = Modifier.size(24.dp),
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
                         } else {
                             IconButton(
                                 onClick = { viewModel.removeTrack(trackWrapper) },

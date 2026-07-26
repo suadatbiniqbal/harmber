@@ -37,60 +37,53 @@ object SpotifyPlaybackResolver {
             if (cached != null) return@withContext cached
 
             val primaryArtist = track.artists.firstOrNull()?.name.orEmpty()
-            val query = if (primaryArtist.isNotEmpty()) "$primaryArtist ${track.name}" else track.name
+            val artistsString = track.artists.joinToString(" ") { it.name }
+            val queries = listOf(
+                "$artistsString ${track.name}",
+                "$primaryArtist ${track.name}",
+                track.name
+            ).distinct()
             
-            val searchResult =
-                YouTube
-                    .search(
-                        query = query,
-                        filter = YouTube.SearchFilter.FILTER_SONG,
-                    ).getOrNull() 
-                    ?: YouTube.search(
-                        query = "${track.name} $primaryArtist",
-                        filter = YouTube.SearchFilter.FILTER_SONG,
-                    ).getOrNull()
-                    ?: YouTube.search(
-                        query = track.name,
-                        filter = YouTube.SearchFilter.FILTER_SONG,
-                    ).getOrNull()
-                    ?: return@withContext null
-
-            val candidates =
-                searchResult.items
-                    .filterIsInstance<SongItem>()
-                    .distinctBy { it.id }
-            
-            if (candidates.isEmpty()) {
-                // Try searching with only the title if combined query fails
-                YouTube.search(track.name, YouTube.SearchFilter.FILTER_SONG).getOrNull()?.items
-                    ?.filterIsInstance<SongItem>()
-                    ?.firstOrNull()?.let { return@withContext resolveToMetadataFromSongItem(it, track) }
-                return@withContext null
-            }
+            var bestCandidate: SongItem? = null
+            var bestScore = 0.0
 
             val precomputed =
                 SpotifyMapper.precompute(
                     title = track.name,
-                    artist = track.artists.joinToString(" ") { it.name },
+                    artist = artistsString,
                     durationMs = track.durationMs,
                 )
 
-            val (best, score) =
-                candidates
-                    .map { candidate ->
-                        candidate to
-                            SpotifyMapper.matchScorePrecomputed(
+            for (query in queries) {
+                val searchResult = YouTube.search(query, YouTube.SearchFilter.FILTER_SONG).getOrNull()
+                val candidates = searchResult?.items?.filterIsInstance<SongItem>().orEmpty()
+                
+                if (candidates.isNotEmpty()) {
+                    val (currentBest, currentScore) = candidates
+                        .map { candidate ->
+                            candidate to SpotifyMapper.matchScorePrecomputed(
                                 precomputed = precomputed,
                                 candidateTitle = candidate.title,
                                 candidateArtist = candidate.artists.joinToString(" ") { it.name },
                                 candidateDurationSec = candidate.duration,
                             )
-                    }.maxByOrNull { it.second }
-                ?: return@withContext null
+                        }.maxByOrNull { it.second } ?: continue
+                    
+                    if (currentScore > bestScore) {
+                        bestCandidate = currentBest
+                        bestScore = currentScore
+                    }
+                    
+                    if (bestScore >= 0.9) break // Good enough
+                }
+            }
             
-            if (score < MIN_MATCH_THRESHOLD) return@withContext null
+            val resultCandidate = bestCandidate ?: return@withContext null
+            if (bestScore < MIN_MATCH_THRESHOLD) return@withContext null
 
-            resolveToMetadataFromSongItem(best, track)
+            val metadata = resolveToMetadataFromSongItem(resultCandidate, track)
+            mutex.withLock { cache[track.id] = metadata }
+            metadata
         }
 
     private suspend fun resolveToMetadataFromSongItem(songItem: SongItem, track: SpotifyTrack): MediaMetadata {

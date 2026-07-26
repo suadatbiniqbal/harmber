@@ -557,9 +557,12 @@ fun AlbumRecommendationsSection(
     navController: NavController,
     modifier: Modifier = Modifier,
 ) {
+    val configuration = androidx.compose.ui.platform.LocalConfiguration.current
+    val cardWidth = if (configuration.screenWidthDp > 600) 240.dp else 210.dp
+    
     LazyRow(
         contentPadding = PaddingValues(horizontal = 24.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(20.dp),
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier.fillMaxWidth(),
     ) {
@@ -573,14 +576,14 @@ fun AlbumRecommendationsSection(
             val isPressed by interactionSource.collectIsPressedAsState()
 
             val animatedScale by animateFloatAsState(
-                targetValue = if (isPressed) 0.94f else if (isHovered) 1.05f else 1f,
-                animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessMedium),
+                targetValue = if (isPressed) 0.94f else if (isHovered) 1.06f else 1f,
+                animationSpec = spring(dampingRatio = 0.55f, stiffness = Spring.StiffnessLow),
                 label = "album_card_scale"
             )
 
             val animatedElevation by animateDpAsState(
-                targetValue = if (isPressed) 2.dp else if (isHovered) 16.dp else 4.dp,
-                animationSpec = tween(300),
+                targetValue = if (isPressed) 4.dp else if (isHovered) 28.dp else 6.dp,
+                animationSpec = tween(400),
                 label = "album_card_elevation"
             )
 
@@ -593,13 +596,13 @@ fun AlbumRecommendationsSection(
 
             Column(
                 modifier = Modifier
-                    .width(200.dp)
+                    .width(cardWidth)
                     .graphicsLayer {
                         scaleX = animatedScale
                         scaleY = animatedScale
                     }
-                    .shadow(animatedElevation, shape = RoundedCornerShape(28.dp))
-                    .clip(RoundedCornerShape(28.dp))
+                    .shadow(animatedElevation, shape = RoundedCornerShape(32.dp))
+                    .clip(RoundedCornerShape(32.dp))
                     .background(animatedColor)
                     .clickable(
                         interactionSource = interactionSource,
@@ -612,7 +615,7 @@ fun AlbumRecommendationsSection(
                     modifier = Modifier
                         .fillMaxWidth()
                         .aspectRatio(1f)
-                        .clip(RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)),
+                        .clip(RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)),
                 ) {
                     AsyncImage(
                         model = ImageRequest.Builder(LocalContext.current)
@@ -629,28 +632,48 @@ fun AlbumRecommendationsSection(
                             .fillMaxSize()
                             .background(
                                 Brush.verticalGradient(
-                                    colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.35f)),
-                                    startY = 140f
+                                    colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.45f)),
+                                    startY = 120f
                                 )
                             )
                     )
+                    
+                    // Quick Action Overlay
+                    if (isHovered) {
+                         Box(
+                             modifier = Modifier
+                                 .align(Alignment.Center)
+                                 .size(56.dp)
+                                 .clip(CircleShape)
+                                 .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.9f)),
+                             contentAlignment = Alignment.Center
+                         ) {
+                             Icon(
+                                 painter = painterResource(id = R.drawable.play),
+                                 contentDescription = null,
+                                 tint = MaterialTheme.colorScheme.onPrimary,
+                                 modifier = Modifier.size(28.dp)
+                             )
+                         }
+                    }
                 }
                 
                 Column(
                     modifier = Modifier
-                        .padding(horizontal = 14.dp, vertical = 14.dp)
+                        .padding(horizontal = 18.dp, vertical = 18.dp)
                         .fillMaxWidth()
                 ) {
                     Text(
                         text = album.title,
-                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold, letterSpacing = (-0.5).sp),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
+                    Spacer(modifier = Modifier.height(2.dp))
                     Text(
                         text = item.artists.joinToString(", ") { it.name },
-                        style = MaterialTheme.typography.bodySmall,
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
@@ -683,14 +706,14 @@ fun MostPlayedAlbumsSection(
             val isPressed by interactionSource.collectIsPressedAsState()
 
             val animatedScale by animateFloatAsState(
-                targetValue = if (isPressed) 0.94f else if (isHovered) 1.05f else 1f,
-                animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessMedium),
+                targetValue = if (isPressed) 0.94f else if (isHovered) 1.06f else 1f,
+                animationSpec = spring(dampingRatio = 0.6f, stiffness = Spring.StiffnessLow),
                 label = "most_played_album_card_scale"
             )
 
             Column(
                 modifier = Modifier
-                    .width(110.dp)
+                    .width(120.dp)
                     .graphicsLayer {
                         scaleX = animatedScale
                         scaleY = animatedScale
@@ -704,8 +727,9 @@ fun MostPlayedAlbumsSection(
             ) {
                 Box(
                     modifier = Modifier
-                        .size(110.dp)
-                        .clip(RoundedCornerShape(28.dp)),
+                        .size(120.dp)
+                        .shadow(if (isHovered) 12.dp else 0.dp, shape = RoundedCornerShape(24.dp))
+                        .clip(RoundedCornerShape(24.dp)),
                 ) {
                     AsyncImage(
                         model = ImageRequest.Builder(LocalContext.current)
@@ -716,18 +740,34 @@ fun MostPlayedAlbumsSection(
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxSize(),
                     )
+                    
+                    if (isHovered) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.Black.copy(alpha = 0.2f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.play),
+                                contentDescription = null,
+                                tint = Color.White,
+                                modifier = Modifier.size(32.dp)
+                            )
+                        }
+                    }
                 }
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(10.dp))
                 Text(
                     text = album.title,
-                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     color = MaterialTheme.colorScheme.onBackground,
                 )
                 Text(
                     text = item.artists.joinToString(", ") { it.name },
-                    style = MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
@@ -884,14 +924,14 @@ fun RandomAlbumsSection(
             val isPressed by interactionSource.collectIsPressedAsState()
 
             val animatedScale by animateFloatAsState(
-                targetValue = if (isPressed) 0.94f else if (isHovered) 1.05f else 1f,
-                animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessMedium),
+                targetValue = if (isPressed) 0.94f else if (isHovered) 1.06f else 1f,
+                animationSpec = spring(dampingRatio = 0.6f, stiffness = Spring.StiffnessLow),
                 label = "random_album_card_scale"
             )
 
             Column(
                 modifier = Modifier
-                    .width(150.dp)
+                    .width(160.dp)
                     .graphicsLayer {
                         scaleX = animatedScale
                         scaleY = animatedScale
@@ -905,8 +945,9 @@ fun RandomAlbumsSection(
             ) {
                 Box(
                     modifier = Modifier
-                        .size(150.dp)
-                        .clip(RoundedCornerShape(32.dp)),
+                        .size(160.dp)
+                        .shadow(if (isHovered) 14.dp else 0.dp, shape = RoundedCornerShape(28.dp))
+                        .clip(RoundedCornerShape(28.dp)),
                 ) {
                     AsyncImage(
                         model = ImageRequest.Builder(LocalContext.current)
@@ -917,18 +958,34 @@ fun RandomAlbumsSection(
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxSize(),
                     )
+                    
+                    if (isHovered) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.Black.copy(alpha = 0.25f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.play),
+                                contentDescription = null,
+                                tint = Color.White,
+                                modifier = Modifier.size(40.dp)
+                            )
+                        }
+                    }
                 }
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(10.dp))
                 Text(
                     text = album.title,
-                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.ExtraBold),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     color = MaterialTheme.colorScheme.onBackground,
                 )
                 Text(
                     text = item.artists.joinToString(", ") { it.name },
-                    style = MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
@@ -1308,28 +1365,32 @@ private fun SpotifyHomePlaylistCard(
     )
     
     val interactionSource = remember { MutableInteractionSource() }
+    val isHovered by interactionSource.collectIsHoveredAsState()
     val isPressed by interactionSource.collectIsPressedAsState()
+    
     val scale by animateFloatAsState(
-        targetValue = if (isPressed) 0.96f else 1.0f,
-        animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+        targetValue = if (isPressed) 0.94f else if (isHovered) 1.08f else 1.0f,
+        animationSpec = spring(dampingRatio = 0.45f, stiffness = Spring.StiffnessMediumLow),
         label = "SpotifyCardScale"
     )
     
     val elevation by animateDpAsState(
-        targetValue = if (isPressed) 2.dp else 12.dp,
+        targetValue = if (isPressed) 2.dp else if (isHovered) 20.dp else 8.dp,
         animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
         label = "SpotifyCardElevation"
     )
 
+    val shadowColor = MaterialTheme.colorScheme.primary.copy(alpha = if (isHovered) 0.25f else 0f)
+
     Column(
         modifier = modifier
-            .width(180.dp)
+            .width(200.dp)
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
             }
-            .shadow(elevation, shape = RoundedCornerShape(32.dp))
-            .clip(RoundedCornerShape(32.dp))
+            .shadow(elevation, shape = RoundedCornerShape(36.dp), spotColor = shadowColor)
+            .clip(RoundedCornerShape(36.dp))
             .background(cardBgColor)
             .combinedClickable(
                 interactionSource = interactionSource,
@@ -1342,7 +1403,7 @@ private fun SpotifyHomePlaylistCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(1f)
-                .clip(RoundedCornerShape(32.dp)),
+                .clip(RoundedCornerShape(36.dp)),
         ) {
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
@@ -1359,10 +1420,10 @@ private fun SpotifyHomePlaylistCard(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(14.dp)
-                    .size(32.dp)
+                    .size(36.dp)
                     .clip(CircleShape)
-                    .background(Color.Black.copy(alpha = 0.4f))
-                    .padding(6.dp),
+                    .background(Color.Black.copy(alpha = 0.5f))
+                    .padding(7.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -1373,12 +1434,21 @@ private fun SpotifyHomePlaylistCard(
                 )
             }
             
-            // Play overlay with nice glass effect or just solid primary
+            // Play overlay 
+            val playBtnScale by animateFloatAsState(
+                targetValue = if (isHovered) 1.15f else 1f,
+                label = "PlayBtnScale"
+            )
+            
             Box(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .padding(14.dp)
-                    .size(42.dp)
+                    .padding(16.dp)
+                    .graphicsLayer {
+                        scaleX = playBtnScale
+                        scaleY = playBtnScale
+                    }
+                    .size(48.dp)
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.primary)
                     .padding(4.dp),
@@ -1388,31 +1458,31 @@ private fun SpotifyHomePlaylistCard(
                     painter = painterResource(id = R.drawable.play),
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onPrimary,
-                    modifier = Modifier.size(22.dp)
+                    modifier = Modifier.size(24.dp)
                 )
             }
         }
         
         Column(
             modifier = Modifier
-                .padding(horizontal = 16.dp)
-                .padding(top = 12.dp, bottom = 16.dp)
+                .padding(horizontal = 20.dp)
+                .padding(top = 14.dp, bottom = 20.dp)
         ) {
             Text(
                 text = playlist.name,
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 color = MaterialTheme.colorScheme.onSurface,
             )
             
-            Spacer(modifier = Modifier.height(2.dp))
+            Spacer(modifier = Modifier.height(4.dp))
             
             Text(
                 text = "${playlist.tracks?.total ?: 0} tracks",
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                 maxLines = 1,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f),
             )
         }
     }

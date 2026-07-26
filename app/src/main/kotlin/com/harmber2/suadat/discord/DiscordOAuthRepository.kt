@@ -87,9 +87,8 @@ object DiscordOAuthRepository {
         val challenge = sha256Base64Url(verifier)
         val scopes =
             listOf(
-                "openid",
                 "identify",
-                "activities.read",
+                "email",
                 "activities.write",
             ).joinToString(separator = " ")
 

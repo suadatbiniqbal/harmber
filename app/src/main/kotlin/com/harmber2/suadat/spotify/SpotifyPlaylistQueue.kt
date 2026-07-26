@@ -13,6 +13,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
+import com.harmber2.suadat.extensions.toMediaItem
 import com.harmber2.suadat.models.MediaMetadata
 import com.harmber2.suadat.playback.queues.Queue
 import com.harmber2.suadat.spotify.models.SpotifyTrack
@@ -49,15 +50,23 @@ class SpotifyPlaylistQueue(
                 return@withContext Queue.Status(title = title, items = emptyList(), mediaItemIndex = 0)
             }
 
-            // Optimize: Resolve tracks until we find at least one playable, with a window
-            val maxInitialToResolve = 15
+            // Use preloadItem if available to start playback immediately
             val resolvedEntries = mutableListOf<Pair<Int, MediaItem>>()
             var currentTargetIndex = startIndex.coerceIn(allTracks.indices)
+
+            preloadItem?.let {
+                resolvedEntries.add(currentTargetIndex to it.toMediaItem())
+            }
+
+            // Optimize: Resolve tracks until we find at least one playable, with a window
+            val maxInitialToResolve = 15
             
             var checkOffset = currentTargetIndex
-            while (resolvedEntries.isEmpty() && checkOffset < (currentTargetIndex + maxInitialToResolve).coerceAtMost(allTracks.size)) {
+            while (resolvedEntries.size < 5 && checkOffset < (currentTargetIndex + maxInitialToResolve).coerceAtMost(allTracks.size)) {
                 val windowTracks = allTracks.subList(checkOffset, (checkOffset + 5).coerceAtMost(allTracks.size))
-                resolvedEntries += resolveTrackEntries(windowTracks, startOffset = checkOffset)
+                val batch = resolveTrackEntries(windowTracks, startOffset = checkOffset)
+                // Avoid duplicating the preloaded item
+                resolvedEntries.addAll(batch.filter { it.first != currentTargetIndex })
                 checkOffset += windowTracks.size
             }
             

@@ -61,7 +61,7 @@ data class SongItem(
     val viewCount: Long? = null,
 ) : YTItem() {
     override val shareLink: String
-        get() = "https://music.youtube.com/watch?v=$id"
+        get() = "https://www.harmber.xyz/watch?v=$id"
 }
 
 data class AlbumItem(
@@ -76,7 +76,7 @@ data class AlbumItem(
     val releaseType: AlbumReleaseType = AlbumReleaseType.ALBUM,
 ) : YTItem() {
     override val shareLink: String
-        get() = "https://music.youtube.com/playlist?list=$playlistId"
+        get() = "https://www.harmber.xyz/playlist?list=$playlistId"
 }
 
 data class PlaylistItem(
@@ -94,7 +94,7 @@ data class PlaylistItem(
     override val explicit: Boolean
         get() = false
     override val shareLink: String
-        get() = "https://music.youtube.com/playlist?list=$id"
+        get() = "https://www.harmber.xyz/playlist?list=$id"
 }
 
 data class ArtistItem(
@@ -111,7 +111,7 @@ data class ArtistItem(
     override val explicit: Boolean
         get() = false
     override val shareLink: String
-        get() = "https://music.youtube.com/channel/$id"
+        get() = "https://www.harmber.xyz/channel/$id"
 }
 
 fun <T : YTItem> List<T>.filterExplicit(enabled: Boolean = true) =
