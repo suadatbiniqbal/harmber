@@ -7,11 +7,13 @@
 
 package com.harmber2.suadat.models
 
+import androidx.annotation.Keep
 import androidx.compose.runtime.Immutable
 import com.google.firebase.database.IgnoreExtraProperties
 
 @IgnoreExtraProperties
 @Immutable
+@Keep
 data class BannerAd(
     var id: String = "",
     var active: Boolean = false,
@@ -27,5 +29,6 @@ data class BannerAd(
     var dailyLimit: Int = 3,
     var startHour: Int = 0,
     var endHour: Int = 23,
-    var showAdTag: Boolean = true
+    var showAdTag: Boolean = true,
+    var showButton: Boolean = true
 )

@@ -149,6 +149,7 @@ import com.harmber2.suadat.utils.joinByBullet
 import com.harmber2.suadat.utils.makeTimeString
 import com.harmber2.suadat.utils.rememberPreference
 import com.harmber2.suadat.utils.reportException
+import com.harmber2.suadat.ui.component.snowable
 import java.util.logging.Logger
 import kotlin.math.roundToInt
 
@@ -297,7 +298,9 @@ fun GridItem(
                     Modifier.fillMaxWidth()
                 } else {
                     Modifier.height(GridThumbnailHeight)
-                }.aspectRatio(thumbnailRatio),
+                }.aspectRatio(thumbnailRatio)
+                    .snowable(RoundedCornerShape(GridThumbnailCornerRadius))
+                    .clip(RoundedCornerShape(GridThumbnailCornerRadius)),
         ) {
             thumbnailContent()
         }

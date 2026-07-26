@@ -26,6 +26,7 @@ class SpotifyAccountViewModel
     @Inject
     constructor(
         private val repository: SpotifyLibraryRepository,
+        private val database: com.harmber2.suadat.db.MusicDatabase,
     ) : ViewModel() {
         private val _uiState = MutableStateFlow(SpotifyAccountUiState(isLoading = true))
         val uiState: StateFlow<SpotifyAccountUiState> = _uiState.asStateFlow()
@@ -127,6 +128,76 @@ class SpotifyAccountViewModel
             }
         }
 
+        fun importAllPlaylists() {
+            viewModelScope.launch(Dispatchers.IO) {
+                _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+                try {
+                    val playlists = repository.refreshPlaylists()
+                    if (playlists.isEmpty()) {
+                        _uiState.update { it.copy(isLoading = false, importAllState = ImportAllState.Success) }
+                        return@launch
+                    }
+
+                    _uiState.update { it.copy(isLoading = false, importAllState = ImportAllState.Loading(0, playlists.size, "")) }
+
+                    playlists.forEachIndexed { pIndex, playlist ->
+                        _uiState.update { 
+                            if (it.importAllState is ImportAllState.Loading) {
+                                it.copy(importAllState = it.importAllState.copy(progress = pIndex, currentPlaylist = playlist.name))
+                            } else it
+                        }
+
+                        val tracks = repository.playlistTracks(playlist.id)
+                        if (tracks.isNotEmpty()) {
+                            val localPlaylistId = com.harmber2.suadat.db.entities.PlaylistEntity.generatePlaylistId()
+                            val playlistEntity = com.harmber2.suadat.db.entities.PlaylistEntity(
+                                id = localPlaylistId,
+                                name = playlist.name,
+                                thumbnailUrl = SpotifyMapper.getPlaylistThumbnail(playlist),
+                                bookmarkedAt = java.time.LocalDateTime.now(),
+                                isEditable = true,
+                            )
+                            database.withTransaction {
+                                insert(playlistEntity)
+                            }
+
+                            var resolvedCount = 0
+                            tracks.forEach { trackWrapper ->
+                                val spotifyTrack = trackWrapper.track ?: return@forEach
+                                try {
+                                    val resolvedMetadata = SpotifyPlaybackResolver.resolveToMetadata(spotifyTrack)
+                                    if (resolvedMetadata != null) {
+                                        database.withTransaction {
+                                            insert(resolvedMetadata)
+                                            insert(
+                                                com.harmber2.suadat.db.entities.PlaylistSongMap(
+                                                    playlistId = localPlaylistId,
+                                                    songId = resolvedMetadata.id,
+                                                    position = resolvedCount,
+                                                )
+                                            )
+                                        }
+                                        resolvedCount++
+                                    }
+                                } catch (_: Exception) {}
+                            }
+                        }
+                        // Add delay to prevent rate limiting
+                        kotlinx.coroutines.delay(1000)
+                    }
+
+                    _uiState.update { it.copy(importAllState = ImportAllState.Success) }
+                } catch (e: Exception) {
+                    reportException(e)
+                    _uiState.update { it.copy(importAllState = ImportAllState.Error(e.message ?: "Failed to import all")) }
+                }
+            }
+        }
+
+        fun clearImportAllState() {
+            _uiState.update { it.copy(importAllState = null) }
+        }
+
         fun dismissError() {
             _uiState.update { it.copy(errorMessage = null) }
         }
@@ -140,4 +211,11 @@ data class SpotifyAccountUiState(
     val playlistCount: Int = 0,
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
+    val importAllState: ImportAllState? = null,
 )
+
+sealed interface ImportAllState {
+    data class Loading(val progress: Int, val total: Int, val currentPlaylist: String) : ImportAllState
+    object Success : ImportAllState
+    data class Error(val message: String) : ImportAllState
+}

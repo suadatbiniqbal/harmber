@@ -260,6 +260,7 @@ import com.harmber2.suadat.ui.component.StarDialog
 import com.harmber2.suadat.ui.component.SpotifyConnectDialog
 import com.harmber2.suadat.ui.component.TopSearch
 import com.harmber2.suadat.ui.component.TvNavigationRail
+import com.harmber2.suadat.ui.component.SeasonalEffectOverlay
 import com.harmber2.suadat.ui.component.rememberBottomSheetState
 import com.harmber2.suadat.ui.component.shimmer.ShimmerTheme
 import com.harmber2.suadat.ui.menu.YouTubeSongMenu
@@ -293,8 +294,14 @@ import com.harmber2.suadat.utils.isLowRamDevice
 import com.harmber2.suadat.utils.rememberEnumPreference
 import com.harmber2.suadat.utils.rememberPreference
 import com.harmber2.suadat.utils.reportException
+import com.harmber2.suadat.models.AdManager
 import com.harmber2.suadat.utils.setAppLocale
 import com.harmber2.suadat.viewmodels.HomeViewModel
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
+import coil3.request.crossfade
 import com.harmber2.suadat.viewmodels.NetworkBannerViewModel
 import com.harmber2.suadat.viewmodels.NewsViewModel
 import com.harmber2.suadat.viewmodels.OnlineSearchSort
@@ -1645,10 +1652,42 @@ class MainActivity : ComponentActivity() {
                                                         ) + WindowInsetsSides.Top,
                                                     ),
                                                 title = {
-                                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                                    val adConfig by AdManager.config.collectAsStateWithLifecycle()
+                                                    val brandColor = remember(adConfig.homeTitleColor) {
+                                                        runCatching { Color(android.graphics.Color.parseColor(adConfig.homeTitleColor)) }
+                                                            .getOrDefault(Color.Unspecified)
+                                                    }
+
+                                                    Row(
+                                                        verticalAlignment = Alignment.CenterVertically,
+                                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                                    ) {
+                                                        if (adConfig.festivalImageUrl.isNotEmpty()) {
+                                                            AsyncImage(
+                                                                model = ImageRequest.Builder(LocalContext.current)
+                                                                    .data(adConfig.festivalImageUrl)
+                                                                    .crossfade(true)
+                                                                    .build(),
+                                                                contentDescription = null,
+                                                                modifier = Modifier.size(32.dp),
+                                                                contentScale = androidx.compose.ui.layout.ContentScale.Fit
+                                                            )
+                                                        }
+
                                                         Text(
                                                             text = stringResource(R.string.app_name),
-                                                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                                                            style = MaterialTheme.typography.headlineSmall.copy(
+                                                                fontWeight = FontWeight.Black,
+                                                                letterSpacing = (-1.5).sp,
+                                                                shadow = if (brandColor != Color.Unspecified) {
+                                                                    androidx.compose.ui.graphics.Shadow(
+                                                                        color = brandColor.copy(alpha = 0.6f),
+                                                                        offset = Offset(0f, 0f),
+                                                                        blurRadius = 12f
+                                                                    )
+                                                                } else null
+                                                            ),
+                                                            color = if (brandColor != Color.Unspecified) brandColor else MaterialTheme.colorScheme.onSurface,
                                                             maxLines = 1,
                                                             overflow = TextOverflow.Ellipsis,
                                                         )
@@ -2254,6 +2293,8 @@ class MainActivity : ComponentActivity() {
                                         end = 16.dp,
                                     ).zIndex(10f),
                         )
+
+                        SeasonalEffectOverlay()
                     }
 
                     LaunchedEffect(shouldShowSearchBar, openSearchImmediately) {
@@ -2411,7 +2452,7 @@ class MainActivity : ComponentActivity() {
             return
         }
 
-        val isHarmberUrl = authority == "harmber.xyz" || authority == "www.harmber.xyz"
+        // val isHarmberUrl = authority == "harmber.xyz" || authority == "www.harmber.xyz"
 
         when (val path = uri.pathSegments.firstOrNull()) {
             "playlist" -> {

@@ -8,6 +8,7 @@
 package com.harmber2.suadat.spotify
 
 import androidx.media3.common.MediaItem
+import com.harmber2.suadat.extensions.toMediaItem
 import com.harmber2.suadat.models.MediaMetadata
 import com.harmber2.suadat.playback.queues.Queue
 import com.harmber2.suadat.spotify.models.SpotifyTrack
@@ -33,10 +34,22 @@ class SpotifyRecommendationsQueue(
             }
 
             val targetIndex = startIndex.coerceIn(allTracks.indices)
-            val resolvedEntries = resolveTrackEntries(allTracks.take(RESOLVE_BATCH_SIZE))
-            val resolvedItems = resolvedEntries.map { it.second }
+            val resolvedEntries = mutableListOf<Pair<Int, MediaItem>>()
+            
+            preloadItem?.let {
+                resolvedEntries.add(targetIndex to it.toMediaItem())
+            }
 
+            val initialBatch = allTracks.take(RESOLVE_BATCH_SIZE)
+            val batchResults = resolveTrackEntries(initialBatch, startOffset = 0)
+            
+            // Add batch results that aren't the preloaded one
+            resolvedEntries.addAll(batchResults.filter { entry -> preloadItem == null || entry.first != targetIndex })
+            resolvedEntries.sortBy { it.first }
+
+            val resolvedItems = resolvedEntries.map { it.second }
             resolveOffset = minOf(allTracks.size, RESOLVE_BATCH_SIZE)
+            
             if (resolvedItems.isEmpty()) {
                 return@withContext Queue.Status(title = title, items = emptyList(), mediaItemIndex = 0)
             }
@@ -48,7 +61,7 @@ class SpotifyRecommendationsQueue(
                     resolvedEntries
                         .indexOfFirst { it.first >= targetIndex }
                         .takeIf { it >= 0 }
-                        ?: resolvedItems.lastIndex,
+                        ?: 0,
             )
         }
 
@@ -60,19 +73,21 @@ class SpotifyRecommendationsQueue(
 
             val end = (resolveOffset + RESOLVE_BATCH_SIZE).coerceAtMost(allTracks.size)
             val batch = allTracks.subList(resolveOffset, end)
+            val resolved = resolveTrackEntries(batch, startOffset = resolveOffset).map { it.second }
             resolveOffset = end
-            resolveTracks(batch)
+            resolved
         }
 
-    private suspend fun resolveTracks(tracks: List<SpotifyTrack>): List<MediaItem> = resolveTrackEntries(tracks).map { it.second }
+    private suspend fun resolveTracks(tracks: List<SpotifyTrack>, startOffset: Int): List<MediaItem> = 
+        resolveTrackEntries(tracks, startOffset).map { it.second }
 
-    private suspend fun resolveTrackEntries(tracks: List<SpotifyTrack>): List<Pair<Int, MediaItem>> =
+    private suspend fun resolveTrackEntries(tracks: List<SpotifyTrack>, startOffset: Int): List<Pair<Int, MediaItem>> =
         coroutineScope {
             tracks.mapIndexed { index, track ->
                 async {
                     SpotifyPlaybackResolver
                         .resolveToMediaItem(track)
-                        ?.let { mediaItem -> index to mediaItem }
+                        ?.let { mediaItem -> (startOffset + index) to mediaItem }
                 }
             }.awaitAll().filterNotNull()
         }

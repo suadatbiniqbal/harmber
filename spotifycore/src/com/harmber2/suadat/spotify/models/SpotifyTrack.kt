@@ -49,5 +49,5 @@ data class SpotifySimpleAlbum(
 @Serializable
 data class SpotifySavedTrack(
     @SerialName("added_at") val addedAt: String? = null,
-    val track: SpotifyTrack,
+    val track: SpotifyTrack = SpotifyTrack(),
 )

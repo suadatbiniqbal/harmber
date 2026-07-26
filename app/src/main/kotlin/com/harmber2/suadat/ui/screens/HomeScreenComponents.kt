@@ -90,6 +90,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -114,6 +115,7 @@ import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import com.harmber2.suadat.R
 import com.harmber2.suadat.constants.GridThumbnailHeight
 import com.harmber2.suadat.constants.ListItemHeight
@@ -141,6 +143,7 @@ import com.harmber2.suadat.models.toMediaMetadata
 import com.harmber2.suadat.playback.PlayerConnection
 import com.harmber2.suadat.playback.queues.ListQueue
 import com.harmber2.suadat.playback.queues.YouTubeQueue
+import com.harmber2.suadat.spotify.SpotifyPlaybackResolver
 import com.harmber2.suadat.spotify.SpotifyRecommendationsQueue
 import com.harmber2.suadat.spotify.models.SpotifyTrack
 import com.harmber2.suadat.ui.component.AlbumGridItem
@@ -155,6 +158,7 @@ import com.harmber2.suadat.ui.component.YouTubeGridItem
 import com.harmber2.suadat.ui.component.shimmer.GridItemPlaceHolder
 import com.harmber2.suadat.ui.component.shimmer.ShimmerHost
 import com.harmber2.suadat.ui.component.shimmer.TextPlaceholder
+import com.harmber2.suadat.ui.component.snowable
 import com.harmber2.suadat.ui.menu.AlbumMenu
 import com.harmber2.suadat.ui.menu.ArtistMenu
 import com.harmber2.suadat.ui.menu.PlaylistMenu
@@ -173,6 +177,155 @@ import kotlin.math.roundToInt
 import kotlin.math.absoluteValue
 import kotlin.random.Random
 import com.harmber2.suadat.ui.utils.SnapLayoutInfoProvider as buildSnapLayoutInfoProvider
+
+@Composable
+fun HomeHeader(
+    navController: NavController,
+    modifier: Modifier = Modifier,
+) {
+    val config by com.harmber2.suadat.models.AdManager.config.collectAsStateWithLifecycle()
+    val titleColor = remember(config.homeTitleColor) {
+        runCatching { Color(android.graphics.Color.parseColor(config.homeTitleColor)) }
+            .getOrDefault(Color.Unspecified)
+    }
+
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp, vertical = 8.dp)
+    ) {
+        Text(
+            text = stringResource(R.string.app_name),
+            style = MaterialTheme.typography.displaySmall.copy(
+                fontWeight = FontWeight.Black,
+                letterSpacing = (-1.5).sp,
+                shadow = if (titleColor != Color.Unspecified) {
+                    androidx.compose.ui.graphics.Shadow(
+                        color = titleColor.copy(alpha = 0.5f),
+                        offset = Offset(0f, 0f),
+                        blurRadius = 12f
+                    )
+                } else null
+            ),
+            color = if (titleColor != Color.Unspecified) titleColor else MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.align(Alignment.CenterStart)
+        )
+
+        // Festival Image Overlay
+        if (config.festivalImageUrl.isNotEmpty()) {
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(config.festivalImageUrl)
+                    .crossfade(true)
+                    .build(),
+                contentDescription = null,
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .size(60.dp)
+                    .graphicsLayer {
+                        alpha = 0.9f
+                    },
+                contentScale = ContentScale.Fit
+            )
+        }
+    }
+}
+
+@Composable
+fun RecentlyPlayedSection(
+    songs: List<Song>,
+    playerConnection: PlayerConnection,
+    navController: NavController,
+    menuState: MenuState,
+    haptic: HapticFeedback,
+    modifier: Modifier = Modifier,
+) {
+    if (songs.isEmpty()) return
+
+    Column(modifier = modifier) {
+        NavigationTitle(
+            title = stringResource(R.string.recently_played),
+            onClick = { navController.navigate("history") }
+        )
+        
+        LazyRow(
+            contentPadding = PaddingValues(horizontal = 24.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            items(
+                items = songs,
+                key = { "recent_${it.id}" },
+            ) { song ->
+                Column(
+                    modifier = Modifier
+                        .width(120.dp)
+                        .combinedClickable(
+                            onClick = {
+                                playerConnection.playQueue(YouTubeQueue.radio(song.toMediaMetadata()))
+                            },
+                            onLongClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                menuState.show {
+                                    SongMenu(
+                                        originalSong = song,
+                                        navController = navController,
+                                        onDismiss = menuState::dismiss,
+                                    )
+                                }
+                            }
+                        ),
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(120.dp)
+                            .clip(RoundedCornerShape(24.dp)),
+                    ) {
+                        AsyncImage(
+                            model = song.song.thumbnailUrl,
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize(),
+                        )
+                        
+                        // Recent indicator
+                        Box(
+                            modifier = Modifier
+                                .padding(8.dp)
+                                .size(24.dp)
+                                .clip(CircleShape)
+                                .background(Color.Black.copy(alpha = 0.5f))
+                                .align(Alignment.TopEnd),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.history),
+                                contentDescription = null,
+                                tint = Color.White,
+                                modifier = Modifier.size(12.dp)
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = song.song.title,
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        color = MaterialTheme.colorScheme.onBackground,
+                    )
+                    Text(
+                        text = song.artists.joinToString(", ") { it.name },
+                        style = MaterialTheme.typography.bodySmall,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+                    )
+                }
+            }
+        }
+    }
+}
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -283,6 +436,7 @@ private fun BannerAdCard(
         modifier = modifier
             .fillMaxWidth()
             .padding(bottom = 8.dp)
+            .snowable(RoundedCornerShape(24.dp))
             .clip(RoundedCornerShape(24.dp)),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainer
@@ -379,46 +533,57 @@ private fun BannerAdCard(
                     if (ad.title.isNotEmpty()) {
                         Text(
                             text = ad.title,
-                            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                            style = MaterialTheme.typography.titleSmall.copy(
+                                fontWeight = FontWeight.ExtraBold,
+                                letterSpacing = (-0.2).sp
+                            ),
                             color = MaterialTheme.colorScheme.onSurface,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
                     }
                     if (ad.subtitle.isNotEmpty()) {
+                        Spacer(Modifier.height(2.dp))
                         Text(
                             text = ad.subtitle,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontWeight = FontWeight.Medium,
+                                letterSpacing = 0.1.sp
+                            ),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
                     }
                 }
                 
-                Spacer(Modifier.width(8.dp))
-                
-                Button(
-                    onClick = {
-                        if (ad.actionUrl.isNotEmpty()) {
-                            try {
-                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(ad.actionUrl))
-                                context.startActivity(intent)
-                            } catch (_: Exception) {}
-                        }
-                    },
-                    shape = RoundedCornerShape(18.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
-                    ),
-                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 6.dp),
-                    modifier = Modifier.height(34.dp)
-                ) {
-                    Text(
-                        text = ad.buttonText.ifEmpty { "Listen" },
-                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
-                    )
+                if (ad.showButton) {
+                    Spacer(Modifier.width(8.dp))
+
+                    Button(
+                        onClick = {
+                            if (ad.actionUrl.isNotEmpty()) {
+                                try {
+                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(ad.actionUrl))
+                                    context.startActivity(intent)
+                                } catch (_: Exception) {
+                                }
+                            }
+                        },
+                        shape = RoundedCornerShape(18.dp),
+                        colors =
+                            ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary,
+                            ),
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 6.dp),
+                        modifier = Modifier.height(34.dp),
+                    ) {
+                        Text(
+                            text = ad.buttonText.ifEmpty { "Listen" },
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                        )
+                    }
                 }
             }
         }
@@ -602,6 +767,7 @@ fun AlbumRecommendationsSection(
                         scaleY = animatedScale
                     }
                     .shadow(animatedElevation, shape = RoundedCornerShape(32.dp))
+                    .snowable(RoundedCornerShape(32.dp))
                     .clip(RoundedCornerShape(32.dp))
                     .background(animatedColor)
                     .clickable(
@@ -718,6 +884,7 @@ fun MostPlayedAlbumsSection(
                         scaleX = animatedScale
                         scaleY = animatedScale
                     }
+                    .snowable(RoundedCornerShape(24.dp))
                     .clickable(
                         interactionSource = interactionSource,
                         indication = null
@@ -936,6 +1103,7 @@ fun RandomAlbumsSection(
                         scaleX = animatedScale
                         scaleY = animatedScale
                     }
+                    .snowable(RoundedCornerShape(28.dp))
                     .clickable(
                         interactionSource = interactionSource,
                         indication = null
@@ -1501,6 +1669,7 @@ fun LazyListScope.SpotifyRecommendationsContainer(
 ) {
     item {
         val spotifyRecommendations by viewModel.spotifyRecommendations.collectAsStateWithLifecycle()
+        var resolvingTrackId by remember { mutableStateOf<String?>(null) }
 
         if (spotifyRecommendations.isNotEmpty()) {
             Column {
@@ -1517,6 +1686,9 @@ fun LazyListScope.SpotifyRecommendationsContainer(
                         items = spotifyRecommendations,
                         key = { it.id },
                     ) { item ->
+                        val trackIsActive = item.id == mediaMetadata?.spotifyTrackId
+                        val trackIsResolving = resolvingTrackId == item.id
+                        
                         YouTubeGridItem(
                             item = SongItem(
                                 id = item.id,
@@ -1525,21 +1697,37 @@ fun LazyListScope.SpotifyRecommendationsContainer(
                                 thumbnail = item.album?.images?.firstOrNull()?.url.orEmpty(),
                                 explicit = item.explicit
                             ),
-                            isActive = item.id == mediaMetadata?.spotifyTrackId,
-                            isPlaying = isPlaying,
+                            isActive = trackIsActive || trackIsResolving,
+                            isPlaying = isPlaying && !trackIsResolving,
                             coroutineScope = scope,
                             modifier = Modifier
                                 .combinedClickable(
+                                    enabled = resolvingTrackId == null || trackIsActive,
                                     onClick = {
-                                        val spotifyRecommendationsList = spotifyRecommendations
-                                        val index = spotifyRecommendationsList.indexOf(item)
-                                        playerConnection.playQueue(
-                                            SpotifyRecommendationsQueue(
-                                                seedTracks = spotifyRecommendationsList,
-                                                startIndex = index.coerceAtLeast(0),
-                                                preloadItem = item.toMediaMetadata()
-                                            )
-                                        )
+                                        if (trackIsActive) {
+                                            playerConnection.player.togglePlayPause()
+                                        } else {
+                                            resolvingTrackId = item.id
+                                            scope.launch {
+                                                try {
+                                                    val spotifyRecommendationsList = spotifyRecommendations
+                                                    val index = spotifyRecommendationsList.indexOf(item)
+                                                    
+                                                    // Pre-resolve the clicked item for instant start
+                                                    val resolvedMetadata = SpotifyPlaybackResolver.resolveToMetadata(item)
+                                                    
+                                                    playerConnection.playQueue(
+                                                        SpotifyRecommendationsQueue(
+                                                            seedTracks = spotifyRecommendationsList,
+                                                            startIndex = index.coerceAtLeast(0),
+                                                            preloadItem = resolvedMetadata
+                                                        )
+                                                    )
+                                                } finally {
+                                                    resolvingTrackId = null
+                                                }
+                                            }
+                                        }
                                     },
                                     onLongClick = {
                                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)

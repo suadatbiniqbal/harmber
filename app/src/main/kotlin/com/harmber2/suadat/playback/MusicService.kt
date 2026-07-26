@@ -4919,7 +4919,15 @@ class MusicService :
     ) {
         super.onMediaItemTransition(mediaItem, reason)
 
-        beginHistorySession(mediaItem?.mediaId, forceNew = true)
+        val mediaId = mediaItem?.mediaId
+        if (mediaId != null) {
+            val metadata = mediaItem.metadata ?: player.currentMetadata
+            ioScope.launch {
+                insertPlaybackHistoryEvent(mediaId, 0L, metadata)
+            }
+        }
+
+        beginHistorySession(mediaId, forceNew = true)
 
         // Pre-load lyrics for upcoming songs in queue
         val currentIndex = player.currentMediaItemIndex

@@ -10,10 +10,10 @@ package com.harmber2.suadat.models
 import java.io.Serializable
 
 data class PersistQueue(
-    val title: String?,
-    val items: List<MediaMetadata>,
-    val mediaItemIndex: Int,
-    val position: Long,
+    val title: String? = null,
+    val items: List<MediaMetadata> = emptyList(),
+    val mediaItemIndex: Int = 0,
+    val position: Long = 0L,
     val queueType: QueueType = QueueType.LIST,
     val queueData: QueueData? = null,
 ) : Serializable {

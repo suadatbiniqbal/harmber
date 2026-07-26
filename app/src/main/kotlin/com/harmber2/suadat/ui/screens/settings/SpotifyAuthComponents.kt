@@ -73,6 +73,9 @@ import coil3.request.ImageRequest
 import com.harmber2.suadat.R
 import com.harmber2.suadat.constants.SpotifyCanvasEnabledKey
 import com.harmber2.suadat.constants.SpotifyRecommendationsEnabledKey
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
+import com.harmber2.suadat.spotify.ImportAllState
 import com.harmber2.suadat.spotify.SpotifyAccountUiState
 import com.harmber2.suadat.spotify.SpotifyAuth
 import com.harmber2.suadat.ui.component.DefaultDialog
@@ -585,6 +588,7 @@ fun PreferenceGroupScope.spotifyAccountPreferences(
     onShowPlaylistsChange: (Boolean) -> Unit,
     onReloadClick: () -> Unit,
     onLogoutClick: () -> Unit,
+    onImportAllClick: () -> Unit,
 ) {
     if (!state.isAuthenticated) {
         item {
@@ -682,6 +686,50 @@ fun PreferenceGroupScope.spotifyAccountPreferences(
             icon = { Icon(painterResource(R.drawable.sync), null) },
             onClick = onReloadClick,
             isEnabled = !state.isLoading,
+        )
+    }
+
+    item {
+        PreferenceEntry(
+            title = { Text(stringResource(R.string.spotify_import_all)) },
+            description = stringResource(R.string.spotify_import_all_desc),
+            icon = { Icon(painterResource(R.drawable.playlist_import), null) },
+            onClick = onImportAllClick,
+            isEnabled = !state.isLoading && state.importAllState == null,
+            trailingContent = {
+                state.importAllState?.let { s ->
+                    when (s) {
+                        is ImportAllState.Loading -> {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = "${s.progress}/${s.total}",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                Spacer(Modifier.width(8.dp))
+                                CircularWavyProgressIndicator(
+                                    modifier = Modifier.size(24.dp),
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        }
+                        is ImportAllState.Success -> {
+                            Icon(
+                                painter = painterResource(R.drawable.check),
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                        is ImportAllState.Error -> {
+                            Icon(
+                                painter = painterResource(R.drawable.error),
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    }
+                }
+            }
         )
     }
 

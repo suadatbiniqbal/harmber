@@ -12,17 +12,17 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class SpotifyToken(
-    @SerialName("access_token") val accessToken: String,
-    @SerialName("token_type") val tokenType: String,
+    @SerialName("access_token") val accessToken: String = "",
+    @SerialName("token_type") val tokenType: String = "",
     @SerialName("scope") val scope: String = "",
-    @SerialName("expires_in") val expiresIn: Int,
+    @SerialName("expires_in") val expiresIn: Int = 0,
     @SerialName("refresh_token") val refreshToken: String? = null,
 )
 
 @Serializable
 data class SpotifyInternalToken(
-    val accessToken: String,
-    val accessTokenExpirationTimestampMs: Long,
+    val accessToken: String = "",
+    val accessTokenExpirationTimestampMs: Long = 0L,
     val isAnonymous: Boolean = false,
     val clientId: String = "",
 )

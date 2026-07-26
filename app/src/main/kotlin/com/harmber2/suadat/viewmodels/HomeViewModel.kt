@@ -110,6 +110,7 @@ class HomeViewModel
     ) : ViewModel() {
         val isRefreshing = MutableStateFlow(false)
         val isLoading = MutableStateFlow(false)
+        val isLoadingMore = MutableStateFlow(false)
         private val isInitialLoadComplete = MutableStateFlow(false)
 
         private val quickPicksMode =
@@ -119,6 +120,7 @@ class HomeViewModel
                 }.distinctUntilChanged()
 
         val quickPicks = MutableStateFlow<List<Song>?>(null)
+        val recentSongs = database.recentSongs(limit = 25).stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
         val speedDialItems = MutableStateFlow<List<LocalItem>>(emptyList())
         val forgottenFavorites = MutableStateFlow<List<Song>?>(null)
         val keepListening = MutableStateFlow<List<LocalItem>?>(null)
@@ -317,11 +319,11 @@ class HomeViewModel
                             .mostPlayedArtists(fromTimeStamp, limit = 15)
                             .collect { artists ->
                                 mostPlayedArtists.value = artists
-                                // Fetch missing artist thumbnails
-                                artists.forEach { artist ->
-                                    val currentThumbnailUrl = artist.artist.thumbnailUrl
-                                    if (currentThumbnailUrl == null || currentThumbnailUrl.contains("yt3.ggpht.com")) {
-                                        viewModelScope.launch(Dispatchers.IO) {
+                                // Sequentially fetch missing artist thumbnails to avoid hitting rate limits
+                                viewModelScope.launch(Dispatchers.IO) {
+                                    artists.forEach { artist ->
+                                        val currentThumbnailUrl = artist.artist.thumbnailUrl
+                                        if (currentThumbnailUrl == null || currentThumbnailUrl.contains("yt3.ggpht.com")) {
                                             YouTube.artist(artist.id).onSuccess { page ->
                                                 database.query {
                                                     update(
@@ -331,19 +333,10 @@ class HomeViewModel
                                                     )
                                                 }
                                             }.onFailure {
-                                                // Fallback to search if artist page fails
-                                                YouTube.search(artist.artist.name, YouTube.SearchFilter.FILTER_ARTIST).onSuccess { searchResult ->
-                                                    searchResult.items.filterIsInstance<ArtistItem>().firstOrNull()?.let { searchArtist ->
-                                                        database.query {
-                                                            update(
-                                                                artist.artist.copy(
-                                                                    thumbnailUrl = searchArtist.thumbnail?.resize(1080, 1080)
-                                                                )
-                                                            )
-                                                        }
-                                                    }
-                                                }
+                                                // Minimal fallback to avoid spamming
                                             }
+                                            // Add a small delay between artist metadata fetches
+                                            kotlinx.coroutines.delay(500)
                                         }
                                     }
                                 }
@@ -668,18 +661,16 @@ class HomeViewModel
             }
         }
 
-        private val _isLoadingMore = MutableStateFlow(false)
-
         fun loadMoreYouTubeItems(continuation: String?) {
-            if (continuation == null || _isLoadingMore.value) return
+            if (continuation == null || isLoadingMore.value) return
             val hideExplicit = context.dataStore.get(HideExplicitKey, false)
             val hideVideo = context.dataStore.get(HideVideoKey, false)
 
             viewModelScope.launch(Dispatchers.IO) {
-                _isLoadingMore.value = true
+                isLoadingMore.value = true
                 val nextSections =
                     YouTube.home(continuation).getOrNull() ?: run {
-                        _isLoadingMore.value = false
+                        isLoadingMore.value = false
                         return@launch
                     }
 
@@ -691,7 +682,7 @@ class HomeViewModel
                                 section.copy(items = section.items.filterExplicit(hideExplicit).filterVideo(hideVideo))
                             },
                     )
-                _isLoadingMore.value = false
+                isLoadingMore.value = false
             }
         }
 

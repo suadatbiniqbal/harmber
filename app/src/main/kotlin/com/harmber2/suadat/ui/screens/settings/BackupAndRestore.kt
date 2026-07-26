@@ -9,7 +9,6 @@
 
 package com.harmber2.suadat.ui.screens.settings
 
-import android.content.Intent
 import android.net.Uri
 import android.os.Message
 import android.view.ViewGroup
@@ -93,6 +92,7 @@ import com.harmber2.suadat.LocalPlayerAwareWindowInsets
 import com.harmber2.suadat.R
 import com.harmber2.suadat.constants.ShowSpotifyPlaylistsKey
 import com.harmber2.suadat.db.entities.Song
+import com.harmber2.suadat.spotify.ImportAllState
 import com.harmber2.suadat.spotify.SpotifyAccountUiState
 import com.harmber2.suadat.spotify.SpotifyAccountViewModel
 import com.harmber2.suadat.spotify.SpotifyAuth
@@ -196,6 +196,13 @@ fun BackupAndRestore(
         }
     }
 
+    LaunchedEffect(spotifyState.importAllState) {
+        if (spotifyState.importAllState is ImportAllState.Success || spotifyState.importAllState is ImportAllState.Error) {
+            delay(2.seconds)
+            spotifyAccountViewModel.clearImportAllState()
+        }
+    }
+
     Column(
         Modifier
             .windowInsetsPadding(LocalPlayerAwareWindowInsets.current)
@@ -249,6 +256,7 @@ fun BackupAndRestore(
                 onLogoutClick = {
                     spotifyAccountViewModel.logout()
                 },
+                onImportAllClick = spotifyAccountViewModel::importAllPlaylists,
             )
         }
     }
@@ -335,11 +343,28 @@ fun BackupAndRestore(
         }
     }
 
+    val importAllState = spotifyState.importAllState
+
     LoadingScreen(
-        isVisible = backupRestoreProgress != null || isProgressStarted,
-        value = backupRestoreProgress?.percent ?: progressPercentage,
-        title = backupRestoreProgress?.title,
-        stepText = backupRestoreProgress?.step ?: progressStatus,
+        isVisible = backupRestoreProgress != null || isProgressStarted || importAllState is ImportAllState.Loading,
+        value =
+            when {
+                backupRestoreProgress != null -> backupRestoreProgress?.percent ?: 0
+                importAllState is ImportAllState.Loading -> if (importAllState.total > 0) (importAllState.progress * 100 / importAllState.total) else 0
+                else -> progressPercentage
+            },
+        title =
+            when {
+                backupRestoreProgress != null -> backupRestoreProgress?.title
+                importAllState is ImportAllState.Loading -> stringResource(R.string.spotify_import_all)
+                else -> null
+            },
+        stepText =
+            when {
+                backupRestoreProgress != null -> backupRestoreProgress?.step
+                importAllState is ImportAllState.Loading -> "${importAllState.currentPlaylist} (${importAllState.progress}/${importAllState.total})"
+                else -> progressStatus
+            },
         indeterminate = backupRestoreProgress?.indeterminate ?: false,
     )
 }

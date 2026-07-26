@@ -118,6 +118,7 @@ import com.harmber2.suadat.constants.ThumbnailCornerRadiusKey
 import com.harmber2.suadat.extensions.metadata
 import com.harmber2.suadat.extensions.toMediaItem
 import com.harmber2.suadat.ui.utils.highRes
+import com.harmber2.suadat.ui.component.snowable
 import com.harmber2.suadat.utils.rememberEnumPreference
 import com.harmber2.suadat.utils.rememberLowDataModeActive
 import com.harmber2.suadat.utils.rememberPreference
@@ -363,6 +364,7 @@ fun Thumbnail(
                             }
                         }
                         .size(240.dp)
+                        .snowable(RoundedCornerShape(thumbnailCornerRadius.dp))
                         .clip(RoundedCornerShape(thumbnailCornerRadius.dp))
                         .background(MaterialTheme.colorScheme.surfaceVariant)
                 ) {
@@ -677,6 +679,7 @@ fun Thumbnail(
                                         modifier =
                                             Modifier
                                                 .size(containerMaxWidth - (PlayerHorizontalPadding * 2))
+                                                .snowable(RoundedCornerShape(thumbnailCornerRadius.dp))
                                                 .clip(RoundedCornerShape(thumbnailCornerRadius.dp)),
                                     ) {
                                         if (hidePlayerThumbnail) {

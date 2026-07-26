@@ -66,7 +66,7 @@ class SpotifyPlaylistQueue(
                 val windowTracks = allTracks.subList(checkOffset, (checkOffset + 5).coerceAtMost(allTracks.size))
                 val batch = resolveTrackEntries(windowTracks, startOffset = checkOffset)
                 // Avoid duplicating the preloaded item
-                resolvedEntries.addAll(batch.filter { it.first != currentTargetIndex })
+                resolvedEntries.addAll(batch.filter { entry -> preloadItem == null || entry.first != currentTargetIndex })
                 checkOffset += windowTracks.size
             }
             
@@ -123,9 +123,24 @@ class SpotifyPlaylistQueue(
         coroutineScope {
             tracks.mapIndexed { index, track ->
                 async {
-                    SpotifyPlaybackResolver
-                        .resolveToMediaItem(track)
-                        ?.let { mediaItem -> (startOffset + index) to mediaItem }
+                    var result: MediaItem? = null
+                    var retryCount = 0
+                    while (result == null && retryCount < 2) {
+                        try {
+                            result = SpotifyPlaybackResolver.resolveToMediaItem(track)
+                            if (result == null && retryCount == 0) {
+                                // Add a small delay and retry once if it failed
+                                kotlinx.coroutines.delay(1000)
+                            }
+                        } catch (e: Exception) {
+                            if (e is io.ktor.client.plugins.ClientRequestException && e.response.status.value == 429) {
+                                // Hit rate limit, wait longer
+                                kotlinx.coroutines.delay(3000)
+                            }
+                        }
+                        retryCount++
+                    }
+                    result?.let { (startOffset + index) to it }
                 }
             }.awaitAll().filterNotNull()
         }

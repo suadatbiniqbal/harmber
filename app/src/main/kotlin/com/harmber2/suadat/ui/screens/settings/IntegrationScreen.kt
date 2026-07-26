@@ -107,6 +107,7 @@ fun IntegrationScreen(
                 onLogoutClick = {
                     spotifyAccountViewModel.logout()
                 },
+                onImportAllClick = spotifyAccountViewModel::importAllPlaylists,
             )
         }
 

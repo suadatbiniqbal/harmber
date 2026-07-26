@@ -88,7 +88,6 @@ object DiscordOAuthRepository {
         val scopes =
             listOf(
                 "identify",
-                "email",
                 "activities.write",
             ).joinToString(separator = " ")
 

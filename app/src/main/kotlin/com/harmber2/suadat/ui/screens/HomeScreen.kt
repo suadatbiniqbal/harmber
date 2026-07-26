@@ -41,7 +41,6 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import kotlinx.coroutines.launch
 import com.harmber2.suadat.LocalPlayerAwareWindowInsets
 import com.harmber2.suadat.LocalPlayerConnection
 import com.harmber2.suadat.R
@@ -68,7 +67,6 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val menuState = LocalMenuState.current
-    val bottomSheetPageState = LocalBottomSheetPageState.current
     val playerConnection = LocalPlayerConnection.current ?: return
     val haptic = LocalHapticFeedback.current
 
@@ -76,6 +74,7 @@ fun HomeScreen(
     val mediaMetadata by playerConnection.mediaMetadata.collectAsStateWithLifecycle()
 
     val quickPicks by viewModel.quickPicks.collectAsStateWithLifecycle()
+    val recentSongs by viewModel.recentSongs.collectAsStateWithLifecycle()
     val speedDialItems by viewModel.speedDialItems.collectAsStateWithLifecycle()
     val forgottenFavorites by viewModel.forgottenFavorites.collectAsStateWithLifecycle()
     val keepListening by viewModel.keepListening.collectAsStateWithLifecycle()
@@ -89,22 +88,16 @@ fun HomeScreen(
     val selectedChip by viewModel.selectedChip.collectAsStateWithLifecycle()
 
     val isLoading: Boolean by viewModel.isLoading.collectAsStateWithLifecycle()
+    val isLoadingMore by viewModel.isLoadingMore.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
 
     val forgottenFavoritesLazyGridState = rememberLazyGridState()
 
     val accountName by viewModel.accountName.collectAsStateWithLifecycle()
     val accountImageUrl by viewModel.accountImageUrl.collectAsStateWithLifecycle()
-    val innerTubeCookie by rememberPreference(InnerTubeCookieKey, "")
-    val (disableBlur) = rememberPreference(DisableBlurKey, true)
+    val (disableBlur) = rememberPreference(DisableBlurKey, defaultValue = true)
     val (showHomeCategoryChips) = rememberPreference(ShowHomeCategoryChipsKey, true)
-    val (quickPicksDisplayMode) = rememberEnumPreference(QuickPicksDisplayModeKey, QuickPicksDisplayMode.LIST)
     val (spotifyRecommendationsEnabled) = rememberPreference(com.harmber2.suadat.constants.SpotifyRecommendationsEnabledKey, false)
-    val isLoggedIn =
-        remember(innerTubeCookie) {
-            hasYouTubeLoginCookie(innerTubeCookie)
-        }
-    val url = if (isLoggedIn) accountImageUrl else null
 
     val scope = rememberCoroutineScope()
     
@@ -114,7 +107,7 @@ fun HomeScreen(
         targetValue = 1f,
         animationSpec = infiniteRepeatable(
             animation = tween(12000, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
+            repeatMode = RepeatMode.Reverse,
         ), label = ""
     )
     val meshOffset2 by infiniteTransition.animateFloat(
@@ -122,7 +115,7 @@ fun HomeScreen(
         targetValue = 1f,
         animationSpec = infiniteRepeatable(
             animation = tween(15000, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
+            repeatMode = RepeatMode.Reverse,
         ), label = ""
     )
 
@@ -145,7 +138,7 @@ fun HomeScreen(
                 ?.index
         }.collect { lastVisibleIndex ->
             val len = lazylistState.layoutInfo.totalItemsCount
-            if (lastVisibleIndex != null && lastVisibleIndex >= len - 3) {
+            if (lastVisibleIndex != null && (lastVisibleIndex >= len - 3)) {
                 viewModel.loadMoreYouTubeItems(homePage?.continuation)
             }
         }
@@ -153,19 +146,8 @@ fun HomeScreen(
 
     if (selectedChip != null) {
         BackHandler {
-            // if a chip is selected, go back to the normal homepage first
             viewModel.toggleChip(selectedChip)
         }
-    }
-
-    LaunchedEffect(showHomeCategoryChips, selectedChip) {
-        if (!showHomeCategoryChips && selectedChip != null) {
-            viewModel.toggleChip(selectedChip)
-        }
-    }
-
-    LaunchedEffect(forgottenFavorites) {
-        forgottenFavoritesLazyGridState.scrollToItem(0)
     }
 
     LaunchedEffect(mediaMetadata, spotifyRecommendationsEnabled) {
@@ -179,127 +161,51 @@ fun HomeScreen(
         }
     }
 
-    // Capture M3 Expressive colors from theme outside drawBehind
     val color1 = MaterialTheme.colorScheme.primary
     val color2 = MaterialTheme.colorScheme.secondary
     val color3 = MaterialTheme.colorScheme.tertiary
-    val color4 = MaterialTheme.colorScheme.primaryContainer
-    val color5 = MaterialTheme.colorScheme.secondaryContainer
     val surfaceColor = MaterialTheme.colorScheme.surface
 
     Box(
         modifier = Modifier.fillMaxSize(),
     ) {
-        // M3E Mesh gradient background layer at the top
         if (!disableBlur) {
             Box(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .fillMaxSize(0.7f) // Cover top 70% of screen
+                        .fillMaxSize(0.7f)
                         .align(Alignment.TopCenter)
-                        .zIndex(-1f) // Place behind all content
+                        .zIndex(-1f)
                         .drawWithCache {
                             val width = this.size.width
                             val height = this.size.height
 
-                            // Create mesh gradient with 5 color blobs for more variation
-                            // First color blob - top left
-                            val brush1 =
-                                Brush.radialGradient(
-                                    colors =
-                                        listOf(
-                                            color1.copy(alpha = 0.38f),
-                                            color1.copy(alpha = 0.24f),
-                                            color1.copy(alpha = 0.14f),
-                                            color1.copy(alpha = 0.06f),
-                                            Color.Transparent,
-                                        ),
-                                    center = Offset(width * (0.1f + 0.1f * meshOffset1), height * (0.05f + 0.1f * meshOffset2)),
-                                    radius = width * 0.55f,
-                                )
-
-                            // Second color blob - top right
-                            val brush2 =
-                                Brush.radialGradient(
-                                    colors =
-                                        listOf(
-                                            color2.copy(alpha = 0.34f),
-                                            color2.copy(alpha = 0.2f),
-                                            color2.copy(alpha = 0.11f),
-                                            color2.copy(alpha = 0.05f),
-                                            Color.Transparent,
-                                        ),
-                                    center = Offset(width * (0.9f - 0.1f * meshOffset2), height * (0.15f + 0.1f * meshOffset1)),
-                                    radius = width * 0.65f,
-                                )
-
-                            // Third color blob - middle left
-                            val brush3 =
-                                Brush.radialGradient(
-                                    colors =
-                                        listOf(
-                                            color3.copy(alpha = 0.3f),
-                                            color3.copy(alpha = 0.17f),
-                                            color3.copy(alpha = 0.09f),
-                                            color3.copy(alpha = 0.04f),
-                                            Color.Transparent,
-                                        ),
-                                    center = Offset(width * (0.25f + 0.1f * meshOffset2), height * (0.4f + 0.1f * meshOffset1)),
-                                    radius = width * 0.6f,
-                                )
-
-                            // Fourth color blob - middle right
-                            val brush4 =
-                                Brush.radialGradient(
-                                    colors =
-                                        listOf(
-                                            color4.copy(alpha = 0.26f),
-                                            color4.copy(alpha = 0.14f),
-                                            color4.copy(alpha = 0.08f),
-                                            color4.copy(alpha = 0.03f),
-                                            Color.Transparent,
-                                        ),
-                                    center = Offset(width * 0.7f, height * 0.5f),
-                                    radius = width * 0.7f,
-                                )
-
-                            // Fifth color blob - bottom center (helps with smooth fade)
-                            val brush5 =
-                                Brush.radialGradient(
-                                    colors =
-                                        listOf(
-                                            color5.copy(alpha = 0.22f),
-                                            color5.copy(alpha = 0.12f),
-                                            color5.copy(alpha = 0.06f),
-                                            color5.copy(alpha = 0.02f),
-                                            Color.Transparent,
-                                        ),
-                                    center = Offset(width * 0.5f, height * 0.75f),
-                                    radius = width * 0.8f,
-                                )
-
-                            // Add a final vertical gradient overlay to ensure smooth bottom fade
-                            val overlayBrush =
-                                Brush.verticalGradient(
-                                    colors =
-                                        listOf(
-                                            Color.Transparent,
-                                            Color.Transparent,
-                                            surfaceColor.copy(alpha = 0.22f),
-                                            surfaceColor.copy(alpha = 0.55f),
-                                            surfaceColor,
-                                        ),
-                                    startY = height * 0.4f,
-                                    endY = height,
-                                )
+                            val brush1 = Brush.radialGradient(
+                                colors = listOf(color1.copy(alpha = 0.38f), Color.Transparent),
+                                center = Offset(width * (0.1f + 0.1f * meshOffset1), height * (0.05f + 0.1f * meshOffset2)),
+                                radius = width * 0.55f,
+                            )
+                            val brush2 = Brush.radialGradient(
+                                colors = listOf(color2.copy(alpha = 0.34f), Color.Transparent),
+                                center = Offset(width * (0.9f - 0.1f * meshOffset2), height * (0.15f + 0.1f * meshOffset1)),
+                                radius = width * 0.65f,
+                            )
+                            val brush3 = Brush.radialGradient(
+                                colors = listOf(color3.copy(alpha = 0.3f), Color.Transparent),
+                                center = Offset(width * (0.25f + 0.1f * meshOffset2), height * (0.4f + 0.1f * meshOffset1)),
+                                radius = width * 0.6f,
+                            )
+                            val overlayBrush = Brush.verticalGradient(
+                                colors = listOf(Color.Transparent, surfaceColor),
+                                startY = height * 0.4f,
+                                endY = height,
+                            )
 
                             onDrawBehind {
                                 drawRect(brush = brush1)
                                 drawRect(brush = brush2)
                                 drawRect(brush = brush3)
-                                drawRect(brush = brush4)
-                                drawRect(brush = brush5)
                                 drawRect(brush = overlayBrush)
                             }
                         },
@@ -318,10 +224,9 @@ fun HomeScreen(
                     remember(forgottenFavoritesLazyGridState) {
                         SnapLayoutInfoProvider(
                             lazyGridState = forgottenFavoritesLazyGridState,
-                            positionInLayout = { layoutSize, itemSize ->
-                                (layoutSize * horizontalLazyGridItemWidthFactor / 2f - itemSize / 2f)
-                            },
-                        )
+                        ) { layoutSize, itemSize ->
+                            (layoutSize * horizontalLazyGridItemWidthFactor / 2f - itemSize / 2f)
+                        }
                     }
 
                 LazyColumn(
@@ -360,7 +265,6 @@ fun HomeScreen(
                         }
                     }
 
-                    // Advertisement / Banner Ads Section
                     if (bannerAds.isNotEmpty()) {
                         item(key = "banner_ads", contentType = "advertisement") {
                             BannerAdSection(
@@ -392,7 +296,6 @@ fun HomeScreen(
                         }
                     }
 
-                    // 3. Spotify
                     spotifyPlaylistsContainer(
                         viewModel = viewModel,
                         navController = navController,
@@ -411,7 +314,6 @@ fun HomeScreen(
                         scope = scope,
                     )
 
-                    // 4. Wide Albums
                     if (albumRecommendations.isNotEmpty()) {
                         item {
                             NavigationTitle(
@@ -429,7 +331,6 @@ fun HomeScreen(
                         }
                     }
 
-                    // 5. Random Albums
                     if (randomAlbums.isNotEmpty()) {
                         item {
                             NavigationTitle(
@@ -447,7 +348,6 @@ fun HomeScreen(
                         }
                     }
 
-                    // 6. Your Albums
                     if (mostPlayedAlbums.isNotEmpty()) {
                         item {
                             NavigationTitle(
@@ -465,7 +365,6 @@ fun HomeScreen(
                         }
                     }
 
-                    // 7. Keep Listening
                     keepListening?.takeIf { it.isNotEmpty() }?.let { items ->
                         item {
                             NavigationTitle(
@@ -581,8 +480,12 @@ fun HomeScreen(
                         }
                     }
 
-                    if (isLoading || homePage?.continuation != null && homePage?.sections?.isNotEmpty() == true) {
+                    if (isLoading && homePage?.sections.isNullOrEmpty()) {
                         item {
+                            HomeLoadingShimmer(modifier = Modifier.animateItem())
+                        }
+                    } else if (isLoadingMore) {
+                         item {
                             HomeLoadingShimmer(modifier = Modifier.animateItem())
                         }
                     }

@@ -155,10 +155,45 @@
 -dontwarn com.google.type.TimeOfDay$Builder
 -dontwarn com.google.type.TimeOfDay
 
-## Firebase Realtime Database
-# Keep classes and members used for serialization
--keep class com.harmber2.suadat.models.BannerAd { *; }
+## Firebase & Harmber Models
+-keep class com.harmber2.suadat.models.** { *; }
 -keepclassmembers class com.harmber2.suadat.models.** {
+    public <init>(...);
     *** get*();
     void set*(***);
 }
+
+## Spotify Protection
+-keep class com.harmber2.suadat.spotify.** { *; }
+-keepclassmembers class com.harmber2.suadat.spotify.** {
+    public <init>(...);
+    *** get*();
+    void set*(***);
+}
+
+## YouTube & InnerTube Protection
+-keep class com.harmber2.suadat.innertube.** { *; }
+-keepclassmembers class com.harmber2.suadat.innertube.** {
+    public <init>(...);
+    *** get*();
+    void set*(***);
+}
+
+## Playback Resolvers
+-keep class com.harmber2.suadat.playback.** { *; }
+
+# General Keep for all models to prevent reflection issues
+-keep @androidx.annotation.Keep class **
+-keepclassmembers class ** {
+    @androidx.annotation.Keep *;
+}
+
+## Firebase & Play Services Hardening
+-keep class com.google.firebase.** { *; }
+-keep interface com.google.firebase.** { *; }
+-keep class * extends com.google.firebase.components.ComponentRegistrar
+-keepclassmembers class * extends com.google.firebase.components.ComponentRegistrar {
+    public <init>();
+}
+-keep class com.google.android.gms.** { *; }
+-dontwarn com.google.android.gms.**

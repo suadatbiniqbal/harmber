@@ -298,7 +298,7 @@ object BotGuardTokenGenerator {
                             .bufferedReader()
                             .use { it.readText() }
                     }
-                // Use a proper document with baseURL and immediate script execution trigger
+                
                 webView.loadDataWithBaseURL(
                     "https://www.youtube.com",
                     html,
@@ -306,9 +306,27 @@ object BotGuardTokenGenerator {
                     "utf-8",
                     null,
                 )
-                // Trigger onPageLoaded after a small delay to ensure script parsing
-                kotlinx.coroutines.delay(100)
-                webView.evaluateJavascript("if (typeof window.BotGuardBridge !== 'undefined') { window.BotGuardBridge.onPageLoaded(); }", null)
+                
+                // Robust polling for script readiness
+                var ready = false
+                var attempts = 0
+                while (!ready && attempts < 50) {
+                    ready = suspendCancellableCoroutine { cont ->
+                        webView.evaluateJavascript("typeof window.botguardScriptsReady !== 'undefined'") { result ->
+                            cont.resume(result?.contains("true") == true)
+                        }
+                    }
+                    if (!ready) {
+                        kotlinx.coroutines.delay(100)
+                        attempts++
+                    }
+                }
+                
+                if (ready) {
+                    webView.evaluateJavascript("window.BotGuardBridge.onPageLoaded()", null)
+                } else {
+                    signalError(PoTokenException("BotGuard scripts failed to initialize in time"))
+                }
             }
         }
 

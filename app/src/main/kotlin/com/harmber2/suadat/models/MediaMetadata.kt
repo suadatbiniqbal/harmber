@@ -124,7 +124,7 @@ fun SongItem.toMediaMetadata() =
 
 fun SpotifyTrack.toMediaMetadata() =
     MediaMetadata(
-        id = "",
+        id = "spotify_track_$id",
         title = name,
         artists =
             artists.map {
