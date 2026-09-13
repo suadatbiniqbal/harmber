@@ -35,22 +35,6 @@ fun buildSettingsGroups(
                 items =
                     listOf(
                         SettingsItem(
-                            key = "account",
-                            icon = painterResource(R.drawable.account),
-                            title = stringResource(R.string.account),
-                            subtitle = stringResource(R.string.settings_account_subtitle),
-                            accentColor = MaterialTheme.colorScheme.primary,
-                            onClick = { navController.navigate("settings/account") },
-                        ),
-                        SettingsItem(
-                            key = "stats",
-                            icon = painterResource(R.drawable.stats),
-                            title = stringResource(R.string.settings_stats_title),
-                            subtitle = stringResource(R.string.settings_stats_subtitle),
-                            accentColor = MaterialTheme.colorScheme.primary,
-                            onClick = { navController.navigate("stats") },
-                        ),
-                        SettingsItem(
                             key = "appearance",
                             icon = painterResource(R.drawable.palette),
                             title = stringResource(R.string.appearance),
@@ -67,12 +51,12 @@ fun buildSettingsGroups(
                             onClick = { navController.navigate("settings/player") },
                         ),
                         SettingsItem(
-                            key = "behavior",
-                            icon = painterResource(R.drawable.swipe),
-                            title = stringResource(R.string.settings_behavior_title),
-                            subtitle = stringResource(R.string.settings_behavior_subtitle),
+                            key = "account",
+                            icon = painterResource(R.drawable.account),
+                            title = stringResource(R.string.account),
+                            subtitle = stringResource(R.string.settings_account_subtitle),
                             accentColor = MaterialTheme.colorScheme.primary,
-                            onClick = { navController.navigate("settings/privacy") },
+                            onClick = { navController.navigate("settings/account") },
                         ),
                         SettingsItem(
                             key = "lyrics",
@@ -81,6 +65,22 @@ fun buildSettingsGroups(
                             subtitle = stringResource(R.string.settings_lyrics_subtitle),
                             accentColor = MaterialTheme.colorScheme.secondary,
                             onClick = { navController.navigate("settings/lyrics") },
+                        ),
+                        SettingsItem(
+                            key = "stats",
+                            icon = painterResource(R.drawable.stats),
+                            title = stringResource(R.string.settings_stats_title),
+                            subtitle = stringResource(R.string.settings_stats_subtitle),
+                            accentColor = MaterialTheme.colorScheme.primary,
+                            onClick = { navController.navigate("stats") },
+                        ),
+                        SettingsItem(
+                            key = "behavior",
+                            icon = painterResource(R.drawable.swipe),
+                            title = stringResource(R.string.settings_behavior_title),
+                            subtitle = stringResource(R.string.settings_behavior_subtitle),
+                            accentColor = MaterialTheme.colorScheme.primary,
+                            onClick = { navController.navigate("settings/privacy") },
                         ),
                         SettingsItem(
                             key = "integration",

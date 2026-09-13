@@ -1,6 +1,6 @@
 /*
  * harmber (2026)
- * © Rukamori — github.com/suadatbiniqbal
+ * © Vetra — github.com/suadatbiniqbal
  * GPL-3.0 License | Contributors: see git history
  * Do not remove or alter this notice. - Per GPL-3.0 Section 4 & Section 5
  */
@@ -162,7 +162,7 @@ fun AppearanceSettings(
             HidePlayerThumbnailKey,
             defaultValue = false,
         )
-    val (archiveTuneCanvasEnabled, onHarmberCanvasEnabledChange) =
+    val (vetraCanvasEnabled, onHarmberCanvasEnabledChange) =
         rememberPreference(
             HarmberCanvasKey,
             defaultValue = true,
@@ -286,7 +286,7 @@ fun AppearanceSettings(
         rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
             if (uri == null) return@rememberLauncherForActivityResult
             if (!CustomFontLoader.isSupportedTtf(context, uri)) {
-                Toast.makeText(context, context.getString(R.string.custom_font_invalid), Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, R.string.custom_font_invalid, Toast.LENGTH_SHORT).show()
                 return@rememberLauncherForActivityResult
             }
 
@@ -622,6 +622,7 @@ fun AppearanceSettings(
                             PlayerBackgroundStyle.BLUR_GRADIENT -> stringResource(R.string.blur_gradient)
                             PlayerBackgroundStyle.GLOW -> stringResource(R.string.glow)
                             PlayerBackgroundStyle.GLOW_ANIMATED -> "Glow Animated"
+                            PlayerBackgroundStyle.APPLE_MUSIC_CANVAS -> "Apple Music Canvas"
                         }
                     },
                 )
@@ -666,7 +667,7 @@ fun AppearanceSettings(
                     title = { Text(stringResource(R.string.harmber_canvas)) },
                     description = stringResource(R.string.harmber_canvas_desc),
                     icon = { Icon(painterResource(R.drawable.motion_photos_on), null) },
-                    checked = archiveTuneCanvasEnabled,
+                    checked = vetraCanvasEnabled,
                     onCheckedChange = onHarmberCanvasEnabledChange,
                 )
             }

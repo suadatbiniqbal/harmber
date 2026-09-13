@@ -1,6 +1,6 @@
 /*
  * harmber (2026)
- * © Rukamori — github.com/suadatbiniqbal
+ * © Vetra — github.com/suadatbiniqbal
  * GPL-3.0 License | Contributors: see git history
  * Do not remove or alter this notice. - Per GPL-3.0 Section 4 & Section 5
  */
@@ -3856,6 +3856,7 @@ fun PlayerBackground(
     playerCustomBlur: Float,
     playerCustomContrast: Float,
     playerCustomBrightness: Float,
+    isPlaying: Boolean = false,
 ) {
     val effectiveBlurRadius = blurRadius.coerceIn(0f, PlayerBackgroundMaxBlurRadius)
     val shouldApplyBlur = !disableBlur && effectiveBlurRadius > 0f

@@ -104,7 +104,7 @@ fun StarDialog(
             ) {
                 Button(
                     onClick = {
-                        uriHandler.openUri("https://discord.gg/FUQNZpN9WG")
+                        uriHandler.openUri("https://discord.gg/wsuRK2pN8J")
                         onSupport()
                     },
                     modifier = Modifier.weight(1f),

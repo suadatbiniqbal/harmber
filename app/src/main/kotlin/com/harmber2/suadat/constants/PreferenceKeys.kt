@@ -1,6 +1,6 @@
 /*
  * harmber (2026)
- * © Rukamori — github.com/suadatbiniqbal
+ * © Vetra — github.com/suadatbiniqbal
  * GPL-3.0 License | Contributors: see git history
  * Do not remove or alter this notice. - Per GPL-3.0 Section 4 & Section 5
  */
@@ -33,7 +33,7 @@ val SliderStyleKey = stringPreferencesKey("sliderStyle")
 val SwipeToSongKey = booleanPreferencesKey("SwipeToSong")
 val PlayerDesignStyleKey = stringPreferencesKey("playerDesignStyle")
 val HidePlayerThumbnailKey = booleanPreferencesKey("hidePlayerThumbnail")
-val HarmberCanvasKey = booleanPreferencesKey("archiveTuneCanvas")
+val HarmberCanvasKey = booleanPreferencesKey("vetraCanvas")
 val ThumbnailCornerRadiusKey = floatPreferencesKey("thumbnailCornerRadius")
 val CropThumbnailToSquareKey = booleanPreferencesKey("cropThumbnailToSquare")
 
@@ -633,6 +633,7 @@ enum class PlayerBackgroundStyle {
     BLUR_GRADIENT,
     GLOW,
     GLOW_ANIMATED,
+    APPLE_MUSIC_CANVAS,
 }
 
 enum class MiniPlayerBackgroundStyle {

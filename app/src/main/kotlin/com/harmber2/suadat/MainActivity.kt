@@ -1,6 +1,6 @@
 /*
  * harmber (2026)
- * © Rukamori — github.com/suadatbiniqbal
+ * © Vetra — github.com/suadatbiniqbal
  * GPL-3.0 License | Contributors: see git history
  * Do not remove or alter this notice. - Per GPL-3.0 Section 4 & Section 5
  */
@@ -254,6 +254,7 @@ import com.harmber2.suadat.ui.component.FloatingNavigationToolbar
 import com.harmber2.suadat.ui.component.IconButton
 import com.harmber2.suadat.ui.component.LocalBottomSheetPageState
 import com.harmber2.suadat.ui.component.LocalMenuState
+import com.harmber2.suadat.ui.component.DiscordRandomDialog
 import com.harmber2.suadat.ui.component.MarkdownText
 import com.harmber2.suadat.ui.component.NetworkStatusBanner
 import com.harmber2.suadat.ui.component.StarDialog
@@ -1347,9 +1348,15 @@ class MainActivity : ComponentActivity() {
 
                     var showStarDialog by remember { mutableStateOf(false) }
                     var showSpotifyConnectDialog by remember { mutableStateOf(false) }
+                    var showDiscordRandomDialog by remember { mutableStateOf(false) }
 
                     LaunchedEffect(Unit) {
                         delay(2000)
+
+                        if (Random.nextInt(100) < 5) {
+                            delay(5000)
+                            showDiscordRandomDialog = true
+                        }
 
                         val isAuthenticated = withContext(Dispatchers.IO) {
                             !dataStore[SpotifySpDcKey].isNullOrBlank()
@@ -1465,6 +1472,12 @@ class MainActivity : ComponentActivity() {
                                     }
                                 }
                             },
+                        )
+                    }
+
+                    if (showDiscordRandomDialog) {
+                        DiscordRandomDialog(
+                            onDismissRequest = { showDiscordRandomDialog = false }
                         )
                     }
 
@@ -1694,7 +1707,7 @@ class MainActivity : ComponentActivity() {
                                                     }
                                                 },
                                                 actions = {
-                                                    IconButton(onClick = { uriHandler.openUri("https://discord.gg/FUQNZpN9WG") }) {
+                                                    IconButton(onClick = { uriHandler.openUri("https://discord.gg/wsuRK2pN8J") }) {
                                                         Icon(
                                                             painter = painterResource(R.drawable.discord),
                                                             contentDescription = "Harmber Discord",

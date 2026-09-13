@@ -206,7 +206,7 @@ If you find Harmber useful:
 **Special Thanks
 Innertune
 metrolist and
-archivetune for the base framework**
+Vetra for the base framework**
 
 ## License
 

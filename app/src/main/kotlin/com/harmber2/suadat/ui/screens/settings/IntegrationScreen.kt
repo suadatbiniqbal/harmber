@@ -85,6 +85,7 @@ fun IntegrationScreen(
             ),
         )
 
+/*
         PreferenceGroup(title = stringResource(R.string.general)) {
             item {
                 PreferenceEntry(
@@ -96,6 +97,7 @@ fun IntegrationScreen(
                 )
             }
         }
+*/
 
         PreferenceGroup(title = stringResource(R.string.spotify_account)) {
             spotifyAccountPreferences(

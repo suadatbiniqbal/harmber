@@ -16,18 +16,18 @@ import androidx.compose.ui.unit.dp
 import com.harmber2.suadat.LocalAnimationsDisabled
 
 object SettingsDimensions {
-    val GroupCardCornerRadius = 16.dp
-    val BannerCardCornerRadius = 20.dp
+    val GroupCardCornerRadius = 24.dp
+    val BannerCardCornerRadius = 28.dp
 
     val ScreenHorizontalPadding = 16.dp
-    val SectionSpacing = 14.dp
-    val RowVerticalPadding = 10.dp
+    val SectionSpacing = 12.dp
+    val RowVerticalPadding = 8.dp
     val RowHorizontalPadding = 14.dp
 
-    val RowIconSize = 36.dp
-    val RowIconInnerSize = 20.dp
-    val BannerIconSize = 44.dp
-    val BannerIconInnerSize = 22.dp
+    val RowIconSize = 32.dp
+    val RowIconInnerSize = 18.dp
+    val BannerIconSize = 40.dp
+    val BannerIconInnerSize = 20.dp
     val ChevronSize = 18.dp
 
     val ProfileCardAvatarSize = 56.dp

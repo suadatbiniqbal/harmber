@@ -1,6 +1,6 @@
 /*
  * harmber (2026)
- * © Rukamori — github.com/suadatbiniqbal
+ * © Vetra — github.com/suadatbiniqbal
  * GPL-3.0 License | Contributors: see git history
  * Do not remove or alter this notice. - Per GPL-3.0 Section 4 & Section 5
  */
@@ -502,7 +502,7 @@ fun BottomSheetPlayer(
     val darkTheme by rememberEnumPreference(DarkModeKey, defaultValue = DarkMode.AUTO)
 
     val (thumbnailCornerRadius) = rememberPreference(ThumbnailCornerRadiusKey, defaultValue = 8f)
-    val archiveTuneCanvasEnabled by rememberPreference(HarmberCanvasKey, true)
+    val vetraCanvasEnabled by rememberPreference(HarmberCanvasKey, true)
     val lowDataModeActive = rememberLowDataModeActive()
     val (maxCanvasCacheSize, _) =
         rememberPreference(
@@ -630,6 +630,7 @@ fun BottomSheetPlayer(
                 PlayerBackgroundStyle.GLOW -> Color.White
                 PlayerBackgroundStyle.GLOW_ANIMATED -> Color.White
                 PlayerBackgroundStyle.CUSTOM -> Color.White
+                PlayerBackgroundStyle.APPLE_MUSIC_CANVAS -> Color.White
             }
         }
 
@@ -646,6 +647,7 @@ fun BottomSheetPlayer(
                 PlayerBackgroundStyle.GLOW -> Color.Black
                 PlayerBackgroundStyle.GLOW_ANIMATED -> Color.Black
                 PlayerBackgroundStyle.CUSTOM -> Color.Black
+                PlayerBackgroundStyle.APPLE_MUSIC_CANVAS -> Color.Black
             }
         }
 
@@ -1011,13 +1013,13 @@ fun BottomSheetPlayer(
                 if (country.length == 2) country.lowercase(Locale.ROOT) else "us"
             }
         val shouldUseV7Canvas =
-            archiveTuneCanvasEnabled &&
+            vetraCanvasEnabled &&
                 !lowDataModeActive &&
                 playerDesignStyle == PlayerDesignStyle.V7 &&
                 !aodModeEnabled &&
                 mediaMetadata != null
         val shouldUseArtworkCanvas =
-            archiveTuneCanvasEnabled &&
+            vetraCanvasEnabled &&
                 !lowDataModeActive &&
                 (playerDesignStyle == PlayerDesignStyle.V8 || playerDesignStyle == PlayerDesignStyle.V9) &&
                 !aodModeEnabled &&
@@ -1802,6 +1804,25 @@ fun BottomSheetPlayer(
             onShowLyrics = { isLyricsScreenVisible = true },
             pureBlack = pureBlack,
         )
+
+        // Vetra Watermark
+        if (state.isExpandedOrExpanding) {
+            val progress = ((state.value - state.collapsedBound) / (state.expandedBound - state.collapsedBound)).coerceIn(0f, 1f)
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = dismissedBound + 8.dp, end = 12.dp),
+                contentAlignment = Alignment.BottomEnd,
+            ) {
+                Text(
+                    text = "Vetra",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = TextBackgroundColor.copy(alpha = 0.25f),
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.alpha(progress)
+                )
+            }
+        }
 
         mediaMetadata?.let { metadata ->
             MikoLyricsTransition(

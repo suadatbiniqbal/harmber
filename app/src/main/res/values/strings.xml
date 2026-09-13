@@ -98,6 +98,10 @@ InnerTune's Weblate instead. -->
         recent history.</string>
     <string name="library_top_mixes_failed">Failed to build top mixes</string>
     <string name="your_playlists">Your Playlists</string>
+    <string name="discord_dialog_title">Join our Discord!</string>
+    <string name="discord_dialog_body">Stay updated with the latest news, request features, and chat with other Harmber users on our official Discord server.</string>
+    <string name="discord_dialog_join">Join</string>
+    <string name="discord_dialog_later">Later</string>
     <string name="see_all">See all</string>
     <string name="your_artists">Your Artists</string>
     <string name="your_albums">Your Albums</string>
@@ -740,7 +744,7 @@ InnerTune's Weblate instead. -->
     <string name="restore_success">Backup restored successfully</string>
     <string name="restore_failed">Failed to restore backup</string>
     <string name="discord_integration">Discord Integration</string>
-    <string name="account_integrations_summary">Spotify, Discord, Last.fm, Libre.fm, ListenBrainz</string>
+    <string name="account_integrations_summary">Spotify, Last.fm, Libre.fm, ListenBrainz</string>
     <string name="discord_login_description">Connect your Discord account with OAuth so Harmber can
         publish Rich Presence.</string>
     <string name="discord_open_authorization">Open Discord authorization</string>

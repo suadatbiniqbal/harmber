@@ -156,7 +156,7 @@ fun Thumbnail(
     val (enableHapticFeedback) = rememberPreference(EnableHapticFeedbackKey, true)
 
     val hidePlayerThumbnail by rememberPreference(HidePlayerThumbnailKey, false)
-    val archiveTuneCanvasEnabled by rememberPreference(HarmberCanvasKey, true)
+    val vetraCanvasEnabled by rememberPreference(HarmberCanvasKey, true)
     val lowDataModeActive = rememberLowDataModeActive()
     val playerDesignStyle by rememberEnumPreference(
         key = PlayerDesignStyleKey,
@@ -548,7 +548,7 @@ fun Thumbnail(
                                         if (country.length == 2) country.lowercase(Locale.ROOT) else "us"
                                     }
                                 val shouldAnimateCanvas =
-                                    archiveTuneCanvasEnabled &&
+                                    vetraCanvasEnabled &&
                                         !lowDataModeActive &&
                                         playerDesignStyle != PlayerDesignStyle.V7 &&
                                         playerDesignStyle != PlayerDesignStyle.V8 &&
